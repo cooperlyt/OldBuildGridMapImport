@@ -41,21 +41,20 @@ public class Q {
         }
     }
 
-    public static String p(Date d){
+    public static String p(java.sql.Timestamp d){
         if (d == null){
             return "NULL";
         }else{
-            SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            return "'" + f.format(d) + "'";
+            return "'" + d.toString() + "'";
         }
     }
 
-    public static String pm(Date d){
+    public static String pm(java.sql.Timestamp d){
         if (d == null){
             return "'2000-1-1'";
         }else{
-            SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            return "'" + f.format(d) + "'";
+
+            return "'" + d.toString() + "'";
         }
     }
 

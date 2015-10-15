@@ -1,12 +1,7 @@
 package com.cooper.house;
 
-import net.sourceforge.jtds.jdbc.DateTime;
-
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by cooper on 10/13/15.
@@ -85,13 +80,13 @@ public class ReadyBusiness {
     private String defineId;
 
 
-    private Date applyTime;
+    private java.sql.Timestamp applyTime;
 
-    private Date checkTime;
+    private java.sql.Timestamp  checkTime;
 
-    private Date regTime;
+    private java.sql.Timestamp  regTime;
 
-    private Date recordTime;
+    private java.sql.Timestamp  recordTime;
 
     private String house;
 
@@ -124,7 +119,7 @@ public class ReadyBusiness {
         this.house = house;
     }
 
-    public void setApplyTime(Date applyTime) {
+    public void setApplyTime(java.sql.Timestamp  applyTime) {
         this.applyTime = applyTime;
     }
 
@@ -162,7 +157,7 @@ public class ReadyBusiness {
     }
 
 
-    public ReadyBusiness(String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, Date checkTime, Date regTime, Date recordTime) {
+    public ReadyBusiness(String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime) {
 
         if (start != null) {
             start.after = this;
@@ -197,8 +192,9 @@ public class ReadyBusiness {
     }
 
     private String genHouseBusinessSql(){
+        SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         String result =  "INSERT INTO OWNER_BUSINESS(ID,VERSION,SOURCE,MEMO,STATUS,DEFINE_NAME,DEFINE_ID,DEFINE_VERSION,SELECT_BUSINESS,CREATE_TIME,APPLY_TIME,CHECK_TIME,REG_TIME,RECORD_TIME,RECORDED,TYPE) VALUES(" +
-                 Q.v( Q.p(id) , "1" , "'BIZ_IMPORT'", Q.p(memo) , Q.p(status) , Q.p(defineName), Q.p(defineId), "NULL", Q.p(selectBusiness), Q.p(new Date(new java.util.Date().getTime())),
+                 Q.v( Q.p(id) , "1" , "'BIZ_IMPORT'", Q.p(memo) , Q.p(status) , Q.p(defineName), Q.p(defineId), "NULL", Q.p(selectBusiness), Q.p(f.format(new Date())),
                          Q.p(applyTime == null ? recordTime : applyTime) , Q.p(checkTime == null ? recordTime : checkTime) , Q.p(regTime == null ? recordTime :regTime ) ,Q.p(recordTime) , NO_RECORD_LIST.contains(getDefineId()) ? "FALSE" : "TRUE" ,"'NORMAL_BIZ'") +
                 ");";
         if (owner != null)

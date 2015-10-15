@@ -5,10 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Created by cooper on 10/13/15.  WP83
@@ -80,7 +79,7 @@ public class RecordImport {
                 long time = new java.util.Date().getTime();
                 try {
                    // sqlWriter.write(business(bizRs.getString(1).trim()));
-                    sqlWriter.write(business("185655"));
+                    sqlWriter.write(business("99972"));
 
                     sqlWriter.flush();
                     sqlWriter.newLine();
@@ -147,8 +146,7 @@ public class RecordImport {
                     }
                 }
 
-
-                ReadyBusiness biz = new ReadyBusiness(houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getDate(4), bizRs.getDate(5), bizRs.getDate(6));
+                ReadyBusiness biz = new ReadyBusiness(houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
 
                 if (MUST_HAVE_SELECT_LIST.contains(biz.getDefineId())) {
                     if (selectBiz == null) {
@@ -187,7 +185,7 @@ public class RecordImport {
 
                                 + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
 
-                                Q.v(Q.p(bizRs.getString(1)), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getDate(7)))
+                                Q.v(Q.p(bizRs.getString(1)), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
 
                                 + ");";
                     }
@@ -218,7 +216,7 @@ public class RecordImport {
                         + " name = '启动' and processid='" + bizRs.getString(1) + "'");
 
                 if (rs.next())
-                    biz.setApplyTime(rs.getDate(1));
+                    biz.setApplyTime(rs.getTimestamp(1));
 
                 rs.close();
                 //sD.close();
@@ -239,7 +237,7 @@ public class RecordImport {
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
                         Q.pmw(bizRs.getString(19), "808"), Q.pmw(bizRs.getString(20), "827"), Q.p(bizRs.getString(21))
                         , Q.pm(bizRs.getString(22)), Q.p(bizRs.getString(23)), Q.p(bizRs.getString(24)),
-                        Q.p(bizRs.getString(25)), Q.p(bizRs.getString(26)), Q.p(bizRs.getDate(27)),
+                        Q.p(bizRs.getString(25)), Q.p(bizRs.getString(26)), Q.p(bizRs.getTimestamp(27)),
                         Q.p(bizRs.getString(28)), Q.p(bizRs.getString(29)), "FALSE");
 
 
@@ -258,7 +256,7 @@ public class RecordImport {
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
                         Q.pmw(bizRs.getString(19), "808"), Q.pmw(bizRs.getString(20), "827"), Q.p(bizRs.getString(21))
                         , Q.pm(bizRs.getString(22)), Q.p(bizRs.getString(23)), Q.p(bizRs.getString(24)),
-                        Q.p(bizRs.getString(25)), Q.p(bizRs.getString(26)), Q.p(bizRs.getDate(27)),
+                        Q.p(bizRs.getString(25)), Q.p(bizRs.getString(26)), Q.p(bizRs.getTimestamp(27)),
                         Q.p(bizRs.getString(28)), Q.p(bizRs.getString(29)), "FALSE");
 
 
@@ -341,7 +339,7 @@ public class RecordImport {
 
                             Q.v(Q.p(bizRs.getString(1)  + "-" + i), Q.p(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)),
                                     Q.p(rs.getString(4)), Q.p(rs.getBigDecimal(5)), Q.p(rs.getString(6)),
-                                    Q.p(rs.getString(7)), Q.pm(rs.getDate(8)), Q.p(rs.getString(9)), Q.p(bizRs.getString(1)))
+                                    Q.p(rs.getString(7)), Q.pm(rs.getTimestamp(8)), Q.p(rs.getString(9)), Q.p(bizRs.getString(1)))
 
                             + ");");
 
@@ -410,7 +408,7 @@ public class RecordImport {
 
                                 rs = sD.executeQuery("SELECT VariableValueDATE from  SHKProcesses sp LEFT JOIN  SHKProcessData spd on spd.process = sp.oid where spd.VariableDefinitionId = 'CONTRACT_DATE' and sp.id = '" + bizRs.getString(8) + "'");
                                 if (rs.next()) {
-                                    date = Q.pm(rs.getDate(1));
+                                    date = Q.pm(rs.getTimestamp(1));
                                 }
 
 
@@ -446,10 +444,10 @@ public class RecordImport {
                         rs = hD.executeQuery("select Name,Phone from FinancialInfo WHERE NO ='" + fincNo + "'");
                         if (rs.next()) {
 
-
+                            SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                             String finalSql = "INSERT INTO FINANCIAL(ID,NAME,PHONE,FINANCIAL_TYPE,CREATE_TIME, CARD) VALUES(" +
                                     Q.v(Q.p(bizRs.getString(1)), Q.pm(rs.getString(1)), Q.p(rs.getString(2)), "'FINANCE_CORP'",
-                                            Q.p(new Date(new java.util.Date().getTime())));
+                                            Q.p(f.format(new Date())));
 
                             rs.close();
                             rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE Type = 110  and BizID = '" + id + "'");
@@ -466,7 +464,7 @@ public class RecordImport {
 
                                         + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
 
-                                        Q.v(Q.p(bizRs.getString(1) + "-t"), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getDate(7)))
+                                        Q.v(Q.p(bizRs.getString(1) + "-t"), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
 
                                         + ");" + finalSql + ",'" + bizRs.getString(1) + "-t" +
 
@@ -498,13 +496,13 @@ public class RecordImport {
                             }
                             rs.close();
                             rs = sD.executeQuery("SELECT VariableValueDATE from  SHKProcesses sp LEFT JOIN  SHKProcessData spd on spd.process = sp.oid where spd.VariableDefinitionId = 'mortgage_due_time_s' and sp.id = '" + bizRs.getString(8) + "'");
-                            if (rs.next() && rs.getDate(1) != null) {
-                                m4 = Q.p(rs.getDate(1));
+                            if (rs.next() && rs.getTimestamp(1) != null) {
+                                m4 = Q.p(rs.getTimestamp(1));
                             }
                             rs.close();
                             rs = sD.executeQuery("SELECT VariableValueDATE from  SHKProcesses sp LEFT JOIN  SHKProcessData spd on spd.process = sp.oid where spd.VariableDefinitionId = 'mortgage_due_time_e' and sp.id = '" + bizRs.getString(8) + "'");
-                            if (rs.next() && rs.getDate(1) != null) {
-                                m5 = Q.p(rs.getDate(1));
+                            if (rs.next() && rs.getTimestamp(1) != null) {
+                                m5 = Q.p(rs.getTimestamp(1));
                             }
                             rs.close();
                             rs = sD.executeQuery("SELECT VariableValueDBL from  SHKProcesses sp LEFT JOIN  SHKProcessData spd on spd.process = sp.oid where spd.VariableDefinitionId = 'MORTGAGE_AREA' and sp.id = '" + bizRs.getString(8) + "'");

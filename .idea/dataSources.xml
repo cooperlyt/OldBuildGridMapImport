@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="2348445710">
+    <data-source source="LOCAL" name="SQL Server - DGHouseInfo@192.168.1.4" read-only="true" uuid="68fe2338-10d1-4f69-9ac4-c5caf89342ce">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <auto-commit>false</auto-commit>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="SQL Server - DGHOUSERECORD@192.168.1.4" read-only="true" uuid="7ba473e3-92bb-4a18-b354-9b4b403e0bc5">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <auto-commit>false</auto-commit>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="SQL Server - shark@192.168.1.4" read-only="true" uuid="1318a334-1f90-4b64-a646-fcf033fb9988">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <auto-commit>false</auto-commit>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://192.168.1.4:1433/shark</jdbc-url>
+      <libraries />
+    </data-source>
+  </component>
+</project>

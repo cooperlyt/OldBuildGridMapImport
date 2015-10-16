@@ -33,7 +33,7 @@ public class RecordImport {
 
     private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
 
-    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/oldRecordSuccess.log";
+    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
     private static Connection houseConn;
 
@@ -71,21 +71,21 @@ public class RecordImport {
 
             bizRs = statement.executeQuery("SELECT DISTINCT HouseHistroy.NO FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null");
 
-            int testI = 0;
+            //int testI = 0;
 
-           // while (bizRs.next()) {
+            while (bizRs.next()) {
 
 
                 long time = new java.util.Date().getTime();
                 try {
-                   // sqlWriter.write(business(bizRs.getString(1).trim()));
-                    sqlWriter.write(business("99972"));
+                   sqlWriter.write(business(bizRs.getString(1).trim()));
+                   // sqlWriter.write(business("117738"));
 
                     sqlWriter.flush();
                     sqlWriter.newLine();
                     curCount ++;
 
-//                    System.out.println(String.valueOf(count) + "/" + curCount + "    " + bizRs.getString(1).trim() + "   " + (new java.util.Date().getTime() - time) + "ms");
+                   System.out.println(String.valueOf(count) + "/" + curCount + "    " + bizRs.getString(1).trim() + "   " + (new java.util.Date().getTime() - time) + "ms"  +  "  " + ( new Double(curCount).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
                 } catch (NoSelectBizException e) {
                     errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "NoSelectBizException");
 
@@ -99,7 +99,7 @@ public class RecordImport {
          //       }
 
 
-        //    }
+           }
             bizRs.close();
             statement.close();
 
@@ -117,11 +117,13 @@ public class RecordImport {
     }
 
 
-    private static String business(String houseCode) throws SQLException, NoSelectBizException, MustHaveSelectBizException {
+    private static String business(String houseCode) throws SQLException, NoSelectBizException, MustHaveSelectBizException, IOException {
 
         Map<String, ReadyBusiness> result = new HashMap<String, ReadyBusiness>();
 
         ReadyBusiness first = null;
+
+        int lastOldState = 0;
 
         Statement statement = recordConn.createStatement();
 
@@ -130,10 +132,11 @@ public class RecordImport {
                 " ,HouseHistroy.HouseOrder,HouseHistroy.UnitName,HouseHistroy.InFloorName,HouseHistroy.HouseArea,HouseHistroy.UseArea,HouseHistroy.CommArea,HouseHistroy.ShineArea," +
                 "HouseHistroy.LoftArea,HouseHistroy.CommParam,HouseHistroy.HouseType,HouseHistroy.UseType,HouseHistroy.Structure,HouseHistroy.KnotSize,HouseHistroy.HouseStation," +
                 "HouseHistroy.EastWall,HouseHistroy.WestWall,HouseHistroy.SouthWall,HouseHistroy.NorthWall,HouseHistroy.MappingDate,HouseHistroy.Direction , HouseHistroy.No ," +
-                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
+                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID, HouseHistroy.HouseState FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
 
         while (bizRs.next()) {
 
+            lastOldState = bizRs.getInt(34);
             String id = bizRs.getString(7);
             if (result.get(id) == null) {
 
@@ -241,7 +244,7 @@ public class RecordImport {
                         Q.p(bizRs.getString(28)), Q.p(bizRs.getString(29)), "FALSE");
 
 
-                String house = "INSERT INTO HOUSE(ID,HOUSE_ORDER,HOUSE_UNIT_NAME,IN_FLOOR_NAME,HOUSE_AREA," +
+                String house = "INSERT INTO HOUSE(HOUSE_STATUS,ID,HOUSE_ORDER,HOUSE_UNIT_NAME,IN_FLOOR_NAME,HOUSE_AREA," +
                         "USE_AREA,COMM_AREA,SHINE_AREA,LOFT_AREA,COMM_PARAM," +
                         "HOUSE_TYPE,USE_TYPE,STRUCTURE,KNOT_SIZE,ADDRESS," +
                         "EAST_WALL,WEST_WALL,SOUTH_WALL,NORTH_WALL,MAP_TIME," +
@@ -250,7 +253,7 @@ public class RecordImport {
                         "FLOOR_COUNT,DOWN_FLOOR_COUNT,BUILD_TYPE,PROJECT_CODE,PROJECT_NAME," +
                         "COMPLETE_DATE,DEVELOPER_CODE,DEVELOPER_NAME,SECTION_CODE,SECTION_NAME," +
                         "DISTRICT_CODE,DISTRICT_NAME,BUILD_NAME,BUILD_DEVELOPER_NUMBER,POOL_MEMO,MAIN_OWNER,REG_INFO,CONTRACT_OWNER)  " +
-                        "VALUES(" + Q.v(Q.p(bizRs.getString(1)), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
+                        "VALUES(" + Q.v( biz.getMainStatus() , Q.p(bizRs.getString(1)), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
                         Q.pm(bizRs.getString(11)), Q.pm(bizRs.getBigDecimal(12)),
                         Q.p(bizRs.getBigDecimal(13)), Q.p(bizRs.getBigDecimal(14)), Q.p(bizRs.getBigDecimal(15)),
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
@@ -538,9 +541,21 @@ public class RecordImport {
         bizRs.close();
         statement.close();
 
-        if (first != null)
+        if (first != null) {
+            Integer lastOldStatus = first.getOldStatus();
+            boolean pass = false;
+            if (lastOldStatus == null && (lastOldState == 127 || lastOldState == 118) ) {
+                pass = true;
+            }else if (lastOldStatus != null && lastOldStatus.equals(lastOldState)){
+                pass = true;
+            }
+            if (!pass){
+                successWriter.write(houseCode + ":old:" + lastOldState + "calc:" + first.getMainStatus());
+                successWriter.newLine();
+            }
+
             return first.run();
-        else
+        }else
             return "";
 
     }

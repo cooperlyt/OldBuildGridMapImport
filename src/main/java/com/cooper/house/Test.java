@@ -7,11 +7,7 @@ public class Test {
 
     public static void main(String[] args){
 
-        String p = null;
 
 
-        String s = "v:" + p;
-
-        System.out.print(s);
     }
 }

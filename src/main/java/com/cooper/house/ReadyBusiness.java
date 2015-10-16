@@ -9,6 +9,21 @@ import java.util.*;
 public class ReadyBusiness {
 
 
+    public final static Map<String,Integer> map = new HashMap<String,Integer>();
+    static {
+        map.put("CONTRACTS_RECORD", 128);
+        map.put("SALE_REGISTER", 129);
+        map.put("DIVERT_REGISTER", 130);
+        map.put("SALE_MORTGAGE_REGISTER", 132);
+        map.put("DIVERT_MORTGAGE_REGISTER", 133);
+        map.put("PLEDGE", 117);
+        map.put("PROJECT_PLEDGE", 890);
+        map.put("DIFFICULTY", 119);
+        map.put("DECLARE_CANCEL", 115);
+        map.put("COURT_CLOSE", 99);
+        map.put("DESTORY", 116);
+
+    }
 
 
     private static final String[] NO_RECORD = {
@@ -156,12 +171,39 @@ public class ReadyBusiness {
         return id;
     }
 
+    private List<HouseStatus> houseStates;
+
+    public String getMainStatus(){
+
+        if (houseStates.isEmpty()){
+            return "NULL";
+        }else{
+            Collections.sort(houseStates, HouseStatus.StatusComparator.getInstance());
+            return "'" + houseStates.get(0).toString() + "'";
+        }
+
+    }
+
+    public Integer getOldStatus(){
+
+        if (!houseStates.isEmpty()){
+
+            Collections.sort(houseStates, HouseStatus.StatusComparator.getInstance());
+            return map.get(houseStates.get(0).toString());
+        }
+        return null;
+    }
+
+    private String statusSql = "";
 
     public ReadyBusiness(String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime) {
 
         if (start != null) {
             start.after = this;
             this.befor = start;
+            houseStates = new ArrayList<HouseStatus>(start.houseStates);
+        }else {
+            houseStates = new ArrayList<HouseStatus>();
         }
 
         this.houseCode = houseCode;
@@ -176,6 +218,27 @@ public class ReadyBusiness {
 
         defineId = temp[temp.length-1];
         status = "COMPLETE";
+
+        HouseState state = FillHouseState.fillHouseState(defineId);
+
+        if (state != null){
+            HouseStatus status = HouseStatus.valueOf(state.getState());
+            if (state.isEnable()){
+                if (status.isAllowRepeat() || !houseStates.contains(status)){
+                    houseStates.add(status);
+                }
+
+
+            }else{
+                houseStates.remove(status);
+            }
+            statusSql = "INSERT INTO ADD_HOUSE_STATUS(ID,BUSINESS,STATUS,IS_REMOVE) VALUES("+
+
+                    Q.v( Q.p(id), Q.p(id) , Q.p(state.getState()) , Q.p(!state.isEnable()) )
+
+                    +");";
+        }
+
 
     }
 
@@ -214,6 +277,9 @@ public class ReadyBusiness {
             Q.p(id),"FALSE"
         ) +
         ");";
+
+
+        result += statusSql;
 
         if (!poolOwner.isEmpty()){
             for(String pool : poolOwner.values()){

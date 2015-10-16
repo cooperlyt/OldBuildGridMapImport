@@ -73,19 +73,19 @@ public class RecordImport {
 
             //int testI = 0;
 
-            while (bizRs.next()) {
+          //  while (bizRs.next()) {
 
 
                 long time = new java.util.Date().getTime();
                 try {
-                   sqlWriter.write(business(bizRs.getString(1).trim()));
-                   // sqlWriter.write(business("117738"));
+                //   sqlWriter.write(business(bizRs.getString(1).trim()));
+                    sqlWriter.write(business("18292"));
 
                     sqlWriter.flush();
                     sqlWriter.newLine();
                     curCount ++;
 
-                   System.out.println(String.valueOf(count) + "/" + curCount + "    " + bizRs.getString(1).trim() + "   " + (new java.util.Date().getTime() - time) + "ms"  +  "  " + ( new Double(curCount).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
+               //    System.out.println(String.valueOf(count) + "/" + curCount + "    " + bizRs.getString(1).trim() + "   " + (new java.util.Date().getTime() - time) + "ms"  +  "  " + ( new Double(curCount).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
                 } catch (NoSelectBizException e) {
                     errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "NoSelectBizException");
 
@@ -99,7 +99,7 @@ public class RecordImport {
          //       }
 
 
-           }
+        //   }
             bizRs.close();
             statement.close();
 
@@ -207,7 +207,7 @@ public class RecordImport {
                     biz.setOwnerId(oldOwnerId, oldCardId, owner);
                 }
 
-                System.out.println(bizRs.getString(1) );
+                //System.out.println(bizRs.getString(1) );
                 rs = sD.executeQuery("select MEMO from DGBiz where code='" + bizRs.getString(33) + "'");
                 rs.next();
                 biz.setDefineName(rs.getString(1));

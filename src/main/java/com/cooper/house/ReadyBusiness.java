@@ -21,7 +21,8 @@ public class ReadyBusiness {
         map.put("DIFFICULTY", 119);
         map.put("DECLARE_CANCEL", 115);
         map.put("COURT_CLOSE", 99);
-        map.put("DESTORY", 116);
+        map.put("DESTROY", 116);
+        map.put("OWNERED",120);
 
     }
 
@@ -219,18 +220,23 @@ public class ReadyBusiness {
         defineId = temp[temp.length-1];
         status = "COMPLETE";
 
-        HouseState state = FillHouseState.fillHouseState(defineId);
+        System.out.println(id);
+
+        HouseState state = FillHouseState.fillHouseState(defineId + ",");
 
         if (state != null){
             HouseStatus status = HouseStatus.valueOf(state.getState());
+
             if (state.isEnable()){
                 if (status.isAllowRepeat() || !houseStates.contains(status)){
                     houseStates.add(status);
+
                 }
 
 
             }else{
                 houseStates.remove(status);
+
             }
             statusSql = "INSERT INTO ADD_HOUSE_STATUS(ID,BUSINESS,STATUS,IS_REMOVE) VALUES("+
 
@@ -238,6 +244,7 @@ public class ReadyBusiness {
 
                     +");";
         }
+
 
 
     }

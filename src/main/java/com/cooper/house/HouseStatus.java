@@ -11,7 +11,7 @@ public enum HouseStatus {
     // 房屋转移预告登记，商品房预告抵押，屋屋转移预告抵押,
     // 抵押,在建工程抵押,异议,声明作废，查封,灭籍
     // 确权,初始登记
-    CONTRACTS_RECORD(12,false),OWNERED(11,false),SALE_REGISTER(10,false),
+    CONTRACTS_RECORD(12,false),OWNERED(10,false),SALE_REGISTER(11,false),
     DIVERT_REGISTER(9,false),SALE_MORTGAGE_REGISTER(8,false),DIVERT_MORTGAGE_REGISTER(7,false),
     PLEDGE(5,true),PROJECT_PLEDGE(6,true),DIFFICULTY(4,false),DECLARE_CANCEL(3,false),COURT_CLOSE(2,true),DESTROY(1,false),
     INIT_REG_CONFIRM(14,false),INIT_REG(13,false);

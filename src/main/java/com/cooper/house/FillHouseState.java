@@ -43,7 +43,7 @@ public class FillHouseState {
         String moveDivertMortgageSaleRegister="WP8,";
 
         //已办产权
-        String ownered = "WP30,WP31,WP41,WP56,WP57,WP58,WP59,WP60,WP61,WP62,WP63,WP64,WP65,WP66,WP67,WP68,WP71,WP72,WP75,WP90,WP86,WP87,";
+        String ownered = "WP33,WP35,WP52,WP102,WP53,WP91,WP54,WP55,WP30,WP31,WP41,WP56,WP57,WP58,WP59,WP60,WP61,WP62,WP63,WP64,WP65,WP66,WP67,WP68,WP71,WP72,WP75,WP90,WP86,WP87,";
 
         //抵押
         String pledge="WP9,WP13,";

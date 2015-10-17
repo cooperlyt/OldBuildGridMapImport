@@ -29,11 +29,11 @@ public class RecordImport {
 
     private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
 
-    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
+    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
 
-    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
+    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
 
-    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
 
     private static Connection houseConn;
 

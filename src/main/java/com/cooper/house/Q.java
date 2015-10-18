@@ -17,11 +17,20 @@ public class Q {
             return "FALSE";
     }
 
+    public static String filterErrorChar(String s){
+        char[] cc = s.toCharArray();
+        for(int i = 0; i < cc.length; i++){
+            if(cc[i] == 0)
+                cc[i] = ' ';
+        }
+        return String.valueOf(cc);
+    }
+
     public static String p(String s){
         if (s == null) {
             return "NULL";
         }else{
-            return "'" + s + "'";
+            return "'" + filterErrorChar(s) + "'";
         }
     }
 
@@ -29,7 +38,7 @@ public class Q {
         if (s == null) {
             return "'未知'";
         }else{
-            return "'" + s + "'";
+            return "'" + filterErrorChar(s) + "'";
         }
     }
 

@@ -35,6 +35,21 @@ public class RecordImport {
 
     private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
 
+
+//    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
+//
+//    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/shark";
+//
+//    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
+//
+//    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
+//
+//    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
+//
+//    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+
+
+
     private static Connection houseConn;
 
     private static Connection sharkConn;
@@ -78,8 +93,8 @@ public class RecordImport {
 
                 long time = new java.util.Date().getTime();
                 try {
-                  sqlWriter.write(business(bizRs.getString(1).trim()));
-               //     sqlWriter.write(business("18292"));
+                 sqlWriter.write(business(bizRs.getString(1).trim()));
+                   //sqlWriter.write(business("124364"));
 
                     sqlWriter.flush();
                     sqlWriter.newLine();
@@ -415,7 +430,8 @@ public class RecordImport {
                                 }
 
 
-                                contractOwner = "INSERT INTO CONTRACT_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,CONTRACT_DATE,TYPE,HOUSE_CODE)  VALUES(" + Q.v(contractId, owner, Q.p(bizRs.getString(1)), date, "'MAP_SELL'", Q.p(houseCode))
+                                contractOwner = "INSERT INTO CONTRACT_OWNER(CONTRACT_NUMBER,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,CONTRACT_DATE,TYPE,HOUSE_CODE,ID)  VALUES(" +
+                                        Q.v(contractId, owner, Q.p(bizRs.getString(1)), date, "'MAP_SELL'", Q.p(houseCode),Q.p(bizRs.getString(1)))
                                         + "); ";
 
                             }
@@ -429,11 +445,12 @@ public class RecordImport {
                 }
 
                 if (contractOwner != null) {
-                    house = contractOwner + house + "," + contractId + ");";
+                    house = contractOwner + house + "," + Q.p(bizRs.getString(1)) + ");";
                 } else {
                     house += ",NULL);";
                 }
 
+                System.out.println(house);
                 biz.setHouse(house);
 
 

@@ -9,7 +9,7 @@ import java.util.List;
 public class FillHouseState {
 
 
-    public static HouseState fillHouseState(String nameid){
+    public static HouseState fillHouseState(String nameid, boolean a){
 
 
 
@@ -80,6 +80,10 @@ public class FillHouseState {
 
         //商品房初始
         String initReg="WP40,";
+
+        if ((nameid.equals("WP33,") || nameid.equals("WP32,")) & a){
+            return null;
+        }
 
         if (nameid!=null && !nameid.trim().equals("")){
             HouseState houseState =new HouseState();

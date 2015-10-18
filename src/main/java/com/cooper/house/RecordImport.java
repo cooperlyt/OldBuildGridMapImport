@@ -244,7 +244,7 @@ public class RecordImport {
                         Q.p(bizRs.getString(28)), Q.p(bizRs.getString(29)), "FALSE");
 
 
-                String house = "INSERT INTO HOUSE(HOUSE_STATUS,ID,HOUSE_ORDER,HOUSE_UNIT_NAME,IN_FLOOR_NAME,HOUSE_AREA," +
+                String house = "INSERT INTO HOUSE(ID,HOUSE_ORDER,HOUSE_UNIT_NAME,IN_FLOOR_NAME,HOUSE_AREA," +
                         "USE_AREA,COMM_AREA,SHINE_AREA,LOFT_AREA,COMM_PARAM," +
                         "HOUSE_TYPE,USE_TYPE,STRUCTURE,KNOT_SIZE,ADDRESS," +
                         "EAST_WALL,WEST_WALL,SOUTH_WALL,NORTH_WALL,MAP_TIME," +
@@ -253,7 +253,7 @@ public class RecordImport {
                         "FLOOR_COUNT,DOWN_FLOOR_COUNT,BUILD_TYPE,PROJECT_CODE,PROJECT_NAME," +
                         "COMPLETE_DATE,DEVELOPER_CODE,DEVELOPER_NAME,SECTION_CODE,SECTION_NAME," +
                         "DISTRICT_CODE,DISTRICT_NAME,BUILD_NAME,BUILD_DEVELOPER_NUMBER,POOL_MEMO,MAIN_OWNER,REG_INFO,CONTRACT_OWNER)  " +
-                        "VALUES(" + Q.v( biz.getMainStatus() , Q.p(bizRs.getString(1)), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
+                        "VALUES(" + Q.v( Q.p(bizRs.getString(1)), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
                         Q.pm(bizRs.getString(11)), Q.pm(bizRs.getBigDecimal(12)),
                         Q.p(bizRs.getBigDecimal(13)), Q.p(bizRs.getBigDecimal(14)), Q.p(bizRs.getBigDecimal(15)),
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),

@@ -222,7 +222,9 @@ public class ReadyBusiness {
 
         System.out.println(id);
 
-        HouseState state = FillHouseState.fillHouseState(defineId + ",");
+
+
+        HouseState state = FillHouseState.fillHouseState(defineId + ",", workId.contains("A"));
 
         if (state != null){
             HouseStatus status = HouseStatus.valueOf(state.getState());
@@ -299,9 +301,9 @@ public class ReadyBusiness {
         if (after != null){
             result += after.genHouseBusinessSql();
         }else{
-            result += "INSERT INTO HOUSE_RECORD(HOUSE_CODE,HOUSE) VALUES("+
+            result += "INSERT INTO HOUSE_RECORD(HOUSE_CODE,HOUSE,HOUSE_STATUS) VALUES("+
 
-                    Q.v(Q.p(houseCode), Q.p(id))
+                    Q.v(Q.p(houseCode), Q.p(id), getMainStatus())
 
                     +");";
         }

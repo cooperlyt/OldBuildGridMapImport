@@ -81,7 +81,7 @@ public class FillHouseState {
         //商品房初始
         String initReg="WP40,";
 
-        if ((nameid.equals("WP33,") || nameid.equals("WP32,")) & a){
+        if ((nameid.equals("WP33,") || nameid.equals("WP32,")) & !a){
             return null;
         }
 

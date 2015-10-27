@@ -13,7 +13,7 @@ import java.util.*;
 public class OldBuildGridMapImport {
 
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.0.4:1433/DGHouseInfo";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
 
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldBuildGridImport.sql";
 

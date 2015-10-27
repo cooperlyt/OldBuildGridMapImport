@@ -143,18 +143,27 @@ public class ReadyBusiness {
         this.defineName = defineName;
     }
 
-    public void setOwnerId(String oldOwnerId, String oldCardId, String owner) {
+    public void setOwnerId(String oldOwnerId, String oldCardId, String owner,boolean takeLast) {
         this.oldCardId = oldCardId;
         this.oldOwnerId = oldOwnerId;
         if (oldOwnerId == null){
             newOwnerId = null;
             this.owner = null;
-        }else if (befor != null  &&  befor.oldOwnerId!= null &&  befor.oldOwnerId.equals(oldOwnerId) && ( (befor.oldCardId == null && oldCardId == null) || (befor.oldCardId != null && befor.oldCardId.equals(oldCardId)))){
+            System.out.print("oldOwnerId is null");
+        }else if (befor != null  &&  befor.oldOwnerId!= null &&  befor.oldOwnerId.equals(oldOwnerId) &&
+                ( takeLast ||
+
+                ((befor.oldCardId == null && oldCardId == null) || (befor.oldCardId != null && befor.oldCardId.equals(oldCardId)))
+
+                )
+                ){
             newOwnerId = befor.newOwnerId;
             this.owner = null;
+            System.out.print("ownerId is old");
         }else{
             newOwnerId = this.id;
             this.owner = owner;
+            System.out.print("ownerId is create");
         }
     }
 
@@ -197,7 +206,9 @@ public class ReadyBusiness {
 
     private String statusSql = "";
 
-    public ReadyBusiness(String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime) {
+    private boolean out ;
+
+    public ReadyBusiness(boolean out,String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime) {
 
         if (start != null) {
             start.after = this;
@@ -214,6 +225,7 @@ public class ReadyBusiness {
         this.checkTime = checkTime;
         this.regTime = regTime;
         this.recordTime = recordTime;
+        this.out = out;
 
         String[] temp = workId.split("_");
 
@@ -264,44 +276,51 @@ public class ReadyBusiness {
     }
 
     private String genHouseBusinessSql(){
-        SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String result =  "INSERT INTO OWNER_BUSINESS(ID,VERSION,SOURCE,MEMO,STATUS,DEFINE_NAME,DEFINE_ID,DEFINE_VERSION,SELECT_BUSINESS,CREATE_TIME,APPLY_TIME,CHECK_TIME,REG_TIME,RECORD_TIME,RECORDED,TYPE) VALUES(" +
-                 Q.v( Q.p(id) , "1" , "'BIZ_IMPORT'", Q.p(memo) , Q.p(status) , Q.p(defineName), Q.p(defineId), "NULL", Q.p(selectBusiness), Q.p(f.format(new Date())),
-                         Q.p(applyTime == null ? recordTime : applyTime) , Q.p(checkTime == null ? recordTime : checkTime) , Q.p(regTime == null ? recordTime :regTime ) ,Q.p(recordTime) , NO_RECORD_LIST.contains(getDefineId()) ? "FALSE" : "TRUE" ,"'NORMAL_BIZ'") +
-                ");";
-        if (owner != null)
-            result += owner;
+        String result = "";
+        if (out) {
 
-        if (mortgaeg != null){
-            result += mortgaeg;
-        }
+            SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            result =  "\n INSERT INTO OWNER_BUSINESS(ID,VERSION,SOURCE,MEMO,STATUS,DEFINE_NAME,DEFINE_ID,DEFINE_VERSION,SELECT_BUSINESS,CREATE_TIME,APPLY_TIME,CHECK_TIME,REG_TIME,RECORD_TIME,RECORDED,TYPE) VALUES(" +
+                    Q.v(Q.p(id), "1", "'BIZ_IMPORT'", Q.p(memo), Q.p(status), Q.p(defineName), Q.p(defineId), "NULL", Q.p(selectBusiness), Q.p(f.format(new Date())),
+                            Q.p(applyTime == null ? recordTime : applyTime), Q.p(checkTime == null ? recordTime : checkTime), Q.p(regTime == null ? recordTime : regTime), Q.p(recordTime), NO_RECORD_LIST.contains(getDefineId()) ? "FALSE" : "TRUE", "'NORMAL_BIZ'") +
+                    ");";
+            if (owner != null)
+                result += owner;
 
-        if (befor == null){
-            result += startHouse;
-        }
-
-        result += house + "INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
-
-        + Q.v( Q.p(id), Q.p(houseCode), Q.p(id), Q.p((befor == null) ? id + "-s" : befor.id),
-            Q.p(id),"FALSE"
-        ) +
-        ");";
-
-
-        result += statusSql;
-
-        if (!poolOwner.isEmpty()){
-            for(String pool : poolOwner.values()){
-                result += pool;
+            if (mortgaeg != null) {
+                result += mortgaeg;
             }
-        }
-        result += linkPoolOwner(id);
 
+            if (befor == null) {
+                result += startHouse;
+            }
+
+            result += house + "INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
+
+                    + Q.v(Q.p(id), Q.p(houseCode), Q.p(id), Q.p((befor == null) ? id + "-s" : befor.id),
+                    Q.p(id), "FALSE"
+            ) +
+                    ");";
+
+
+            result += statusSql;
+
+            if (!poolOwner.isEmpty()) {
+                for (String pool : poolOwner.values()) {
+                    result += pool;
+                }
+            }
+            result += linkPoolOwner(id);
+
+        }
 
         if (after != null){
             result += after.genHouseBusinessSql();
-        }else{
-            result += "INSERT INTO HOUSE_RECORD(HOUSE_CODE,HOUSE,HOUSE_STATUS) VALUES("+
+        }else if (out){
+            result += "DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE = " + Q.p(houseCode)
+
+                    +
+            " ;  INSERT INTO HOUSE_RECORD(HOUSE_CODE,HOUSE,HOUSE_STATUS) VALUES("+
 
                     Q.v(Q.p(houseCode), Q.p(id), getMainStatus())
 

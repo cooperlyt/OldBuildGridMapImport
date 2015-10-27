@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -13,6 +14,12 @@ import java.util.Date;
  * Created by cooper on 10/13/15.  WP83
  */
 public class RecordImport {
+
+    public static final String[] TAKE_LAST_OWNER_BIZ ={
+            "WP9"  ,"WP10","WP12","WP13","WP14","WP15","WP17","WP22","WP25","WP26","WP1","WP2","WP4","WP5","WP8"
+    };
+
+    public static final List<String> TAKE_LAST_OWNER_BIZ_LIST = Arrays.asList(TAKE_LAST_OWNER_BIZ);
 
     public static final String[] MUST_HAVE_SELECT = {
             "WP37", "WP43", "WP45", "WP46"
@@ -29,11 +36,11 @@ public class RecordImport {
 
     private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
 
-    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
-
-    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
-
-    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
+//    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
+//
+//    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
+//
+//    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
 
 
 //    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
@@ -42,12 +49,23 @@ public class RecordImport {
 //
 //    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
 //
-//    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
-//
-//    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
-//
-//    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
 
+    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
+
+    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+
+    //private static final String BEGIN_DATE = "2015-10-23";
+
+//    private static Date CONTINUE_DATE;
+//
+//    static {
+//        try {
+//            CONTINUE_DATE = new SimpleDateFormat("yyyy-MM-dd").parse(BEGIN_DATE);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 
     private static Connection houseConn;
@@ -77,16 +95,16 @@ public class RecordImport {
             Statement statement = recordConn.createStatement();
 
 
-            ResultSet bizRs = statement.executeQuery("SELECT count(DISTINCT HouseHistroy.NO) FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null");
+            ResultSet bizRs = statement.executeQuery("SELECT count(DISTINCT HouseHistroy.NO) FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null ");
             bizRs.next();
             count = bizRs.getInt(1);
             bizRs.close();
             statement.close();
             statement = recordConn.createStatement();
 
-            bizRs = statement.executeQuery("SELECT DISTINCT HouseHistroy.NO FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null");
+            bizRs = statement.executeQuery("SELECT DISTINCT HouseHistroy.NO FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null  " );
 
-            //int testI = 0;
+
 
             while (bizRs.next()) {
 
@@ -94,7 +112,7 @@ public class RecordImport {
                 long time = new java.util.Date().getTime();
                 try {
                  sqlWriter.write(business(bizRs.getString(1).trim()));
-                   //sqlWriter.write(business("124364"));
+                   //sqlWriter.write(business("16629"));
 
                     sqlWriter.flush();
                     sqlWriter.newLine();
@@ -102,19 +120,17 @@ public class RecordImport {
 
                   System.out.println(String.valueOf(count) + "/" + curCount + "    " + bizRs.getString(1).trim() + "   " + (new java.util.Date().getTime() - time) + "ms"  +  "  " + ( new Double(curCount).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
                 } catch (NoSelectBizException e) {
-                    errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "NoSelectBizException");
+                    errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "SelectBizNotFound");
+                    errorWriter.newLine();
 
                 } catch (MustHaveSelectBizException e) {
                     errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "MustHaveSelectBizException");
+                    errorWriter.newLine();
                 }
 
-                //TODO test
-         //       if (++testI == 100){
-         //           break;
-         //       }
 
 
-          }
+            }
             bizRs.close();
             statement.close();
 
@@ -147,7 +163,7 @@ public class RecordImport {
                 " ,HouseHistroy.HouseOrder,HouseHistroy.UnitName,HouseHistroy.InFloorName,HouseHistroy.HouseArea,HouseHistroy.UseArea,HouseHistroy.CommArea,HouseHistroy.ShineArea," +
                 "HouseHistroy.LoftArea,HouseHistroy.CommParam,HouseHistroy.HouseType,HouseHistroy.UseType,HouseHistroy.Structure,HouseHistroy.KnotSize,HouseHistroy.HouseStation," +
                 "HouseHistroy.EastWall,HouseHistroy.WestWall,HouseHistroy.SouthWall,HouseHistroy.NorthWall,HouseHistroy.MappingDate,HouseHistroy.Direction , HouseHistroy.No ," +
-                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID, HouseHistroy.HouseState FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
+                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID, HouseHistroy.HouseState, Business.b FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
 
         while (bizRs.next()) {
 
@@ -164,7 +180,9 @@ public class RecordImport {
                     }
                 }
 
-                ReadyBusiness biz = new ReadyBusiness(houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
+//new Date(bizRs.getTimestamp(35).getTime()).after(CONTINUE_DATE)
+
+                ReadyBusiness biz = new ReadyBusiness(true , houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
 
                 if (MUST_HAVE_SELECT_LIST.contains(biz.getDefineId())) {
                     if (selectBiz == null) {
@@ -182,13 +200,18 @@ public class RecordImport {
                 String oldOwnerId = bizRs.getString(31);
 
                 if (oldOwnerId == null || oldOwnerId.trim().equals("")) {
-                    biz.setOwnerId(null, null, null);
+                    if (TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId())){
+                        errorWriter.write("MUST OWNER -->" + id);
+                        errorWriter.newLine();
+                    }
+
+                    biz.setOwnerId(null, null, null, false);
                 } else {
                     String oldCardId = null;
                     String owner = "";
 
 
-                    rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE (Type = 111 or Type= 198) and BizID = '" + id + "' and OwnerID = '" + oldOwnerId + "'");
+                    rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE (Type = 111 or Type= 198) and BizID = '" + id + "' and ((OwnerID = '" + oldOwnerId + "') or (Type = 198))");
 
 
                     if (rs.next()) {
@@ -219,7 +242,7 @@ public class RecordImport {
                     }
 
 
-                    biz.setOwnerId(oldOwnerId, oldCardId, owner);
+                    biz.setOwnerId(oldOwnerId, oldCardId, owner,TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
                 }
 
                 //System.out.println(bizRs.getString(1) );
@@ -249,7 +272,7 @@ public class RecordImport {
                         "FLOOR_COUNT,DOWN_FLOOR_COUNT,BUILD_TYPE,PROJECT_CODE,PROJECT_NAME," +
                         "COMPLETE_DATE,DEVELOPER_CODE,DEVELOPER_NAME,SECTION_CODE,SECTION_NAME," +
                         "DISTRICT_CODE,DISTRICT_NAME,BUILD_NAME,BUILD_DEVELOPER_NUMBER)  " +
-                        "VALUES(" + Q.v(Q.p(bizRs.getString(1) + "-s"), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
+                        "VALUES(" + Q.v( Q.p(bizRs.getString(1) + "-s"), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
                         Q.pm(bizRs.getString(11)), Q.pm(bizRs.getBigDecimal(12)),
                         Q.p(bizRs.getBigDecimal(13)), Q.p(bizRs.getBigDecimal(14)), Q.p(bizRs.getBigDecimal(15)),
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
@@ -450,7 +473,7 @@ public class RecordImport {
                     house += ",NULL);";
                 }
 
-                System.out.println(house);
+
                 biz.setHouse(house);
 
 

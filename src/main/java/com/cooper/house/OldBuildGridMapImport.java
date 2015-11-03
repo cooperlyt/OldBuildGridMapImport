@@ -1,9 +1,6 @@
 package com.cooper.house;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 
@@ -17,6 +14,8 @@ public class OldBuildGridMapImport {
 
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldBuildGridImport.sql";
 
+    private static final String ID_LINK_FILE = "/Users/cooper/Documents/ONBUILDID.txt";
+
 
     private static final String HOUSE_SQL =       "SELECT Html_Page, Html_Order,HouseUnit, UnitName,      InFloor + (Html_RowSpan - 1) ,InFloorName, Html_ColSpan, Html_RowSpan,Html_UnionColSpan,Html_UnionColSpanLeft, h.NO, h.HouseOrder  FROM HOUSE h WHERE h.BuildID ='";
 
@@ -28,8 +27,48 @@ public class OldBuildGridMapImport {
 
     private static BufferedWriter writer;
 
+    private static Set<String> error = new HashSet<String>();
+
+    private static Map<String,String> buildIdMap = new HashMap<String, String>();
+
+
+    public static void readFileByLines() {
+        File file = new File(ID_LINK_FILE);
+        BufferedReader reader = null;
+        try {
+            System.out.println("以行为单位读取文件内容，一次读一整行：");
+            reader = new BufferedReader(new FileReader(file));
+            String tempString = null;
+            int line = 1;
+            // 一次读入一行，直到读入null为文件结束
+            while ((tempString = reader.readLine()) != null) {
+                // 显示行号
+
+
+                String[] ss = tempString.split(" \\| ");
+                buildIdMap.put(ss[1].trim(),ss[0].trim());
+                System.out.println(tempString);
+                System.out.println(ss[1] + "=" +ss[0]);
+
+                line++;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                }
+            }
+        }
+    }
+
 
     public static void main(String[] args) {
+
+        readFileByLines();
 
         titleId = 1; gridId = 1; rowId = 1; blockId = 1;
         try {
@@ -129,8 +168,12 @@ public class OldBuildGridMapImport {
         writer.newLine();
 
         for(Map.Entry<Integer,List<HouseData>> data: datas){
+            if (buildIdMap.get(buildId) == null){
+                throw  new IllegalArgumentException("idError:" + buildId);
+               // System.out.println("ID ERROR:" + buildId);
+            }
 
-            writer.write("INSERT INTO BUILD_GRID_MAP(ID,BUILD_ID,NAME,_ORDER) VALUES('I-" + gridId + "','" + buildId + "','第" + data.getKey() + "页'," + data.getKey() +");");
+            writer.write("INSERT INTO BUILD_GRID_MAP(ID,BUILD_ID,NAME,_ORDER) VALUES('I-" + gridId + "','" + buildIdMap.get(buildId) + "','第" + data.getKey() + "页'," + data.getKey() +");");
             writer.newLine();
 
             Map<Integer,String> unitMap = new HashMap<Integer, String>();
@@ -228,9 +271,76 @@ public class OldBuildGridMapImport {
                 floorList.add(entry.getValue());
             }
 
+            //---m
+
+            int maxRow = 0;
+
+            for(List<List<HouseData>> floor: floorList){
+                int count = 0;
+                for (List<HouseData> fu: floor){
+                    for(HouseData hd: fu){
+                        count += hd.colspan;
+                    }
+                }
+                if (count > maxRow){
+                    maxRow = count;
+                }
+            }
+            //System.out.println("Size:" + floorList.size() + "|" + maxRow);
+
+            //maxRow = maxRow + 10;
+
+            try {
+                HouseData[][] dm = new HouseData[floorList.size()][maxRow];
+                for (int i = 0; i < floorList.size(); i++) {
+                    int j = 0;
+                    for (List<HouseData> fu : floorList.get(i)) {
+                        for (HouseData hd : fu) {
+                            for (int x = 0; x < hd.colspan; x++) {
+                                for (int y = 0; y < hd.rowspan; y++) {
+                                    //System.out.print(String.valueOf(i + y) + "," + (j + x) );
+
+                                    while (dm[i + y][j] != null) {
+                                        j++;
+                                    }
+                                    dm[i + y][j] = hd;
+                                    j = j++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < floorList.size(); i++) {
+                    for (int j = 0; j < maxRow; j++) {
+                      if (dm[i][j].index == null) {
+                            dm[i][j].index = j;
+                        }
+                    }
+                }
+
+            }catch ( Exception e){
+
+                for(List<List<HouseData>> floor: floorList){
+                    int j = 0;
+                    for (List<HouseData> fu: floor){
+                        for(HouseData hd: fu){
+                            hd.index = j++;
+                        }
+                    }
+
+                }
+
+                System.out.println("error:" + buildId);
+
+
+            }
+
+            //---
+
             int i = 0;
             for(List<List<HouseData>> floor: floorList){
-                int j = 0;
+                //int j = 0;
                 writer.write("INSERT INTO GRID_ROW(ID,TITLE,_ORDER,FLOOR_INDEX,GRID_ID) VALUES('I-" +
                         rowId  + "','" + getFloorName(floor)  + "'," + i + "," + getFloorIndex(floor) +
                         ",'I-" + gridId + "');");
@@ -239,13 +349,16 @@ public class OldBuildGridMapImport {
 
                 for(List<HouseData> houseDatas: floor)
                     for(HouseData houseData: houseDatas){
+                        if (houseData.index == null){
+                            System.out.println("------------null  :" + buildId);
+                        }
                         if (houseData.houseCode != null) {
                             writer.write("INSERT INTO GRID_BLOCK(ID,ROW_ID,_ORDER,COLSPAN,ROWSPAN,UNIT_NAME,UNIT_INDEX,HAVE_DOWN_ROOM,HOUSE_CODE,HOUSE_ORDER) VALUES('I-" +
-                                    blockId++ + "','I-" + rowId + "'," + j++ + "," + houseData.colspan + "," + houseData.rowspan + ",'" +
+                                    blockId++ + "','I-" + rowId + "'," + houseData.index + "," + houseData.colspan + "," + houseData.rowspan + ",'" +
                                     houseData.unitName + "'," + houseData.unit + ",FALSE,'" + houseData.houseCode + "','" + houseData.houseOrder + "');");
                         }else{
                             writer.write("INSERT INTO GRID_BLOCK(ID,ROW_ID,_ORDER,COLSPAN,ROWSPAN,UNIT_NAME,UNIT_INDEX,HAVE_DOWN_ROOM) VALUES('I-" +
-                                    blockId++ + "','I-" + rowId + "'," + j++ + "," + houseData.colspan + "," + houseData.rowspan + ",'" +
+                                    blockId++ + "','I-" + rowId + "'," + houseData.index + "," + houseData.colspan + "," + houseData.rowspan + ",'" +
                                     houseData.unitName + "'," + houseData.unit + ",FALSE);");
                         }
                         writer.newLine();
@@ -313,6 +426,8 @@ public class OldBuildGridMapImport {
         int unioncol;
 
         int unioncolLeft;
+
+        Integer index = null;
 
         public HouseData(ResultSet rs) throws SQLException {
             this.page = rs.getInt(1);

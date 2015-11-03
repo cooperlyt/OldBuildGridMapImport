@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="2348445710">
+  <component name="DataSourceManagerImpl" format="xml" hash="2863646182">
     <data-source source="LOCAL" name="SQL Server - DGHouseInfo@192.168.1.4" read-only="true" uuid="68fe2338-10d1-4f69-9ac4-c5caf89342ce">
       <driver-ref>sqlserver.jtds</driver-ref>
       <auto-commit>false</auto-commit>

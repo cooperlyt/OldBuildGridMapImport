@@ -36,6 +36,9 @@ public class RecordImport {
 
     private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
 
+
+
+
 //    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
 //
 //    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
@@ -43,29 +46,24 @@ public class RecordImport {
 //    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
 
 
-//    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
-//
-//    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/shark";
-//
-//    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
-//
+
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
 
     private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
 
     private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-    //private static final String BEGIN_DATE = "2015-10-23";
+        private static final String BEGIN_DATE = "2015-11-3";
 
-//    private static Date CONTINUE_DATE;
-//
-//    static {
-//        try {
-//            CONTINUE_DATE = new SimpleDateFormat("yyyy-MM-dd").parse(BEGIN_DATE);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private static Date CONTINUE_DATE;
+
+    static {
+        try {
+            CONTINUE_DATE = new SimpleDateFormat("yyyy-MM-dd").parse(BEGIN_DATE);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     private static Connection houseConn;
@@ -95,14 +93,14 @@ public class RecordImport {
             Statement statement = recordConn.createStatement();
 
 
-            ResultSet bizRs = statement.executeQuery("SELECT count(DISTINCT HouseHistroy.NO) FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null ");
+            ResultSet bizRs = statement.executeQuery("SELECT count(DISTINCT HouseHistroy.NO) FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and Business.b >= '" + BEGIN_DATE + "'");
             bizRs.next();
             count = bizRs.getInt(1);
             bizRs.close();
             statement.close();
             statement = recordConn.createStatement();
 
-            bizRs = statement.executeQuery("SELECT DISTINCT HouseHistroy.NO FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null  " );
+            bizRs = statement.executeQuery("SELECT DISTINCT HouseHistroy.NO FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and Business.b >= '" + BEGIN_DATE + "'" );
 
 
 
@@ -180,9 +178,9 @@ public class RecordImport {
                     }
                 }
 
-//new Date(bizRs.getTimestamp(35).getTime()).after(CONTINUE_DATE)
+//
 
-                ReadyBusiness biz = new ReadyBusiness(true , houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
+                ReadyBusiness biz = new ReadyBusiness(new Date(bizRs.getTimestamp(35).getTime()).after(CONTINUE_DATE) , houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
 
                 if (MUST_HAVE_SELECT_LIST.contains(biz.getDefineId())) {
                     if (selectBiz == null) {

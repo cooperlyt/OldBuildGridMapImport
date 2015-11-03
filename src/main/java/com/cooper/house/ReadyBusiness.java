@@ -149,7 +149,7 @@ public class ReadyBusiness {
         if (oldOwnerId == null){
             newOwnerId = null;
             this.owner = null;
-            System.out.print("oldOwnerId is null");
+
         }else if (befor != null  &&  befor.oldOwnerId!= null &&  befor.oldOwnerId.equals(oldOwnerId) &&
                 ( takeLast ||
 
@@ -159,11 +159,11 @@ public class ReadyBusiness {
                 ){
             newOwnerId = befor.newOwnerId;
             this.owner = null;
-            System.out.print("ownerId is old");
+
         }else{
             newOwnerId = this.id;
             this.owner = owner;
-            System.out.print("ownerId is create");
+
         }
     }
 
@@ -311,6 +311,8 @@ public class ReadyBusiness {
                 }
             }
             result += linkPoolOwner(id);
+
+            result += "DELETE FROM LOCKED_HOUSE WHERE HOUSE_CODE =" + Q.p(houseCode) + " AND TYPE = 'SYSTEM_LOCKED';";
 
         }
 

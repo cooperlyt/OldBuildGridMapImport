@@ -1823,7 +1823,7 @@
       <column name="HoldValue" sqlType="decimal" precision="18" scale="3" nullable="true" jdbcType="3"/>
       <column name="AssessmentPrice" sqlType="decimal" precision="18" scale="3" nullable="true" jdbcType="3"/>
       <column name="BuyHouseMoney" sqlType="decimal" precision="18" scale="3" nullable="true" jdbcType="3"/>
-      <column name="isImport" sqlType="bit" precision="1" scale="0" nullable="true" jdbcType="-7"/>
+      <column name="b" sqlType="datetime" precision="23" scale="3" nullable="false" jdbcType="93" def="JyhnZXRkYXRlKCkpJw=="/>
       <primary-key name="PK_BUSINESS" columns="ID"/>
       <foreign-key name="FK_BUSINESS_REFERENCE_BUSINESS" columns="SelectBiz" ref-table="Business" ref-schema="dbo" ref-catalog="DGHouseRecord" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <exported-key name="FK_BUSINESS_REFERENCE_BUSINESS" table="Business" schema="dbo" catalog="DGHouseRecord" columns="SelectBiz"/>

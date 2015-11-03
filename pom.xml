@@ -11,7 +11,11 @@
 
 
     <dependencies>
-
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.6</version>
+        </dependency>
         <dependency>
 
             <groupId>net.sourceforge.jtds</groupId>
@@ -42,7 +46,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.cooper.house.RecordImport</mainClass>
+                            <mainClass>com.cooper.house.BuildConnect</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

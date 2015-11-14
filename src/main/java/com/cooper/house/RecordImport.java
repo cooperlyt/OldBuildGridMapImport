@@ -53,7 +53,7 @@ public class RecordImport {
 
     private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-        private static final String BEGIN_DATE = "2015-11-3";
+        private static final String BEGIN_DATE = "2015-11-13";
 
     private static Date CONTINUE_DATE;
 
@@ -491,7 +491,7 @@ public class RecordImport {
                                             Q.p(f.format(new Date())));
 
                             rs.close();
-                            rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE Type = 110  and BizID = '" + id + "'");
+                            rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE (Type = 110 or Type = 198)  and BizID = '" + id + "'");
 
 
                             if (rs.next()) {

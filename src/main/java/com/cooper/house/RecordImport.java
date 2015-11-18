@@ -53,7 +53,7 @@ public class RecordImport {
 
     private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-        private static final String BEGIN_DATE = "2015-11-13";
+        private static final String BEGIN_DATE = "2015-11-18";
 
     private static Date CONTINUE_DATE;
 
@@ -156,35 +156,37 @@ public class RecordImport {
 
         Statement statement = recordConn.createStatement();
 
-        ResultSet bizRs = statement.executeQuery("SELECT  Business.NameID,Business.Memo,Business.SelectBiz,Business.FinalTime,Business.RegisterTime, Case CONVERT(VARCHAR(8),Business.BOTime,108) WHEN '00:00:00' THEN Convert(DATETIME,  CONVERT(VARCHAR(10),Business.BOTime ,23) + ' ' +CONVERT(VARCHAR(8),HouseHistroy.ChangeDate,108) ) ELSE  Business.BOTime END as FULLBOTIME , Business.ID, Business.NameID " +
+        ResultSet bizRs = statement.executeQuery("SELECT  Business.RecordBizNO,Business.Memo,Business.SelectBiz,Business.FinalTime,Business.RegisterTime, Case CONVERT(VARCHAR(8),Business.BOTime,108) WHEN '00:00:00' THEN Convert(DATETIME,  CONVERT(VARCHAR(10),Business.BOTime ,23) + ' ' +CONVERT(VARCHAR(8),HouseHistroy.ChangeDate,108) ) ELSE  Business.BOTime END as FULLBOTIME , Business.ID, Business.NameID " +
                 //9
                 " ,HouseHistroy.HouseOrder,HouseHistroy.UnitName,HouseHistroy.InFloorName,HouseHistroy.HouseArea,HouseHistroy.UseArea,HouseHistroy.CommArea,HouseHistroy.ShineArea," +
                 "HouseHistroy.LoftArea,HouseHistroy.CommParam,HouseHistroy.HouseType,HouseHistroy.UseType,HouseHistroy.Structure,HouseHistroy.KnotSize,HouseHistroy.HouseStation," +
                 "HouseHistroy.EastWall,HouseHistroy.WestWall,HouseHistroy.SouthWall,HouseHistroy.NorthWall,HouseHistroy.MappingDate,HouseHistroy.Direction , HouseHistroy.No ," +
-                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID, HouseHistroy.HouseState, Business.b FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
+                "HouseHistroy.BuildID ,HouseHistroy.MainOwner, HouseHistroy.PoolMemo, Business.WorkID, HouseHistroy.HouseState, Business.b, Business.NameID FROM HouseHistroy LEFT JOIN Business ON Business.ID = HouseHistroy.Business WHERE HouseHistroy.Business is not null and HouseHistroy.NO = '" + houseCode + "' and (workid  not like '%WP83' and workid not like '%WP84') order by Business.BOTime, HouseHistroy.ChangeDate");
 
         while (bizRs.next()) {
 
             lastOldState = bizRs.getInt(34);
-            String id = bizRs.getString(7);
-            if (result.get(id) == null) {
+            String oldid = bizRs.getString(7);
+            String id = bizRs.getString(1);
+           // String nameId =  bizRs.getString(8);
+            if (result.get(oldid) == null) {
 
                 ReadyBusiness selectBiz = null;
                 String selectBizId = bizRs.getString(3);
                 if (selectBizId != null && !selectBizId.trim().equals("")) {
                     selectBiz = result.get(selectBizId);
                     if (selectBiz == null) {
-                        throw new NoSelectBizException(bizRs.getString(1));
+                        throw new NoSelectBizException(oldid);
                     }
                 }
 
 //
 
-                ReadyBusiness biz = new ReadyBusiness(new Date(bizRs.getTimestamp(35).getTime()).after(CONTINUE_DATE) , houseCode, first, bizRs.getString(8), bizRs.getString(1), bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6));
+                ReadyBusiness biz = new ReadyBusiness(new Date(bizRs.getTimestamp(35).getTime()).after(CONTINUE_DATE) , houseCode, first, bizRs.getString(8), id, bizRs.getString(2), (selectBiz == null) ? null : selectBiz.getId(), bizRs.getTimestamp(4), bizRs.getTimestamp(5), bizRs.getTimestamp(6),bizRs.getString("NameID"));
 
                 if (MUST_HAVE_SELECT_LIST.contains(biz.getDefineId())) {
                     if (selectBiz == null) {
-                        throw new MustHaveSelectBizException(id);
+                        throw new MustHaveSelectBizException(oldid);
                     }
                     selectBiz.setStatus("COMPLETE_CANCEL");
                 }
@@ -216,15 +218,15 @@ public class RecordImport {
                         oldCardId = rs.getString(1);
                         owner = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
                                 Q.v(
-                                        Q.p(bizRs.getString(1)), Q.pm(rs.getString(2)), Q.p(rs.getInt(3) == 111 ? "OWNER_RSHIP" : "NOTICE")
+                                        Q.p(id), Q.pm(rs.getString(2)), Q.p(rs.getInt(3) == 111 ? "OWNER_RSHIP" : "NOTICE")
 
-                                        , Q.p(bizRs.getString(1)), Q.p(rs.getBoolean(4))
+                                        , Q.p(id), Q.p(rs.getBoolean(4))
 
                                 )
 
                                 + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
 
-                                Q.v(Q.p(bizRs.getString(1)), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
+                                Q.v(Q.p(id), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
 
                                 + ");";
                     }
@@ -234,7 +236,7 @@ public class RecordImport {
 
                     if (ovalue != null) {
                         owner += "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,OWNER_CARD) VALUES(" +
-                                Q.v(Q.p(bizRs.getString(1)), ovalue, Q.p(bizRs.getString(1)), oldCardId == null ? "NULL" : Q.p(bizRs.getString(1)))
+                                Q.v(Q.p(id), ovalue, Q.p(id), oldCardId == null ? "NULL" : Q.p(id))
 
                                 + ");";
                     }
@@ -243,7 +245,7 @@ public class RecordImport {
                     biz.setOwnerId(oldOwnerId, oldCardId, owner,TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
                 }
 
-                //System.out.println(bizRs.getString(1) );
+
                 rs = sD.executeQuery("select MEMO from DGBiz where code='" + bizRs.getString(33) + "'");
                 rs.next();
                 biz.setDefineName(rs.getString(1));
@@ -252,7 +254,7 @@ public class RecordImport {
                 //sD = sharkConn.createStatement();
                 rs = sD.executeQuery("SELECT dateadd(s,(cast(left(cast(A.LastStateTime as varchar(20)),10) as int(4))+8*60*60),'1970-01-01 00:00:00') as creaetime" +
                         " FROM SHKActivities AS A WHERE "
-                        + " name = '启动' and processid='" + bizRs.getString(1) + "'");
+                        + " name = '启动' and processid='" + bizRs.getString(8)  + "'");
 
                 if (rs.next())
                     biz.setApplyTime(rs.getTimestamp(1));
@@ -270,7 +272,7 @@ public class RecordImport {
                         "FLOOR_COUNT,DOWN_FLOOR_COUNT,BUILD_TYPE,PROJECT_CODE,PROJECT_NAME," +
                         "COMPLETE_DATE,DEVELOPER_CODE,DEVELOPER_NAME,SECTION_CODE,SECTION_NAME," +
                         "DISTRICT_CODE,DISTRICT_NAME,BUILD_NAME,BUILD_DEVELOPER_NUMBER)  " +
-                        "VALUES(" + Q.v( Q.p(bizRs.getString(1) + "-s"), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
+                        "VALUES(" + Q.v( Q.p(id + "-s"), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
                         Q.pm(bizRs.getString(11)), Q.pm(bizRs.getBigDecimal(12)),
                         Q.p(bizRs.getBigDecimal(13)), Q.p(bizRs.getBigDecimal(14)), Q.p(bizRs.getBigDecimal(15)),
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
@@ -289,7 +291,7 @@ public class RecordImport {
                         "FLOOR_COUNT,DOWN_FLOOR_COUNT,BUILD_TYPE,PROJECT_CODE,PROJECT_NAME," +
                         "COMPLETE_DATE,DEVELOPER_CODE,DEVELOPER_NAME,SECTION_CODE,SECTION_NAME," +
                         "DISTRICT_CODE,DISTRICT_NAME,BUILD_NAME,BUILD_DEVELOPER_NUMBER,POOL_MEMO,MAIN_OWNER,REG_INFO,CONTRACT_OWNER)  " +
-                        "VALUES(" + Q.v( Q.p(bizRs.getString(1)), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
+                        "VALUES(" + Q.v( Q.p(id), Q.pm(bizRs.getString(9)), Q.p(bizRs.getString(10)),
                         Q.pm(bizRs.getString(11)), Q.pm(bizRs.getBigDecimal(12)),
                         Q.p(bizRs.getBigDecimal(13)), Q.p(bizRs.getBigDecimal(14)), Q.p(bizRs.getBigDecimal(15)),
                         Q.p(bizRs.getBigDecimal(16)), Q.p(bizRs.getBigDecimal(17)), Q.pmwc(bizRs.getString(18)),
@@ -374,11 +376,11 @@ public class RecordImport {
                 // String poolOwner = "";
                 while (rs.next()) {
 
-                    biz.putPoolOwner(bizRs.getString(1) + "-" + i, "INSERT INTO BUSINESS_POOL(ID,NAME,ID_TYPE,ID_NO,RELATION,POOL_AREA,PERC,PHONE,CREATE_TIME,MEMO,BUSINESS) VALUES(" +
+                    biz.putPoolOwner(id + "-" + i, "INSERT INTO BUSINESS_POOL(ID,NAME,ID_TYPE,ID_NO,RELATION,POOL_AREA,PERC,PHONE,CREATE_TIME,MEMO,BUSINESS) VALUES(" +
 
-                            Q.v(Q.p(bizRs.getString(1)  + "-" + i), Q.p(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)),
+                            Q.v(Q.p(id  + "-" + i), Q.p(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)),
                                     Q.p(rs.getString(4)), Q.p(rs.getBigDecimal(5)), Q.p(rs.getString(6)),
-                                    Q.p(rs.getString(7)), Q.pm(rs.getTimestamp(8)), Q.p(rs.getString(9)), Q.p(bizRs.getString(1)))
+                                    Q.p(rs.getString(7)), Q.pm(rs.getTimestamp(8)), Q.p(rs.getString(9)), Q.p(id))
 
                             + ");");
 
@@ -415,12 +417,12 @@ public class RecordImport {
                     house += ",NULL";
                 } else {
                     house = "INSERT INTO HOUSE_REG_INFO(ID,HOUSE_PORPERTY,HOUSE_FROM) VALUES(" +
-                            Q.v(Q.p(bizRs.getString(1)), houseProperty <= 0 ? "909" : String.valueOf(houseProperty)
+                            Q.v(Q.p(id), houseProperty <= 0 ? "909" : String.valueOf(houseProperty)
                                     , houseFrom <= 0 ? "4270" : String.valueOf(houseFrom)
 
                             )
 
-                            + ");" + house + "," + Q.p(bizRs.getString(1));
+                            + ");" + house + "," + Q.p(id);
                 }
 
                 String contractOwner = null;
@@ -452,7 +454,7 @@ public class RecordImport {
 
 
                                 contractOwner = "INSERT INTO CONTRACT_OWNER(CONTRACT_NUMBER,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,CONTRACT_DATE,TYPE,HOUSE_CODE,ID)  VALUES(" +
-                                        Q.v(contractId, owner, Q.p(bizRs.getString(1)), date, "'MAP_SELL'", Q.p(houseCode),Q.p(bizRs.getString(1)))
+                                        Q.v(contractId, owner, Q.p(id), date, "'MAP_SELL'", Q.p(houseCode),Q.p(id))
                                         + "); ";
 
                             }
@@ -466,7 +468,7 @@ public class RecordImport {
                 }
 
                 if (contractOwner != null) {
-                    house = contractOwner + house + "," + Q.p(bizRs.getString(1)) + ");";
+                    house = contractOwner + house + "," + Q.p(id) + ");";
                 } else {
                     house += ",NULL);";
                 }
@@ -487,7 +489,7 @@ public class RecordImport {
 
                             SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                             String finalSql = "INSERT INTO FINANCIAL(ID,NAME,PHONE,FINANCIAL_TYPE,CREATE_TIME, CARD) VALUES(" +
-                                    Q.v(Q.p(bizRs.getString(1)), Q.pm(rs.getString(1)), Q.p(rs.getString(2)), "'FINANCE_CORP'",
+                                    Q.v(Q.p(id), Q.pm(rs.getString(1)), Q.p(rs.getString(2)), "'FINANCE_CORP'",
                                             Q.p(f.format(new Date())));
 
                             rs.close();
@@ -497,17 +499,17 @@ public class RecordImport {
                             if (rs.next()) {
                                 finalSql = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
                                         Q.v(
-                                                Q.p(bizRs.getString(1) + "-t"), Q.pm(rs.getString(2)), Q.p("MORTGAGE_CARD")
+                                                Q.p(id + "-t"), Q.pm(rs.getString(2)), Q.p("MORTGAGE_CARD")
 
-                                                , Q.p(bizRs.getString(1)), Q.p(rs.getBoolean(4))
+                                                , Q.p(id), Q.p(rs.getBoolean(4))
 
                                         )
 
                                         + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
 
-                                        Q.v(Q.p(bizRs.getString(1) + "-t"), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
+                                        Q.v(Q.p(id + "-t"), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
 
-                                        + ");" + finalSql + ",'" + bizRs.getString(1) + "-t" +
+                                        + ");" + finalSql + ",'" + id + "-t" +
 
                                         "');";
                             } else {
@@ -553,7 +555,7 @@ public class RecordImport {
 
 
                             finalSql += "INSERT INTO MORTGAEGE_REGISTE(ID,HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,BUSINESS_ID,FIN,OWNER,ORG_NAME)  VALUES(" +
-                                    Q.v(Q.p(bizRs.getString(1)), m1, m2, m3, m4, m5, m6, Q.p(bizRs.getString(1)), Q.p(bizRs.getString(1)), Q.p(biz.getNewOwnerId()), Q.p("开源市房产局"))
+                                    Q.v(Q.p(id), m1, m2, m3, m4, m5, m6, Q.p(id), Q.p(id), Q.p(biz.getNewOwnerId()), Q.p("开源市房产局"))
                              + ");";
 
 
@@ -570,7 +572,7 @@ public class RecordImport {
                 }
 
 
-                result.put(id, biz);
+                result.put(oldid, biz);
                 first = biz;
 
 

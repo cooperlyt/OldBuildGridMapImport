@@ -208,7 +208,9 @@ public class ReadyBusiness {
 
     private boolean out ;
 
-    public ReadyBusiness(boolean out,String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime) {
+    private String nameId;
+
+    public ReadyBusiness(boolean out,String houseCode, ReadyBusiness start, String workId, String id, String memo, String selectBusiness, java.sql.Timestamp  checkTime, java.sql.Timestamp  regTime, java.sql.Timestamp  recordTime, String nameId) {
 
         if (start != null) {
             start.after = this;
@@ -218,6 +220,7 @@ public class ReadyBusiness {
             houseStates = new ArrayList<HouseStatus>();
         }
 
+        this.nameId = nameId;
         this.houseCode = houseCode;
         this.id = id;
         this.memo = memo;
@@ -295,13 +298,27 @@ public class ReadyBusiness {
                 result += startHouse;
             }
 
-            result += house + "INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
+            result += house;
+
+
+
+            result +=   "\n INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
 
                     + Q.v(Q.p(id), Q.p(houseCode), Q.p(id), Q.p((befor == null) ? id + "-s" : befor.id),
                     Q.p(id), "FALSE"
             ) +
-                    ");";
+                    ");\n";
 
+            //----- 因为改ID 所以两条有一条会成功，一条失败
+            result +=  "INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
+
+                    + Q.v(Q.p(nameId), Q.p(houseCode), Q.p(id), Q.p((befor == null) ? id + "-s" : befor.id),
+                    Q.p(id), "FALSE"
+            ) +
+                    ");\n";
+
+
+            /////----
 
             result += statusSql;
 

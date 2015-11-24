@@ -13,6 +13,45 @@ import java.util.Date;
 /**
  * Created by cooper on 10/13/15.  WP83
  */
+
+
+
+
+
+//
+//
+//UPDATE HOUSE SET NOITCE_OWNER = null , OLD_OWNER = null;
+//
+//
+//
+//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+//        set h.NOITCE_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND (ob.DEFINE_ID = 'WP44' or ob.DEFINE_ID = 'WP45');
+//
+//
+//
+//
+//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+//        set h.OLD_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP40' ,'WP52','WP102', 'WP53', 'WP54', 'WP55');
+//
+//
+//
+//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+//        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
+//        set h.NOITCE_OWNER = sh.NOITCE_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
+//        'WP9' , 'WP10', 'WP12' ,'WP13', 'WP14' ,'WP15' ,'WP17' ,'WP44', 'WP45' ,'WP46' ,'WP1',
+//        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.NOITCE_OWNER is null;
+//
+//
+//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+//        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
+//        set h.OLD_OWNER = sh.OLD_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
+//        'WP9' 'WP10' 'WP12' 'WP13' 'WP14' 'WP15' 'WP17' 'WP44' 'WP45' 'WP46' 'WP1'
+//        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.OLD_OWNER is null;
+//
+//
+//
+
+
 public class RecordImport {
 
     public static final String[] TAKE_LAST_OWNER_BIZ ={
@@ -49,11 +88,13 @@ public class RecordImport {
 
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
 
+    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
+
     private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
 
     private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-        private static final String BEGIN_DATE = "2015-11-18";
+        private static final String BEGIN_DATE = "2015-11-15";
 
     private static Date CONTINUE_DATE;
 
@@ -75,6 +116,8 @@ public class RecordImport {
     private static BufferedWriter errorWriter;
 
     private static BufferedWriter successWriter;
+
+    private static BufferedWriter patchWriter;
 
     private static BufferedWriter sqlWriter;
 
@@ -197,54 +240,66 @@ public class RecordImport {
 
                 ResultSet rs;
 
-                String oldOwnerId = bizRs.getString(31);
+                if (!biz.getDefineId().equals("WP40")) {
 
-                if (oldOwnerId == null || oldOwnerId.trim().equals("")) {
-                    if (TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId())){
-                        errorWriter.write("MUST OWNER -->" + id);
-                        errorWriter.newLine();
+                    String oldOwnerId = bizRs.getString(31);
+
+                    if (oldOwnerId == null || oldOwnerId.trim().equals("")) {
+                        if (TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId())) {
+                            errorWriter.write("MUST OWNER -->" + id);
+                            errorWriter.newLine();
+                        }
+
+                        biz.setOwnerId(null, null, null, false);
+                    } else {
+                        String oldCardId = null;
+                        String owner = "";
+
+
+                        rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE (Type = 111 or Type= 198) and BizID = '" + oldid + "' and ((OwnerID = '" + oldOwnerId + "') or (Type = 198))");
+
+
+                        if (rs.next()) {
+                            oldCardId = rs.getString(1);
+                            owner = " INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
+                                    Q.v(
+                                            Q.p(id), Q.pm(rs.getString(2)), Q.p(rs.getInt(3) == 111 ? "OWNER_RSHIP" : "NOTICE")
+
+                                            , Q.p(id), Q.p(rs.getBoolean(4))
+
+                                    )
+
+                                    + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
+
+                                    Q.v(Q.p(id), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
+
+                                    + ");";
+                        }
+                        rs.close();
+
+//                        patchWriter.write(owner);
+//                        patchWriter.write("UPDATE BUSINESS_OWNER set OWNER_CARD =" +Q.p(id) + " where ID = " +  Q.p(id) + ";");
+//                        patchWriter.newLine();
+//                        patchWriter.flush();
+                        String ovalue = ownerInfo(oldOwnerId);
+
+                        if (ovalue != null) {
+                            //owner += "UPDATE BUSINESS_OWNER set OWNER_CARD =" +Q.p(id) + " where ID = " +  Q.p(id) + ";\n";
+
+                            owner += "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,OWNER_CARD) VALUES(" +
+                                    Q.v(Q.p(id), ovalue, Q.p(id), oldCardId == null ? "NULL" : Q.p(id))
+
+                                    + ");";
+                        }
+
+
+                        biz.setOwnerId(oldOwnerId, oldCardId, owner, TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
+
+
+
                     }
 
-                    biz.setOwnerId(null, null, null, false);
-                } else {
-                    String oldCardId = null;
-                    String owner = "";
-
-
-                    rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE (Type = 111 or Type= 198) and BizID = '" + id + "' and ((OwnerID = '" + oldOwnerId + "') or (Type = 198))");
-
-
-                    if (rs.next()) {
-                        oldCardId = rs.getString(1);
-                        owner = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
-                                Q.v(
-                                        Q.p(id), Q.pm(rs.getString(2)), Q.p(rs.getInt(3) == 111 ? "OWNER_RSHIP" : "NOTICE")
-
-                                        , Q.p(id), Q.p(rs.getBoolean(4))
-
-                                )
-
-                                + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
-
-                                Q.v(Q.p(id), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
-
-                                + ");";
-                    }
-                    rs.close();
-
-                    String ovalue = ownerInfo(oldOwnerId);
-
-                    if (ovalue != null) {
-                        owner += "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,OWNER_CARD) VALUES(" +
-                                Q.v(Q.p(id), ovalue, Q.p(id), oldCardId == null ? "NULL" : Q.p(id))
-
-                                + ");";
-                    }
-
-
-                    biz.setOwnerId(oldOwnerId, oldCardId, owner,TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
                 }
-
 
                 rs = sD.executeQuery("select MEMO from DGBiz where code='" + bizRs.getString(33) + "'");
                 rs.next();
@@ -322,7 +377,12 @@ public class RecordImport {
                             + " left join District as dd on b.sDistrictID=dd.id) as c"
                             + " left join Developer as dpr on c.developerid=dpr.id"
                             + " where c.id ='" + buildId + "'");
+
+                    String developerName = null;
+                    String developerId = null;
                     if (rs.next()) {
+                        developerName = rs.getString(8);
+                        developerId = rs.getString(7);
                         afterSql = "," + Q.v(Q.p(bizRs.getString(30)), Q.p(rs.getString(14)), Q.pm(rs.getString(15)), Q.pm(rs.getString(16))
                                 , "NULL", Q.p(rs.getString(2)), String.valueOf(rs.getInt(3))
                                 , String.valueOf(rs.getInt(3)), "0", Q.p(rs.getString(4)), Q.pmId(rs.getString(5)),
@@ -333,6 +393,46 @@ public class RecordImport {
 
                     }
                     rs.close();
+
+                    if (biz.getDefineId().equals("WP40")){
+                        System.out.println(id);
+                        rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE BizID = '" + oldid + "'");
+                        String card = null;
+
+                        if (rs.next()) {
+
+
+
+                            card = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
+                                    Q.v(
+                                            Q.p(id), Q.pm(rs.getString(2)), Q.p("OWNER_RSHIP")
+
+                                            , Q.p(id), Q.p(true)
+
+                                    )
+
+                                    + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
+
+                                    Q.v(Q.p(id), Q.pm(rs.getString(5)), Q.p(rs.getString(6)), Q.p(rs.getTimestamp(7)))
+
+                                    + ");";
+
+                        }
+
+                        String owner = "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD) VALUES(" +
+                                Q.v(Q.p(id), Q.pm(developerName),Q.p("OTHER"),Q.pm(developerId), Q.p(id), card == null ? "NULL" : Q.p(id))
+
+                                + ");";
+
+                        if (card != null){
+                            owner = card + owner;
+                        }
+
+
+                        biz.setOwnerId(developerId, rs.getString(1), owner, TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
+                    }
+
+
                     //sD.close();
                 }
 
@@ -692,10 +792,26 @@ public class RecordImport {
             return;
         }
 
+                file = new File(PATCH_OUT_FILE_PATH);
+        try {
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            patchWriter = new BufferedWriter(fw);
+        } catch (IOException e) {
+            System.out.println("success 文件创建失败");
+            e.printStackTrace();
+            return;
+        }
         try {
             begin();
         } finally {
 
+            try {
+                patchWriter.flush();
+                patchWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             try {
                 successWriter.flush();

@@ -309,16 +309,6 @@ public class ReadyBusiness {
             ) +
                     ");\n";
 
-            //----- 因为改ID 所以两条有一条会成功，一条失败
-            result +=  "INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
-
-                    + Q.v(Q.p(nameId), Q.p(houseCode), Q.p(id), Q.p((befor == null) ? id + "-s" : befor.id),
-                    Q.p(id), "FALSE"
-            ) +
-                    ");\n";
-
-
-            /////----
 
             result += statusSql;
 

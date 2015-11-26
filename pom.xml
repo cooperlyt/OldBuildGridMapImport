@@ -46,7 +46,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.cooper.house.BuildConnect</mainClass>
+                            <mainClass>com.cooper.house.ImportContract</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

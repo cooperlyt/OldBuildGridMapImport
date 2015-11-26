@@ -17,39 +17,39 @@ import java.util.Date;
 
 
 
+/*
 
-//
-//
-//UPDATE HOUSE SET NOITCE_OWNER = null , OLD_OWNER = null;
-//
-//
-//
-//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
-//        set h.NOITCE_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND (ob.DEFINE_ID = 'WP44' or ob.DEFINE_ID = 'WP45');
-//
-//
-//
-//
-//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
-//        set h.OLD_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP40' ,'WP52','WP102', 'WP53', 'WP54', 'WP55');
-//
-//
-//
-//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
-//        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
-//        set h.NOITCE_OWNER = sh.NOITCE_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
-//        'WP9' , 'WP10', 'WP12' ,'WP13', 'WP14' ,'WP15' ,'WP17' ,'WP44', 'WP45' ,'WP46' ,'WP1',
-//        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.NOITCE_OWNER is null;
-//
-//
-//        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
-//        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
-//        set h.OLD_OWNER = sh.OLD_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
-//        'WP9' 'WP10' 'WP12' 'WP13' 'WP14' 'WP15' 'WP17' 'WP44' 'WP45' 'WP46' 'WP1'
-//        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.OLD_OWNER is null;
-//
-//
-//
+
+UPDATE HOUSE SET NOITCE_OWNER = null , OLD_OWNER = null;
+
+
+
+        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+        set h.NOITCE_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND (ob.DEFINE_ID = 'WP44' or ob.DEFINE_ID = 'WP45');
+
+
+
+
+        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+        set h.OLD_OWNER = h.MAIN_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP40' ,'WP52','WP102', 'WP53', 'WP54', 'WP55');
+
+
+
+        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
+        set h.NOITCE_OWNER = sh.NOITCE_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
+        'WP9' , 'WP10', 'WP12' ,'WP13', 'WP14' ,'WP15' ,'WP17' ,'WP44', 'WP45' ,'WP46' ,'WP1',
+        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.NOITCE_OWNER is null;
+
+
+        UPDATE HOUSE h LEFT JOIN BUSINESS_HOUSE bh on h.ID = bh.AFTER_HOUSE LEFT JOIN OWNER_BUSINESS ob ON ob.id = bh.BUSINESS_ID
+        LEFT JOIN HOUSE sh on sh.ID = bh.START_HOUSE
+        set h.OLD_OWNER = sh.OLD_OWNER WHERE ob.STATUS <> 'ABORT' AND ob.DEFINE_ID in ('WP33' , 'WP40', 'WP32' ,'WP41' ,'WP52', 'WP102' ,'WP53' ,'WP91' ,'WP54', 'WP55',
+        'WP9' 'WP10' 'WP12' 'WP13' 'WP14' 'WP15' 'WP17' 'WP44' 'WP45' 'WP46' 'WP1'
+        'WP2', 'WP4', 'WP73' ,'WP74', 'WP36', 'WP37' ,'WP42' ,'WP43') AND h.OLD_OWNER is null;
+
+
+*/
 
 
 public class RecordImport {
@@ -94,7 +94,7 @@ public class RecordImport {
 
     private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-        private static final String BEGIN_DATE = "2015-11-15";
+        private static final String BEGIN_DATE = "2015-11-26";
 
     private static Date CONTINUE_DATE;
 

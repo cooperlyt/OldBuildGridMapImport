@@ -78,23 +78,24 @@ public class RecordImport {
 
 
 
-//    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
+    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
+
+    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
+
+    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
+
+    private static final String PATCH_OUT_FILE_PATH = "/root/Documents/oldPatch.sql";
+
+
+//    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
 //
-//    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
+//    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
 //
-//    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
+//    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
+//
+//    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-
-
-    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
-
-    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
-
-    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
-
-    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
-
-        private static final String BEGIN_DATE = "2015-11-26";
+        private static final String BEGIN_DATE = "2015-12-22";
 
     private static Date CONTINUE_DATE;
 

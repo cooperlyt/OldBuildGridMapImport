@@ -95,7 +95,7 @@ public class RecordImport {
 //
 //    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
-        private static final String BEGIN_DATE = "2015-12-22";
+        private static final String BEGIN_DATE = "2015-12-30";
 
     private static Date CONTINUE_DATE;
 

@@ -12,9 +12,9 @@ import java.util.*;
  */
 public class SuperOldBuildGridMapImport {
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.11.152:1433/DGHouseInfo";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/DGHouseInfo";
 
-    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldBuildGridImport.sql";
+    private static final String OUT_FILE_PATH = "g:/oldBuildGridImport.sql";
 
     private static Connection conn;
 
@@ -226,10 +226,10 @@ public class SuperOldBuildGridMapImport {
             writer.newLine();
             writer.newLine();
 
-           // while (buildRS.next()) {
-           //     readBuild(buildRS.getString(1).trim());
-           // }
-            readBuild("755");
+            while (buildRS.next()) {
+                readBuild(buildRS.getString(1).trim());
+            }
+            //readBuild("755");
             writer.flush();
             writer.close();
             fw.close();

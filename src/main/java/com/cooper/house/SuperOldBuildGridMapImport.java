@@ -14,7 +14,7 @@ public class SuperOldBuildGridMapImport {
 
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/DGHouseInfo";
 
-    private static final String OUT_FILE_PATH = "g:/oldBuildGridImport.sql";
+    private static final String OUT_FILE_PATH = "/root/Documents/oldBuildGridImport.sql";
 
     private static Connection conn;
 

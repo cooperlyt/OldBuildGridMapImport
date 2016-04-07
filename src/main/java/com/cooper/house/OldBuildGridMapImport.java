@@ -10,7 +10,7 @@ import java.util.*;
 public class OldBuildGridMapImport {
 
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHouseInfo";
 
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldBuildGridImport.sql";
 
@@ -29,46 +29,48 @@ public class OldBuildGridMapImport {
 
     private static Set<String> error = new HashSet<String>();
 
-    private static Map<String,String> buildIdMap = new HashMap<String, String>();
+    //private static Map<String,String> buildIdMap = new HashMap<String, String>();
 
 
-    public static void readFileByLines() {
-        File file = new File(ID_LINK_FILE);
-        BufferedReader reader = null;
-        try {
-            System.out.println("以行为单位读取文件内容，一次读一整行：");
-            reader = new BufferedReader(new FileReader(file));
-            String tempString = null;
-            int line = 1;
-            // 一次读入一行，直到读入null为文件结束
-            while ((tempString = reader.readLine()) != null) {
-                // 显示行号
+//    public static void readFileByLines() {
+//        File file = new File(ID_LINK_FILE);
+//        BufferedReader reader = null;
+//        try {
+//            System.out.println("以行为单位读取文件内容，一次读一整行：");
+//            reader = new BufferedReader(new FileReader(file));
+//            String tempString = null;
+//            int line = 1;
+//            // 一次读入一行，直到读入null为文件结束
+//            while ((tempString = reader.readLine()) != null) {
+//                // 显示行号
+//
+//
+//                String[] ss = tempString.split(" \\| ");
+//                buildIdMap.put(ss[1].trim(),ss[0].trim());
+//                System.out.println(tempString);
+//                System.out.println(ss[1] + "=" +ss[0]);
+//
+//                line++;
+//            }
+//            reader.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (reader != null) {
+//                try {
+//                    reader.close();
+//                } catch (IOException e1) {
+//                }
+//            }
+//        }
+//    }
 
 
-                String[] ss = tempString.split(" \\| ");
-                buildIdMap.put(ss[1].trim(),ss[0].trim());
-                System.out.println(tempString);
-                System.out.println(ss[1] + "=" +ss[0]);
-
-                line++;
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e1) {
-                }
-            }
-        }
-    }
 
 
     public static void main(String[] args) {
 
-        readFileByLines();
+        //readFileByLines();
 
         titleId = 1; gridId = 1; rowId = 1; blockId = 1;
         try {
@@ -76,7 +78,7 @@ public class OldBuildGridMapImport {
             conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
-            ResultSet buildRS = statement.executeQuery("SELECT ID FROM Build ");
+            ResultSet buildRS = statement.executeQuery("SELECT ID,NO FROM Build ");
             File file = new File(OUT_FILE_PATH);
             if (file.exists()){
                 file.delete();
@@ -95,7 +97,7 @@ public class OldBuildGridMapImport {
             writer.newLine();
 
             while (buildRS.next()) {
-                readBuild(buildRS.getString(1).trim());
+                readBuild(buildRS.getString(1).trim(),"D" + buildRS.getString(2).trim());
 
             }
 
@@ -116,7 +118,7 @@ public class OldBuildGridMapImport {
     }
 
 
-    private static void readBuild(String buildId) throws SQLException, IOException {
+    private static void readBuild(String buildId, String convertId) throws SQLException, IOException {
 
         Map<Integer,List<HouseData>> gridMapData = new HashMap<Integer, List<HouseData>>();
         Statement statement = conn.createStatement();
@@ -155,11 +157,11 @@ public class OldBuildGridMapImport {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
-        readBuildGridMap(buildId,mapDatas);
+        readBuildGridMap(buildId,mapDatas,convertId);
 
     }
 
-    private static void readBuildGridMap(String buildId,List<Map.Entry<Integer,List<HouseData>>> datas) throws IOException {
+    private static void readBuildGridMap(String buildId,List<Map.Entry<Integer,List<HouseData>>> datas,String convertId) throws IOException {
 
 
         writer.newLine();
@@ -168,12 +170,12 @@ public class OldBuildGridMapImport {
         writer.newLine();
 
         for(Map.Entry<Integer,List<HouseData>> data: datas){
-            if (buildIdMap.get(buildId) == null){
-                throw  new IllegalArgumentException("idError:" + buildId);
-               // System.out.println("ID ERROR:" + buildId);
-            }
+//            if (buildIdMap.get(buildId) == null){
+//                throw  new IllegalArgumentException("idError:" + buildId);
+//               // System.out.println("ID ERROR:" + buildId);
+//            }
 
-            writer.write("INSERT INTO BUILD_GRID_MAP(ID,BUILD_ID,NAME,_ORDER) VALUES('I-" + gridId + "','" + buildIdMap.get(buildId) + "','第" + data.getKey() + "页'," + data.getKey() +");");
+            writer.write("INSERT INTO BUILD_GRID_MAP(ID,BUILD_ID,NAME,_ORDER) VALUES('I-" + gridId + "','" + convertId + "','第" + data.getKey() + "页'," + data.getKey() +");");
             writer.newLine();
 
             Map<Integer,String> unitMap = new HashMap<Integer, String>();

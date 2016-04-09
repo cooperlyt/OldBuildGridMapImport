@@ -95,6 +95,11 @@ public class ReadyBusiness {
 
     private String defineId;
 
+    private String otherBizInfo = "";
+
+    public void setOtherBizInfo(String otherBizInfo) {
+        this.otherBizInfo = otherBizInfo;
+    }
 
     private java.sql.Timestamp applyTime;
 
@@ -112,6 +117,84 @@ public class ReadyBusiness {
 
     private String owner;
 
+
+    private String developerOwner;
+
+    private String developerOwnerId;
+
+    private String contractOwner;
+
+    private String contractOwnerId;
+
+    private String noticeOwner;
+
+    private String noticeOwnerId;
+
+    public String getDeveloperOwnerId() {
+        return developerOwnerId;
+    }
+
+    public String getContractOwnerId() {
+        return contractOwnerId;
+    }
+
+    public String getNoticeOwnerId() {
+        return noticeOwnerId;
+    }
+
+    public void setDeveloperOwner(String id,String owner){
+        if (id == null){
+            if (befor != null && befor.getDeveloperOwnerId() != null){
+                developerOwnerId = befor.getDeveloperOwnerId();
+                developerOwner = null;
+            }else {
+                developerOwnerId = null;
+                developerOwner = null;
+            }
+        }else if(id == ""){
+            developerOwnerId = null;
+            developerOwner = null;
+        }else{
+            developerOwnerId = id;
+            developerOwner = owner;
+        }
+    }
+
+    public void setContractOwner(String id,String owner){
+        if (id == null){
+            if (befor != null && befor.getContractOwnerId() != null){
+                contractOwnerId = befor.getContractOwnerId();
+                contractOwner = null;
+            }else {
+                contractOwnerId = null;
+                contractOwner = null;
+            }
+        }else if(id == ""){
+            contractOwnerId = null;
+            contractOwner = null;
+        }else{
+            contractOwnerId = id;
+            contractOwner = owner;
+        }
+    }
+
+
+    public void setNoticeOwner(String id,String owner){
+        if (id == null){
+            if (befor != null && befor.getNoticeOwnerId() != null){
+                noticeOwnerId = befor.getDeveloperOwnerId();
+            }else {
+                noticeOwnerId = null;
+            }
+            noticeOwner = null;
+        }else if(id == ""){
+            noticeOwnerId = null;
+            noticeOwner = null;
+        }else{
+            noticeOwnerId = id;
+            noticeOwner = owner;
+        }
+    }
 
     private String mortgaeg;
 
@@ -321,6 +404,32 @@ public class ReadyBusiness {
 
             result += "DELETE FROM LOCKED_HOUSE WHERE HOUSE_CODE =" + Q.p(houseCode) + " AND TYPE = 'SYSTEM_LOCKED';";
 
+            result += otherBizInfo;
+
+            if (developerOwner != null){
+                result += developerOwner;
+            }
+
+            if (developerOwnerId != null){
+                result += "UPDATE HOUSE set OLD_OWNER = " + Q.p(developerOwnerId) + " where ID = " + Q.p(id) + ";";
+            }
+
+            if (contractOwner != null){
+                result += contractOwner;
+            }
+
+            if (contractOwnerId != null){
+                result += "UPDATE HOUSE set CONTRACT_OWNER = " + Q.p(contractOwnerId) + " where ID = " + Q.p(id) + ";";
+            }
+
+            if (noticeOwner != null){
+                result += contractOwner;
+            }
+
+
+            if (noticeOwnerId != null){
+                result += "UPDATE HOUSE set NOITCE_OWNER = " + Q.p(noticeOwnerId) + " where ID = " + Q.p(id) + ";";
+            }
         }
 
         if (after != null){

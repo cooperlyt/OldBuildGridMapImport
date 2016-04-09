@@ -244,6 +244,139 @@ public class RecordImport {
 
                 ResultSet rs;
 
+//                if (biz.getDefineId().equals("WP42")){
+//                    biz.setContractOwner();
+//                }else if (biz.getDefineId().equals("WP43") || biz.getDefineId().equals("WP41") || biz.getDefineId().equals("WP101")){
+//                    biz.setContractOwner("",null);
+//                }
+
+                if (biz.getDefineId().equals("WP44") || biz.getDefineId().equals("WP45") || biz.getDefineId().equals("WP47") ){
+
+
+                    rs = sD.executeQuery("select dhc.NO,dhc.CardNO,dhc.memo,dhc.printTime from DGHouseRecord..Business as db left join DGHouseInfo..houseCard dhc on db.id=dhc.bizid " +
+                            "where dhc.type=198 " +
+                            "and RecordBizNO=" + Q.p(id));
+
+                    String card = null;
+                    if (rs.next()) {
+                        card = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
+                                Q.v(
+                                        Q.p("n-" + id), Q.pm(rs.getString(1)), Q.p("NOTICE")
+                                        , Q.p(id), Q.p(true)
+                                )
+
+                                + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
+
+                                Q.v(Q.p("n-" + id), Q.pm(rs.getString(2)), Q.p(rs.getString(3)), Q.p(rs.getTimestamp(4)))
+
+                                + ");";
+                    }
+
+                    rs = sD.executeQuery(
+                            "  select VariableValueVCHAR from " +
+                                    "    (select db.RecordBizNO,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                                    "      left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                                    "    left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                                    "  where spd.VariableDefinitionId = 'pre_buy_people' and VariableValueVCHAR is not null and VariableValueVCHAR<>'' and a.RecordBizNo =" + Q.p(id));
+
+
+
+                    if (rs.next()) {
+
+                        String ovalue = ownerInfo(rs.getString(1));
+                        String nowner = "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,OWNER_CARD) VALUES(" +
+                                Q.v(Q.p("n-" + id),ovalue , card == null ? "NULL" : Q.p(id))
+
+                                + ");";
+                        biz.setNoticeOwner("n-" + id,card == null ? nowner : card + nowner);
+
+                    }
+
+
+
+
+                }else if (biz.getDefineId().equals("WP46") || biz.getDefineId().equals("WP41")){
+                    biz.setNoticeOwner("",null);
+                }
+
+                if (biz.getDefineId().equals("WP40")){
+
+                    rs = sD.executeQuery("select dhc.NO,dhc.CardNO,dhc.memo,dhc.printTime from DGHouseRecord..Business as db left join DGHouseInfo..houseCard dhc on db.id=dhc.bizid " +
+                            "where dhc.type=110 " +
+                            "and RecordBizNO=" + Q.p(id));
+
+                    String card = null;
+                    if (rs.next()) {
+                        card = "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" +
+                                Q.v(
+                                        Q.p("d-" + id), Q.pm(rs.getString(1)), Q.p("OWNER_RSHIP")
+                                        , Q.p(id), Q.p(true)
+                                )
+
+                                + ");INSERT INTO CARD_INFO(ID,CODE,MEMO,PRINT_TIME) VALUES(" +
+
+                                Q.v(Q.p("d-" + id), Q.pm(rs.getString(2)), Q.p(rs.getString(3)), Q.p(rs.getTimestamp(4)))
+
+                                + ");";
+                    }
+
+                    rs = hD.executeQuery("select d.Name, d.ID from House h left join Build b on b.ID = h.BuildID left join project p on p.ID = b.ProjectID left join Developer d on d.ID = p.DeveloperID where h.NO = " + Q.p(houseCode));
+
+                    if (rs.next()) {
+
+                        String owner = "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD) VALUES(" +
+                                Q.v(Q.p("d-" + id), Q.pm(rs.getString(1)), Q.p("OTHER"), Q.pm(rs.getString(2)), Q.p(id), card == null ? "NULL" : Q.p(id))
+
+                                + ");";
+                        biz.setDeveloperOwner("d-" + id,card == null ? owner : card + owner);
+                    }
+
+
+                }else if (biz.getDefineId().equals("WP41")){
+                    biz.setDeveloperOwner("",null);
+                }
+
+
+                String businessOtherInfo = "";
+
+                rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
+                        "where bizid = " + Q.p(oldid));
+
+
+                while (rs.next()){
+                    businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES(" +
+
+                            Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false))
+                            + ",1);";
+                    ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));
+                    while (rs2.next()){
+                        businessOtherInfo += "INSERT INTO UPLOAD_FILE(FILE_NAME,EMP_NAME,EMP_CODE,MD5,BUSINESS_FILE_ID,ID,UPLOAD_TIME) VALUES(" +
+
+                                Q.v(Q.p(rs2.getString(1)), Q.p(rs2.getString(2)), Q.p(rs2.getString(3)), Q.p(rs2.getString(4)),Q.p(rs.getString(1)),Q.p(rs2.getString(5)),Q.p(rs2.getTimestamp(6)))
+                                + ");";
+                    }
+
+                }
+
+
+                rs = sD.executeQuery("select e.NO,e.Name,RegisterTime,e2.NO,e2.Name,FinalTime from DGHouseRecord..Business b left join DGEmployee e on e.ID = b.Finalworker left join DGEmployee e2 on e2.ID = b.enrolworker where (Finalworker is not null or enrolworker is not null) and  RecordBizNO = " + Q.p(id));
+
+                if (rs.next()){
+                    businessOtherInfo += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+
+                    + Q.v(Q.p("c-" + id), Q.p("CHECK_EMP"),Q.p(rs.getString(1)),Q.p(rs.getString(2)),Q.p(id),Q.p(rs.getTimestamp(3)))
+                    + "); INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES(" +
+                        Q.v(Q.p("f-" + id),Q.p("REG_EMP"),Q.p(rs.getString(4)), Q.p(rs.getString(5)), Q.p(id),Q.p(rs.getTimestamp(6)))
+                            + ");";
+                }
+
+                
+
+
+
+                biz.setOtherBizInfo(businessOtherInfo);
+
+
                 if (!biz.getDefineId().equals("WP40")) {
 
                     String oldOwnerId = bizRs.getString(31);
@@ -304,6 +437,8 @@ public class RecordImport {
                     }
 
                 }
+
+
 
                 rs = sD.executeQuery("select MEMO from DGBiz where code='" + bizRs.getString(33) + "'");
                 rs.next();
@@ -659,7 +794,7 @@ public class RecordImport {
 
 
                             finalSql += "INSERT INTO MORTGAEGE_REGISTE(ID,HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,BUSINESS_ID,FIN,OWNER,ORG_NAME)  VALUES(" +
-                                    Q.v(Q.p(id), m1, m2, m3, m4, m5, m6, Q.p(id), Q.p(id), Q.p(biz.getNewOwnerId()), Q.p("开源市房产局"))
+                                    Q.v(Q.p(id), m1, m2, m3, m4, m5, m6, Q.p(id), Q.p(id), Q.p(biz.getNewOwnerId()), Q.p("鞍山市经济开发区房产局"))
                              + ");";
 
 

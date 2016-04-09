@@ -78,7 +78,7 @@ public class OldBuildGridMapImport {
             conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
-            ResultSet buildRS = statement.executeQuery("SELECT ID,NO FROM Build ");
+            ResultSet buildRS = statement.executeQuery("SELECT ID,NO FROM Build where ID <> '1401A8C01461C5D201461461C5F10003'");
             File file = new File(OUT_FILE_PATH);
             if (file.exists()){
                 file.delete();

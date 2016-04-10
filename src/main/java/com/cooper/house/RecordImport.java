@@ -69,36 +69,36 @@ public class RecordImport {
             , "WP24", "WP84", "WP100", "WP74"};
     private static final List<String> MUST_HAVE_SELECT_LIST = Arrays.asList(MUST_HAVE_SELECT);
 
-    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
+    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHouseInfo";
 
-    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/shark";
+    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/shark";
 
-    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
-
-
+    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHOUSERECORD";
 
 
-    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
 
-    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
 
-    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
-
-    private static final String PATCH_OUT_FILE_PATH = "/root/Documents/oldPatch.sql";
-
+//    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
 //
-//    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
+//    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
 //
-//    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
+//    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
 //
-//    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
-//
-//    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+//    private static final String PATCH_OUT_FILE_PATH = "/root/Documents/oldPatch.sql";
+
+
+    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
+
+    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
+
+    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
+
+    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
 
     //ky 2016-04-7
 
-    private static final String BEGIN_DATE = "2016-04-7";
+    private static final String BEGIN_DATE = "1960-01-1";
 
     private static Date CONTINUE_DATE;
 
@@ -190,6 +190,59 @@ public class RecordImport {
             return;
         }
 
+    }
+
+
+    private static String svs(Statement sD, String varId, String RecordBizNo) throws SQLException {
+        ResultSet rs = sD.executeQuery("select VariableValueVCHAR from " +
+                "(select db.RecordBizNO,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                "left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                "left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                "where spd.VariableDefinitionId = " + Q.p(varId) +
+                "and RecordBizNO=" + Q.p(RecordBizNo));
+        if (rs.next()){
+           return rs.getString(1);
+        }
+        return null;
+    }
+
+    private static Timestamp svt(Statement sD, String varId, String RecordBizNo) throws SQLException {
+        ResultSet rs = sD.executeQuery("select VariableValueDATE from " +
+                "(select db.RecordBizNO,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                "left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                "left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                "where spd.VariableDefinitionId = " + Q.p(varId) +
+                "and RecordBizNO=" + Q.p(RecordBizNo));
+        if (rs.next()){
+            return rs.getTimestamp(1);
+        }
+        return null;
+    }
+
+    private static Double svd(Statement sD, String varId, String RecordBizNo) throws SQLException {
+        ResultSet rs = sD.executeQuery("select VariableValueDBL from " +
+                "(select db.RecordBizNO,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                "left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                "left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                "where spd.VariableDefinitionId = " + Q.p(varId) +
+                "and RecordBizNO=" + Q.p(RecordBizNo));
+        if (rs.next()){
+            return rs.getDouble(1);
+        }
+        return null;
+    }
+
+    private static Long svl(Statement sD, String varId, String RecordBizNo) throws SQLException {
+        ResultSet rs = sD.executeQuery("select VariableValueLONG from " +
+                "(select db.RecordBizNO,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                "left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                "left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                "where spd.VariableDefinitionId = " + Q.p(varId) +
+                "and RecordBizNO=" + Q.p(RecordBizNo));
+        if (rs.next()){
+            return rs.getLong(1);
+        }
+        return null;
     }
 
 
@@ -337,6 +390,8 @@ public class RecordImport {
                 }
 
 
+
+
                 String businessOtherInfo = "";
 
                 rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
@@ -370,8 +425,108 @@ public class RecordImport {
                             + ");";
                 }
 
-                
 
+                if (biz.getDefineId().equals("WP73")) {
+                    String ownerId = "" + svl(sD, "close_people", id);
+
+                    businessOtherInfo += "INSERT INTO CLOSE_HOUSE(ID,BUSINESS_ID,CLOSE_DOWN_CLOUR,CLOSE_DATE,LEGAL_DOCUMENTS,EXECUTION_NOTICE,SEND_PEOPLE,PHONE,EXECUTION_CARD_NO,WORK_CARD_NO) " +
+                            " VALUES(" +
+                                Q.v(Q.p(id),Q.p(id),Q.p(svs(sD,"closeDown_clour",id)), Q.pm(svt(sD,"close_date",id)), Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD,"open_file",id)), Q.p(ownerName(ownerId)),Q.p(ownerPhone(ownerId)),Q.p(svs(sD,"mark_workNo",id)),Q.p(svs(sD,"workNo",id)))
+                            +");";
+                }
+
+                if (biz.getDefineId().equals("WP74")) {
+                    String ownerId = "" + svl(sD,"open_people",id);
+                    businessOtherInfo += "INSERT INTO HOUSE_CLOSE_CANCEL(ID,BUSINESS_ID,CANCEL_DATE,CANCEL_DOWN_CLOUR,LEGAL_DOCUMENTS,EXECUTION_NOTICE,SEND_PEOPLE,PHONE) " +
+                            " VALUES(" +
+                                Q.v(Q.p(id),Q.p(id),Q.pm(svt(sD,"open_date",id)),Q.pm(svs(sD,"open_clour",id)),Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD,"open_file",id)), Q.p(ownerName(ownerId)),Q.p(ownerPhone(ownerId)))
+                            +");";
+                }
+
+
+
+
+                rs = sD.executeQuery("select VariableDefinitionId ,VariableValueVCHAR from " +
+                        "(select db.RecordBizNO,db.nameid,sp.id,sp.oid from DGHouseRecord..Business as db " +
+                        "left join shark..SHKProcesses as sp on db.nameid = sp.id) as a " +
+                        "left join shark..SHKProcessData as spd on a.oid=spd.process " +
+                        "where (spd.VariableDefinitionId = 'terrible_relation_people' " +
+                        "or spd.VariableDefinitionId = 'correct_people' " +
+                        "or spd.VariableDefinitionId = 'correct_people' " +
+                        "or spd.VariableDefinitionId = 'entrust_deputy' " +
+                        "or spd.VariableDefinitionId = 'mortgage_proxy' " +
+                        "or spd.VariableDefinitionId = 'mortgage_obligee_proxy' " +
+                        "or spd.VariableDefinitionId = 'pre_sell_proxy' " +
+                        "or spd.VariableDefinitionId = 'pre_buy_proxy' " +
+                        "or spd.VariableDefinitionId = 'record_agent' " +
+                        "or spd.VariableDefinitionId = 'developer_proxy' " +
+                        "or spd.VariableDefinitionId = 'buyer_proxy' " +
+                        "or spd.VariableDefinitionId = 'ancester_proxy' " +
+                        "or spd.VariableDefinitionId = 'heir_proxy' " +
+                        "or spd.VariableDefinitionId = 'old_owner_proxy' " +
+                        "or spd.VariableDefinitionId = 'new_owner_proxy' " +
+                        "or spd.VariableDefinitionId = 'new_owner_proxy' " +
+                        "or spd.VariableDefinitionId = 'accuser' " +
+                        "or spd.VariableDefinitionId = 'open_accuser') " +
+                        "and VariableValueVCHAR<>'' and RecordBizNO =" + Q.p(id));
+
+
+                int ii = 1;
+                while (rs.next()){
+                    String persionType = rs.getString(1);
+                    String type = null;
+                    if (persionType=="terrible_relation_people") {
+                        type="TERRIBLE_RELATION";
+                    }
+
+                    if ((persionType=="correct_people") || (persionType=="accuser")  || (persionType=="open_accuser")) {
+                        type = "CORRECT";
+                    }
+
+                    if ((persionType=="entrust_deputy") || (persionType=="record_agent")) {
+                        type = "OWNER_ENTRUST";
+                    }
+
+                    if (persionType=="mortgage_proxy") {
+                        type = "MORTGAGE";
+                    }
+
+                    if (persionType=="mortgage_obligee_proxy") {
+                        type = "MORTGAGE_OBLIGEE";
+                    }
+
+                    if ((persionType=="pre_sell_proxy") || (persionType=="developer_proxy")) {
+                        type = "PRE_SALE_ENTRUST";
+                    }
+                    if (persionType=="pre_buy_proxy") {
+                        type = "PRE_BUY_ENTRUST";
+                    }
+
+
+                    if ((persionType=="sellers_agent") || (persionType=="old_owner_proxy")  || (persionType=="ancester_proxy")) {
+                        type = "SELL_ENTRUST";
+                    }
+
+                    if ((persionType=="buyer_proxy") || (persionType=="new_owner_proxy")  || (persionType=="heir_proxy")) {
+                        type = "BUY_ENTRUST";
+                    }
+
+
+
+                    Statement sss = houseConn.createStatement();
+                    ResultSet rsss = sss.executeQuery(" SELECT Name,IDType,IDNO,Phone,Address FROM OwnerInfo WHERE ID = '" + rs.getString(2) + "'");
+
+                    String oss = null;
+                    if (rsss.next()) {
+                        oss = Q.v(Q.p(rsss.getString(3)), Q.pCardType(rsss.getInt(2)), Q.pm(rsss.getString(1)), Q.p(rsss.getString(4)));
+                    }
+
+                    if (type != null && oss != null){
+                        businessOtherInfo += "INSERT INTO BUSINESS_PERSION(ID,BUSINESS_ID,TYPE,ID_NO,ID_TYPE,NAME,PHONE) VALUES("
+                            + Q.v(Q.p(id+ "-" + ii),Q.p(id),Q.p(type)) + oss +
+                                ");";
+                    }
+                }
 
 
                 biz.setOtherBizInfo(businessOtherInfo);
@@ -538,6 +693,8 @@ public class RecordImport {
                         rs = hD.executeQuery("select ID,NO,Type,Cancel,CardNO,Memo,PrintTime from HouseCard WHERE BizID = '" + oldid + "'");
                         String card = null;
 
+                        String dOldCard = null;
+
                         if (rs.next()) {
 
 
@@ -556,6 +713,8 @@ public class RecordImport {
 
                                     + ");";
 
+                            dOldCard = rs.getString(1);
+
                         }
 
                         String owner = "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD) VALUES(" +
@@ -568,7 +727,7 @@ public class RecordImport {
                         }
 
 
-                        biz.setOwnerId(developerId, rs.getString(1), owner, TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
+                        biz.setOwnerId(developerId, dOldCard, owner, TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
                     }
 
 
@@ -846,6 +1005,28 @@ public class RecordImport {
         if (rs.next()) {
             return Q.v(Q.p(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)), Q.p(rs.getString(4)),
                     Q.p(rs.getString(5)), Q.p(rs.getString(6)));
+        } else {
+            return null;
+        }
+    }
+
+    private static String ownerName(String ownerId) throws SQLException {
+        if (ownerId == null) return null;
+        Statement statement = houseConn.createStatement();
+        ResultSet rs = statement.executeQuery(" SELECT Name FROM OwnerInfo WHERE ID = '" + ownerId + "'");
+        if (rs.next()) {
+            return rs.getString(1);
+        } else {
+            return null;
+        }
+    }
+
+    private static String ownerPhone(String ownerId) throws SQLException {
+        if (ownerId == null) return null;
+        Statement statement = houseConn.createStatement();
+        ResultSet rs = statement.executeQuery(" SELECT Phone FROM OwnerInfo WHERE ID = '" + ownerId + "'");
+        if (rs.next()) {
+            return rs.getString(1);
         } else {
             return null;
         }

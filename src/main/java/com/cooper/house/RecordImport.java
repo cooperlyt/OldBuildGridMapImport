@@ -78,22 +78,22 @@ public class RecordImport {
 
 
 
-//    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
+    private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
+
+    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
+
+    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
+
+    private static final String PATCH_OUT_FILE_PATH = "/root/Documents/oldPatch.sql";
+
+
+//    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
 //
-//    private static final String ERROR_FILE_PATH = "/root/Documents/oldRecordError.log";
+//    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
 //
-//    private static final String SUCCESS_FILE_PATH = "/root/Documents/statusError.log";
+//    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
 //
-//    private static final String PATCH_OUT_FILE_PATH = "/root/Documents/oldPatch.sql";
-
-
-    private static final String OUT_FILE_PATH = "/Users/cooper/Documents/oldRecord.sql";
-
-    private static final String PATCH_OUT_FILE_PATH = "/Users/cooper/Documents/oldPatch.sql";
-
-    private static final String ERROR_FILE_PATH = "/Users/cooper/Documents/oldRecordError.log";
-
-    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
+//    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
 
     //ky 2016-04-7
@@ -171,8 +171,10 @@ public class RecordImport {
                 } catch (MustHaveSelectBizException e) {
                     errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "MustHaveSelectBizException");
                     errorWriter.newLine();
+                } catch (MainOwnerNotFoundException e) {
+                    errorWriter.write(bizRs.getString(1).trim() + ">" + e.bizId + ">" + "MainOwnerNotFoundException");
+                    errorWriter.newLine();
                 }
-
 
 
             }
@@ -246,7 +248,7 @@ public class RecordImport {
     }
 
 
-    private static String business(String houseCode) throws SQLException, NoSelectBizException, MustHaveSelectBizException, IOException {
+    private static String business(String houseCode) throws SQLException, NoSelectBizException, MustHaveSelectBizException, IOException, MainOwnerNotFoundException {
 
         Map<String, ReadyBusiness> result = new HashMap<String, ReadyBusiness>();
 
@@ -336,9 +338,9 @@ public class RecordImport {
 
                     if (rs.next()) {
 
-                        String ovalue = ownerInfo(rs.getString(1));
-                        String nowner = "INSERT INTO  BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,BUSINESS,OWNER_CARD) VALUES(" +
-                                Q.v(Q.p("n-" + id),ovalue , card == null ? "NULL" : Q.p(id))
+                        String ovalue = ownerInfoByNo(rs.getString(1));
+                        String nowner = "INSERT INTO  BUSINESS_OWNER(ID,BUSINESS,NAME,ID_TYPE,ID_NO,PHONE,ROOT_ADDRESS,ADDRESS,OWNER_CARD) VALUES(" +
+                                Q.v(Q.p("n-" + id),Q.p(id),ovalue , card == null ? "NULL" : Q.p(id))
 
                                 + ");";
                         biz.setNoticeOwner("n-" + id,card == null ? nowner : card + nowner);
@@ -427,19 +429,19 @@ public class RecordImport {
 
 
                 if (biz.getDefineId().equals("WP73")) {
-                    String ownerId = "" + svl(sD, "close_people", id);
+                    String ownerId = "" + svs(sD, "close_people", id);
 
                     businessOtherInfo += "INSERT INTO CLOSE_HOUSE(ID,BUSINESS_ID,CLOSE_DOWN_CLOUR,CLOSE_DATE,LEGAL_DOCUMENTS,EXECUTION_NOTICE,SEND_PEOPLE,PHONE,EXECUTION_CARD_NO,WORK_CARD_NO) " +
                             " VALUES(" +
-                                Q.v(Q.p(id),Q.p(id),Q.p(svs(sD,"closeDown_clour",id)), Q.pm(svt(sD,"close_date",id)), Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD,"open_file",id)), Q.p(ownerName(ownerId)),Q.p(ownerPhone(ownerId)),Q.p(svs(sD,"mark_workNo",id)),Q.p(svs(sD,"workNo",id)))
+                                Q.v(Q.p(id),Q.p(id),Q.p(svs(sD,"closeDown_clour",id)), Q.pm(svt(sD,"close_date",id)), Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD, "open_file",id)), Q.p(ownerNameByNo(ownerId)),Q.p(ownerPhoneByNo(ownerId)),Q.p(svs(sD,"mark_workNo",id)),Q.p(svs(sD,"workNo",id)))
                             +");";
                 }
 
                 if (biz.getDefineId().equals("WP74")) {
-                    String ownerId = "" + svl(sD,"open_people",id);
+                    String ownerId = "" + svs(sD, "open_people", id);
                     businessOtherInfo += "INSERT INTO HOUSE_CLOSE_CANCEL(ID,BUSINESS_ID,CANCEL_DATE,CANCEL_DOWN_CLOUR,LEGAL_DOCUMENTS,EXECUTION_NOTICE,SEND_PEOPLE,PHONE) " +
                             " VALUES(" +
-                                Q.v(Q.p(id),Q.p(id),Q.pm(svt(sD,"open_date",id)),Q.pm(svs(sD,"open_clour",id)),Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD,"open_file",id)), Q.p(ownerName(ownerId)),Q.p(ownerPhone(ownerId)))
+                                Q.v(Q.p(id),Q.p(id),Q.pm(svt(sD,"open_date",id)),Q.pm(svs(sD,"open_clour",id)),Q.p(svs(sD,"open_cardId",id)), Q.p(svs(sD, "open_file",id)), Q.p(ownerNameByNo(ownerId)),Q.p(ownerPhoneByNo(ownerId)))
                             +");";
                 }
 
@@ -514,7 +516,7 @@ public class RecordImport {
 
 
                     Statement sss = houseConn.createStatement();
-                    ResultSet rsss = sss.executeQuery(" SELECT Name,IDType,IDNO,Phone,Address FROM OwnerInfo WHERE ID = '" + rs.getString(2) + "'");
+                    ResultSet rsss = sss.executeQuery(" SELECT Name,IDType,IDNO,Phone,Address FROM OwnerInfo WHERE NO = '" + rs.getString(2) + "'");
 
                     String oss = null;
                     if (rsss.next()) {
@@ -529,6 +531,19 @@ public class RecordImport {
                 }
 
 
+
+                rs = sD.executeQuery("select NO,Cabinet,box from " +
+                        "       (select db.RecordBizNO,db.box,db.Cabinet,rb.Business,rb.Record from " +
+                        "              DGHouseRecord..Business as db left join DGHouseRecord..RecordandBiz as rb on db.id = rb.business) as a " +
+                        "       left join DGHouseRecord..Record as rd on a.Record=rd.id WHERE RecordBizNo = " + Q.p(id));
+
+                if (rs.next()){
+                    businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,CABINET,BOX,RECORD_CODE) VALUES("
+                            + Q.v(Q.p(id),Q.p(id),Q.p(rs.getString(2)),Q.p(rs.getString(3)),Q.pm(rs.getString(1)))
+                            + ");UPDATE BUSINESS_HOUSE set RECORD_STORE =" + Q.p(id) + " WHERE ID=" + Q.p(id) + ";";
+                }
+
+
                 biz.setOtherBizInfo(businessOtherInfo);
 
 
@@ -538,8 +553,8 @@ public class RecordImport {
 
                     if (oldOwnerId == null || oldOwnerId.trim().equals("")) {
                         if (TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId())) {
-                            errorWriter.write("MUST OWNER -->" + id);
-                            errorWriter.newLine();
+                            successWriter.write("MUST OWNER -->" + id);
+                            successWriter.newLine();
                         }
 
                         biz.setOwnerId(null, null, null, false);
@@ -951,6 +966,9 @@ public class RecordImport {
                                 m6 = String.valueOf(rs.getDouble(1));
                             }
 
+                            if (biz.getNewOwnerId() == null){
+                                throw new MainOwnerNotFoundException(id);
+                            }
 
                             finalSql += "INSERT INTO MORTGAEGE_REGISTE(ID,HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,BUSINESS_ID,FIN,OWNER,ORG_NAME)  VALUES(" +
                                     Q.v(Q.p(id), m1, m2, m3, m4, m5, m6, Q.p(id), Q.p(id), Q.p(biz.getNewOwnerId()), Q.p("鞍山市经济开发区房产局"))
@@ -1003,6 +1021,17 @@ public class RecordImport {
         Statement statement = houseConn.createStatement();
         ResultSet rs = statement.executeQuery(" SELECT Name,IDType,IDNO,Phone,City,Address FROM OwnerInfo WHERE ID = '" + ownerId + "'");
         if (rs.next()) {
+            return Q.v(Q.pm(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)), Q.p(rs.getString(4)),
+                    Q.p(rs.getString(5)), Q.p(rs.getString(6)));
+        } else {
+            return null;
+        }
+    }
+
+    private static String ownerInfoByNo(String ownerId) throws SQLException {
+        Statement statement = houseConn.createStatement();
+        ResultSet rs = statement.executeQuery(" SELECT Name,IDType,IDNO,Phone,City,Address FROM OwnerInfo WHERE NO = '" + ownerId + "'");
+        if (rs.next()) {
             return Q.v(Q.p(rs.getString(1)), Q.pCardType(rs.getInt(2)), Q.pm(rs.getString(3)), Q.p(rs.getString(4)),
                     Q.p(rs.getString(5)), Q.p(rs.getString(6)));
         } else {
@@ -1010,10 +1039,10 @@ public class RecordImport {
         }
     }
 
-    private static String ownerName(String ownerId) throws SQLException {
+    private static String ownerNameByNo(String ownerId) throws SQLException {
         if (ownerId == null) return null;
         Statement statement = houseConn.createStatement();
-        ResultSet rs = statement.executeQuery(" SELECT Name FROM OwnerInfo WHERE ID = '" + ownerId + "'");
+        ResultSet rs = statement.executeQuery(" SELECT Name FROM OwnerInfo WHERE NO = '" + ownerId + "'");
         if (rs.next()) {
             return rs.getString(1);
         } else {
@@ -1021,10 +1050,10 @@ public class RecordImport {
         }
     }
 
-    private static String ownerPhone(String ownerId) throws SQLException {
+    private static String ownerPhoneByNo(String ownerId) throws SQLException {
         if (ownerId == null) return null;
         Statement statement = houseConn.createStatement();
-        ResultSet rs = statement.executeQuery(" SELECT Phone FROM OwnerInfo WHERE ID = '" + ownerId + "'");
+        ResultSet rs = statement.executeQuery(" SELECT Phone FROM OwnerInfo WHERE NO = '" + ownerId + "'");
         if (rs.next()) {
             return rs.getString(1);
         } else {

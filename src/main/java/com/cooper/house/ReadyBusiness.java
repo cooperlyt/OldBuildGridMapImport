@@ -423,7 +423,7 @@ public class ReadyBusiness {
             }
 
             if (noticeOwner != null){
-                result += contractOwner;
+                result += noticeOwner;
             }
 
 

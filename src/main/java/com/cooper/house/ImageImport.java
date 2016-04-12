@@ -15,29 +15,44 @@ public class ImageImport {
 
     private static final String MASTER_ADDRESS = "http://192.168.1.220:9333";
 
-    private static final String HOUSE_DB_URL = "jdbc:mysql://192.168.1.220:3306/HOUSE_INFO";
+    private static final String HOUSE_DB_URL = "jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
     private static final String OUT_FILE_PATH = "/root/Documents/FileReplace.sql";
 
+    private static final String OLD_PATH="E:/Release/DGHIS/uploadFile/";
+
+    private static final String NEW_PATH="/root/Documents/files/";
+
+    private static final String ERROR_FILE="/root/Documents/fileError.log";
+
     private static BufferedWriter sqlWriter;
+
+    private static BufferedWriter errorWriter;
 
     private static void replaceFile(String id, String path){
 
-        WeedFSClientBuilder builder = new WeedFSClientBuilder();
+
         try {
 
 
 
             File f = new File(path);
 
-            WeedFSClient client = WeedFSClientBuilder.createBuilder().setMasterUrl(new URL(MASTER_ADDRESS)).build();
-            Assignation a = client.assign(new AssignParams());
-            client.write(a.weedFSFile,a.location,f);
+            if (!f.exists()) {
+                errorWriter.write("file not exists:" + f.getAbsolutePath() + ">" + id);
+                errorWriter.newLine();
+                errorWriter.flush();
+                return;
+            }
+                WeedFSClient client = WeedFSClientBuilder.createBuilder().setMasterUrl(new URL(MASTER_ADDRESS)).build();
+                Assignation a = client.assign(new AssignParams());
+                client.write(a.weedFSFile, a.location, f);
 
-            sqlWriter.write("UPDATE UPLOAD_FILE set ID=" + Q.p(a.weedFSFile.fid) + " where ID=" + Q.p(id) + ";");
-            sqlWriter.newLine();
+                sqlWriter.write("UPDATE UPLOAD_FILE set ID=" + Q.p(a.weedFSFile.fid) + " where ID=" + Q.p(id) + ";");
+                sqlWriter.newLine();
 
-            sqlWriter.flush();
+                sqlWriter.flush();
+
 
         } catch (MalformedURLException e) {
             System.out.println("地址错误");
@@ -69,8 +84,24 @@ public class ImageImport {
             return;
         }
 
+        File erroLog = new File(ERROR_FILE);
+
+        if (erroLog.exists()) {
+            erroLog.delete();
+        }
+        try {
+            file.createNewFile();
+            FileWriter fwe = new FileWriter(erroLog.getAbsoluteFile());
+            errorWriter = new BufferedWriter(fwe);
+        } catch (IOException e) {
+            System.out.println("日志 文件创建失败");
+            e.printStackTrace();
+            return;
+        }
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
+
 
             houseConn = DriverManager.getConnection(HOUSE_DB_URL, "root", "isNull");
 
@@ -78,19 +109,33 @@ public class ImageImport {
 
 
             Statement statement = houseConn.createStatement();
+            ResultSet rs = statement.executeQuery("select COUNT(ID) from UPLOAD_FILE");
+            Long count = new Long(0);
+            if (rs.next()){
+                count = rs.getLong(1);
+            }
             ResultSet bizRs = statement.executeQuery("select ID,FILE_NAME from UPLOAD_FILE");
 
+            int i = 1;
+
             while (bizRs.next()){
-                replaceFile(bizRs.getString(1),bizRs.getString(2));
+
+                System.out.println("" + count + "/" + i  + "              " + ( new Double(i).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
+
+
+                String srcPath = bizRs.getString(2).replace(OLD_PATH,NEW_PATH);
+                replaceFile(bizRs.getString(1),srcPath);
+                i++;
             }
 
             sqlWriter.close();
 
+            errorWriter.close();
         } catch (ClassNotFoundException e) {
             System.out.println( "database driver fail");
             return;
         } catch (SQLException e) {
-            System.out.println("database driver fail");
+            System.out.println("sql Exception driver fail");
             return;
         } catch (IOException e) {
             System.out.println("file error");

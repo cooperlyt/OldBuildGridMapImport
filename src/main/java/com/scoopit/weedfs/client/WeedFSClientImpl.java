@@ -78,6 +78,7 @@ class WeedFSClientImpl implements WeedFSClient {
 
             ObjectMapper mapper = new ObjectMapper();
             try {
+                //System.out.print(response.getEntity().getContent());
                 AssignResult result = mapper.readValue(response.getEntity().getContent(), AssignResult.class);
 
                 if (result.error != null) {

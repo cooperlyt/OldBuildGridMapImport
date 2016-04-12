@@ -397,19 +397,19 @@ public class RecordImport {
                 String businessOtherInfo = "";
 
                 rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
-                        "where bizid = " + Q.p(oldid));
+                        "where bizid = " + Q.p(bizRs.getString(8)));
 
-
+                int pi = 1;
                 while (rs.next()){
                     businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES(" +
 
-                            Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false))
-                            + ",1);";
+                            Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false), String.valueOf(pi++))
+                            + ");";
                     ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));
                     while (rs2.next()){
                         businessOtherInfo += "INSERT INTO UPLOAD_FILE(FILE_NAME,EMP_NAME,EMP_CODE,MD5,BUSINESS_FILE_ID,ID,UPLOAD_TIME) VALUES(" +
 
-                                Q.v(Q.p(rs2.getString(1)), Q.p(rs2.getString(2)), Q.p(rs2.getString(3)), Q.p(rs2.getString(4)),Q.p(rs.getString(1)),Q.p(rs2.getString(5)),Q.p(rs2.getTimestamp(6)))
+                                Q.v(Q.p(rs2.getString(1)), Q.p(rs2.getString(2)), Q.p(rs2.getString(3)), Q.pm(rs2.getString(4)),Q.p(rs.getString(1)),Q.p(rs2.getString(5)),Q.p(rs2.getTimestamp(6)))
                                 + ");";
                     }
 

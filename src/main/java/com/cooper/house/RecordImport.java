@@ -156,6 +156,14 @@ public class RecordImport {
 
                 long time = new java.util.Date().getTime();
                 try {
+
+                    //鞍山不导的房屋
+                    if ("2-54-57-9".equals(bizRs.getString(1).trim()) ||
+                            "2-54-26-2051".equals(bizRs.getString(1).trim()) ||
+                            "44-51-21-28".equals(bizRs.getString(1).trim()) ||
+                            "44-46-3-2061".equals(bizRs.getString(1).trim())){
+                        continue;
+                    }
                  sqlWriter.write(business(bizRs.getString(1).trim()));
                    //sqlWriter.write(business("16629"));
 
@@ -396,6 +404,26 @@ public class RecordImport {
 
                 String businessOtherInfo = "";
 
+
+
+
+                rs = sD.executeQuery("select NO,Cabinet,box from " +
+                        "       (select db.RecordBizNO,db.box,db.Cabinet,rb.Business,rb.Record from " +
+                        "              DGHouseRecord..Business as db left join DGHouseRecord..RecordandBiz as rb on db.id = rb.business) as a " +
+                        "       left join DGHouseRecord..Record as rd on a.Record=rd.id WHERE RecordBizNo = " + Q.p(id));
+
+                String recordCode = null;
+                String cab = null;
+                String box = null;
+                if (rs.next()){
+                    recordCode = rs.getString(1);
+                    cab = rs.getString(2);
+                    box = rs.getString(3);
+                    businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,RECORD_CODE,IN_ROOM,CREATE_TIEM) VALUES("
+                            + Q.v(Q.p(id),Q.p(id),Q.pm(rs.getString(1)),Q.p(true),Q.pm(bizRs.getTimestamp(6)))
+                            + ");";
+                }
+
                 rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
                         "where bizid = " + Q.p(bizRs.getString(8)));
 
@@ -404,7 +432,9 @@ public class RecordImport {
                     businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES(" +
 
                             Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false), String.valueOf(pi++))
-                            + ");";
+                            + ");INSERT INTO RECORD_LOCAL(ID,FRAME,CABINET,BOX,RECORD_CODE) VALUES("+
+                            Q.v(Q.p(rs.getString(1)), Q.p("1"),Q.pm(cab),Q.pm(box),Q.p(recordCode + (pi - 1)))
+                            +");";
                     ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));
                     while (rs2.next()){
                         businessOtherInfo += "INSERT INTO UPLOAD_FILE(FILE_NAME,EMP_NAME,EMP_CODE,MD5,BUSINESS_FILE_ID,ID,UPLOAD_TIME) VALUES(" +
@@ -532,16 +562,6 @@ public class RecordImport {
 
 
 
-                rs = sD.executeQuery("select NO,Cabinet,box from " +
-                        "       (select db.RecordBizNO,db.box,db.Cabinet,rb.Business,rb.Record from " +
-                        "              DGHouseRecord..Business as db left join DGHouseRecord..RecordandBiz as rb on db.id = rb.business) as a " +
-                        "       left join DGHouseRecord..Record as rd on a.Record=rd.id WHERE RecordBizNo = " + Q.p(id));
-
-                if (rs.next()){
-                    businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,CABINET,BOX,RECORD_CODE) VALUES("
-                            + Q.v(Q.p(id),Q.p(id),Q.p(rs.getString(2)),Q.p(rs.getString(3)),Q.pm(rs.getString(1)))
-                            + ");UPDATE BUSINESS_HOUSE set RECORD_STORE =" + Q.p(id) + " WHERE ID=" + Q.p(id) + ";";
-                }
 
 
                 biz.setOtherBizInfo(businessOtherInfo);
@@ -597,7 +617,8 @@ public class RecordImport {
                                     Q.v(Q.p(id), ovalue, Q.p(id), oldCardId == null ? "NULL" : Q.p(id))
 
                                     + ");";
-                        }
+                        }else
+                            throw new MainOwnerNotFoundException(id);
 
 
                         biz.setOwnerId(oldOwnerId, oldCardId, owner, TAKE_LAST_OWNER_BIZ_LIST.contains(biz.getDefineId()));
@@ -846,7 +867,7 @@ public class RecordImport {
                     rs = sD.executeQuery("SELECT VariableValueVCHAR from  SHKProcesses sp LEFT JOIN  SHKProcessData spd on spd.process = sp.oid where spd.VariableDefinitionId = 'record_people' and sp.id = '" + bizRs.getString(8) + "'");
                     if (rs.next()) {
 
-                        String owner = ownerInfo(rs.getString(1));
+                        String owner = ownerInfoByNo(rs.getString(1));
                         if (owner != null) {
 
 

@@ -69,13 +69,17 @@ public class RecordImport {
             , "WP24", "WP84", "WP100", "WP74"};
     private static final List<String> MUST_HAVE_SELECT_LIST = Arrays.asList(MUST_HAVE_SELECT);
 
-    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHouseInfo";
+//    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHouseInfo";
+//
+//    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/shark";
+//
+//    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHOUSERECORD";
 
-    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/shark";
+    private static final String HOUSE_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHouseInfo";
 
-    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHOUSERECORD";
+    private static final String SHARK_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/shark";
 
-
+    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
 
 
     private static final String OUT_FILE_PATH = "/root/Documents/oldRecord.sql";
@@ -98,7 +102,7 @@ public class RecordImport {
 
     //ky 2016-04-7
 
-    private static final String BEGIN_DATE = "1960-01-1";
+    private static final String BEGIN_DATE = "2016-04-7";
 
     private static Date CONTINUE_DATE;
 
@@ -157,13 +161,6 @@ public class RecordImport {
                 long time = new java.util.Date().getTime();
                 try {
 
-                    //鞍山不导的房屋
-                    if ("2-54-57-9".equals(bizRs.getString(1).trim()) ||
-                            "2-54-26-2051".equals(bizRs.getString(1).trim()) ||
-                            "44-51-21-28".equals(bizRs.getString(1).trim()) ||
-                            "44-46-3-2061".equals(bizRs.getString(1).trim())){
-                        continue;
-                    }
                  sqlWriter.write(business(bizRs.getString(1).trim()));
                    //sqlWriter.write(business("16629"));
 
@@ -313,7 +310,7 @@ public class RecordImport {
 //                    biz.setContractOwner("",null);
 //                }
 
-                if (biz.getDefineId().equals("WP44") || biz.getDefineId().equals("WP45") || biz.getDefineId().equals("WP47") ){
+                if (biz.getDefineId().equals("WP1") || biz.getDefineId().equals("WP2") || biz.getDefineId().equals("WP3")  || biz.getDefineId().equals("WP44") || biz.getDefineId().equals("WP45") || biz.getDefineId().equals("WP47") ){
 
 
                     rs = sD.executeQuery("select dhc.NO,dhc.CardNO,dhc.memo,dhc.printTime from DGHouseRecord..Business as db left join DGHouseInfo..houseCard dhc on db.id=dhc.bizid " +
@@ -803,7 +800,7 @@ public class RecordImport {
                 house += biz.getNewOwnerId() == null ? ",NULL" : ",'" + biz.getNewOwnerId() + "'";
 
 
-                rs = hD.executeQuery("select ho.Name,ho.IDType,ho.IDNO,hc.Relation,hc.PoolArea,hc.Perc,ho.Phone,hc.PrintTime,hc.Memo from houseCard hc left JOIN OwnerInfo ho on ho.ID = hc.OwnerID where hc.id is not null and (hc.type = 77) and (hc.no='' or hc.no is null) and bizid ='" + id + "'");
+                rs = hD.executeQuery("select ho.Name,ho.IDType,ho.IDNO,hc.Relation,hc.PoolArea,hc.Perc,ho.Phone,hc.PrintTime,hc.Memo from houseCard hc left JOIN OwnerInfo ho on ho.ID = hc.OwnerID where hc.id is not null and (hc.type = 77) and (hc.no='' or hc.no is null) and bizid ='" + oldid + "'");
 
                 int i = 0;
 

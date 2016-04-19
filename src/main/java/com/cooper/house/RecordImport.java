@@ -417,7 +417,7 @@ public class RecordImport {
                     cab = rs.getString(2);
                     box = rs.getString(3);
                     businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,RECORD_CODE,IN_ROOM,CREATE_TIEM) VALUES("
-                            + Q.v(Q.p(id),Q.p(id),Q.pm(rs.getString(1)),Q.p(true),Q.pm(bizRs.getTimestamp(6)))
+                            + Q.v(Q.p(id),Q.p(id),Q.pm(rs.getString(1)),Q.p(cab != null && box != null),Q.pm(bizRs.getTimestamp(6)))
                             + ");";
                 }
 
@@ -429,7 +429,9 @@ public class RecordImport {
                     businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES(" +
 
                             Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false), String.valueOf(pi++))
-                            + ");INSERT INTO RECORD_LOCAL(ID,FRAME,CABINET,BOX,RECORD_CODE) VALUES("+
+                            + ");";
+                    if (cab != null && box != null)
+                        businessOtherInfo += "INSERT INTO RECORD_LOCAL(ID,FRAME,CABINET,BOX,RECORD_CODE) VALUES("+
                             Q.v(Q.p(rs.getString(1)), Q.p("1"),Q.pm(cab),Q.pm(box),Q.p(recordCode + (pi - 1)))
                             +");";
                     ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));

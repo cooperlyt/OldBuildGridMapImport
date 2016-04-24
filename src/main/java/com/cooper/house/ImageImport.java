@@ -109,12 +109,12 @@ public class ImageImport {
 
 
             Statement statement = houseConn.createStatement();
-            ResultSet rs = statement.executeQuery("select COUNT(ID) from UPLOAD_FILE");
+            ResultSet rs = statement.executeQuery("select COUNT(ID) from UPLOAD_FILE where not (ID like '%,%')");
             Long count = new Long(0);
             if (rs.next()){
                 count = rs.getLong(1);
             }
-            ResultSet bizRs = statement.executeQuery("select ID,FILE_NAME from UPLOAD_FILE");
+            ResultSet bizRs = statement.executeQuery("select ID,FILE_NAME from UPLOAD_FILE where not (ID like '%,%')");
 
             int i = 1;
 
@@ -128,8 +128,10 @@ public class ImageImport {
                 i++;
             }
 
+            sqlWriter.flush();
             sqlWriter.close();
-
+            //
+            errorWriter.flush();
             errorWriter.close();
         } catch (ClassNotFoundException e) {
             System.out.println( "database driver fail");

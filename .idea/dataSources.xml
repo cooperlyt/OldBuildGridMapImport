@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="1718455648">
+  <component name="DataSourceManagerImpl" format="xml" hash="3823427819">
     <data-source source="LOCAL" name="SQL Server - shark@192.168.1.200" uuid="c001214f-bac5-4af2-99ce-346f114d0be0">
       <driver-ref>sqlserver.jtds</driver-ref>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:jtds:sqlserver://192.168.1.200:1433/shark</jdbc-url>
-      <libraries />
     </data-source>
     <data-source source="LOCAL" name="SQL Server - dghouseinfo@192.168.1.200" uuid="ae82a2a8-3dcf-40e5-9254-0e3436672eb5">
       <driver-ref>sqlserver.jtds</driver-ref>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:jtds:sqlserver://192.168.1.200:1433/dghouseinfo</jdbc-url>
-      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="SQL Server (jTds) - fang_chan_dg@192.168.199.231" uuid="c6208c03-b999-4fe3-be18-3617b347c59f">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://192.168.199.231:1433/fang_chan_dg</jdbc-url>
     </data-source>
   </component>
 </project>

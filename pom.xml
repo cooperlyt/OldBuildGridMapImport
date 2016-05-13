@@ -100,7 +100,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.cooper.house.RecordImport</mainClass>
+                            <mainClass>com.cooper.house.ImageImport</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

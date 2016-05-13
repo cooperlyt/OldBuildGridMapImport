@@ -50,8 +50,6 @@
       <column name="PackageName" sqlType="varchar" precision="50" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_DGBIZ" columns="ID"/>
       <foreign-key name="FK_DGBIZ_REFERENCE_DGWORDBO" columns="StartVarType" ref-table="DGWordBook" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DGBIZAND_REFERENCE_DGBIZ" table="DGBizAndRateItems" schema="dbo" catalog="shark" columns="Biz"/>
-      <exported-key name="FK_DGROLEBI_REFERENCE_DGBIZ" table="DGRoleBiz" schema="dbo" catalog="shark" columns="Biz_ID"/>
       <index name="AK_KEY_2_DGBIZ" unique="true" columns="Code"/>
     </table>
     <table name="DGBizAndRateItems" schema="dbo" catalog="shark" type="TABLE">
@@ -69,7 +67,6 @@
       <column name="IsImportant" sqlType="bit" precision="1" scale="0" nullable="false" jdbcType="-7"/>
       <column name="IsUpload" sqlType="bit" precision="1" scale="0" nullable="true" jdbcType="-7"/>
       <primary-key name="PK_DGBIZDOC" columns="ID"/>
-      <exported-key name="FK_DGBIZFIL_REFERENCE_DGBIZDOC" table="DGBizFile" schema="dbo" catalog="shark" columns="DocID"/>
     </table>
     <table name="DGBizFile" schema="dbo" catalog="shark" type="TABLE">
       <column name="ID" sqlType="varchar" precision="32" scale="0" nullable="false" jdbcType="12"/>
@@ -104,9 +101,6 @@
       <primary-key name="PK_DGEMPLOYEE" columns="ID"/>
       <foreign-key name="FK_DGEMPLOY_RELATIONS_DGORGANI" columns="Org_ID" ref-table="DGOrganise" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_DGEMPLOY_REFERENCE_DGWORDBO" columns="job" ref-table="DGWordBook" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DGBIZFIL_REFERENCE_DGEMPLOY" table="DGBizFile" schema="dbo" catalog="shark" columns="EmployeeID"/>
-      <exported-key name="FK_DGEMPLOY_RELATIONS_DGEMPLOY" table="DGEmployeeRole" schema="dbo" catalog="shark" columns="Emp_ID"/>
-      <exported-key name="FK_DGSYSTEM_REFERENCE_DGEMPLOY" table="DGSystemLog" schema="dbo" catalog="shark" columns="EmployeeID"/>
       <index name="AK_KEY_2_DGEMPLOY" unique="true" columns="NO"/>
       <index name="Relationship_6_FK" unique="false" columns="Org_ID"/>
     </table>
@@ -127,7 +121,6 @@
       <column name="Icon" sqlType="varchar" precision="100" scale="0" nullable="true" jdbcType="12"/>
       <column name="InSystem" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4" def="KDAp"/>
       <primary-key name="PK_DGFUNCGROUP" columns="ID"/>
-      <exported-key name="FK_DGFUNCTI_REFERENCE_DGFUNCGR" table="DGFunction" schema="dbo" catalog="shark" columns="GroupID"/>
     </table>
     <table name="DGFunction" schema="dbo" catalog="shark" type="TABLE">
       <column name="ID" sqlType="varchar" precision="32" scale="0" nullable="false" jdbcType="12"/>
@@ -142,7 +135,6 @@
       <column name="WhetherProtected" sqlType="bit" precision="1" scale="0" nullable="false" jdbcType="-7" def="KDEp"/>
       <primary-key name="PK_DGFUNCTION" columns="ID"/>
       <foreign-key name="FK_DGFUNCTI_REFERENCE_DGFUNCGR" columns="GroupID" ref-table="DGFuncGroup" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DGROLEFU_RELATIONS_DGFUNCTI" table="DGRoleFunction" schema="dbo" catalog="shark" columns="Fun_ID"/>
     </table>
     <table name="DGOrganise" schema="dbo" catalog="shark" type="TABLE">
       <column name="ID" sqlType="varchar" precision="32" scale="0" nullable="false" jdbcType="12"/>
@@ -154,8 +146,6 @@
       <column name="Memo" sqlType="varchar" precision="100" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_DGORGANISE" columns="ID"/>
       <foreign-key name="FK_DGORGANI_REFERENCE_DGORGANI" columns="ParentID" ref-table="DGOrganise" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DGEMPLOY_RELATIONS_DGORGANI" table="DGEmployee" schema="dbo" catalog="shark" columns="Org_ID"/>
-      <exported-key name="FK_DGORGANI_REFERENCE_DGORGANI" table="DGOrganise" schema="dbo" catalog="shark" columns="ParentID"/>
       <index name="AK_KEY_2_DGORGANI" unique="true" columns="NO"/>
     </table>
     <table name="DGRateItems" schema="dbo" catalog="shark" type="TABLE">
@@ -167,7 +157,6 @@
       <column name="Memo" sqlType="varchar" precision="200" scale="0" nullable="true" jdbcType="12"/>
       <column name="CalcDetails" sqlType="varchar" precision="500" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_DGRATEITEMS" columns="ID"/>
-      <exported-key name="FK_DGBIZAND_REFERENCE_DGRATEIT" table="DGBizAndRateItems" schema="dbo" catalog="shark" columns="RateItems"/>
     </table>
     <table name="DGRecordContents" schema="dbo" catalog="shark" type="TABLE">
       <column name="ID" sqlType="varchar" precision="32" scale="0" nullable="false" jdbcType="12"/>
@@ -191,9 +180,6 @@
       <column name="NO" sqlType="varchar" precision="50" scale="0" nullable="false" jdbcType="12"/>
       <column name="Name" sqlType="varchar" precision="20" scale="0" nullable="false" jdbcType="12"/>
       <primary-key name="PK_DGROLE" columns="ID"/>
-      <exported-key name="FK_DGEMPLOY_RELATIONS_DGROLE" table="DGEmployeeRole" schema="dbo" catalog="shark" columns="Rol_ID"/>
-      <exported-key name="FK_DGROLEBI_REFERENCE_DGROLE" table="DGRoleBiz" schema="dbo" catalog="shark" columns="Rol_ID"/>
-      <exported-key name="FK_DGROLEFU_RELATIONS_DGROLE" table="DGRoleFunction" schema="dbo" catalog="shark" columns="Rol_ID"/>
       <index name="AK_KEY_2_DGROLE" unique="true" columns="NO"/>
     </table>
     <table name="DGRoleBiz" schema="dbo" catalog="shark" type="TABLE">
@@ -240,8 +226,6 @@
       <column name="Priority" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="PK_DGWORDBOOK" columns="ID"/>
       <foreign-key name="FK_DGWORDBO_RELATIONS_DGWORDBO" columns="TypeID" ref-table="DGWordBookType" ref-schema="dbo" ref-catalog="shark" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DGBIZ_REFERENCE_DGWORDBO" table="DGBiz" schema="dbo" catalog="shark" columns="StartVarType"/>
-      <exported-key name="FK_DGEMPLOY_REFERENCE_DGWORDBO" table="DGEmployee" schema="dbo" catalog="shark" columns="job"/>
       <index name="Relationship_11_FK" unique="false" columns="TypeID"/>
     </table>
     <table name="DGWordBookType" schema="dbo" catalog="shark" type="TABLE">
@@ -250,7 +234,6 @@
       <column name="IsSystem" sqlType="bit" precision="1" scale="0" nullable="false" jdbcType="-7"/>
       <column name="Memo" sqlType="varchar" precision="100" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_DGWORDBOOKTYPE" columns="ID"/>
-      <exported-key name="FK_DGWORDBO_RELATIONS_DGWORDBO" table="DGWordBook" schema="dbo" catalog="shark" columns="TypeID"/>
     </table>
     <table name="HoldValueVIEW" schema="dbo" catalog="shark" type="VIEW">
       <column name="hvid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
@@ -336,8 +319,6 @@
       <column name="REQUESTS_RECOVERY" sqlType="nvarchar" precision="1" scale="0" nullable="false" jdbcType="12"/>
       <column name="JOB_DATA" sqlType="image" precision="2147483647" scale="0" nullable="true" jdbcType="2004"/>
       <primary-key name="PK_QRTZ_JOB_DETAILS" columns="JOB_NAME,JOB_GROUP"/>
-      <exported-key name="FK_QRTZ_JOB_LISTENERS_QRTZ_JOB_DETAILS" table="QRTZ_JOB_LISTENERS" schema="dbo" catalog="shark" columns="JOB_NAME,JOB_GROUP"/>
-      <exported-key name="FK_QRTZ_TRIGGERS_QRTZ_JOB_DETAILS" table="QRTZ_TRIGGERS" schema="dbo" catalog="shark" columns="JOB_NAME,JOB_GROUP"/>
     </table>
     <table name="QRTZ_JOB_LISTENERS" schema="dbo" catalog="shark" type="TABLE">
       <column name="JOB_NAME" sqlType="nvarchar" precision="180" scale="0" nullable="false" jdbcType="12"/>
@@ -388,9 +369,6 @@
       <column name="JOB_DATA" sqlType="image" precision="2147483647" scale="0" nullable="true" jdbcType="2004"/>
       <primary-key name="PK_QRTZ_TRIGGERS" columns="TRIGGER_NAME,TRIGGER_GROUP"/>
       <foreign-key name="FK_QRTZ_TRIGGERS_QRTZ_JOB_DETAILS" columns="JOB_NAME,JOB_GROUP" ref-table="QRTZ_JOB_DETAILS" ref-schema="dbo" ref-catalog="shark" ref-columns="JOB_NAME,JOB_GROUP" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_QRTZ_CRON_TRIGGERS_QRTZ_TRIGGERS" table="QRTZ_CRON_TRIGGERS" schema="dbo" catalog="shark" columns="TRIGGER_NAME,TRIGGER_GROUP"/>
-      <exported-key name="FK_QRTZ_SIMPLE_TRIGGERS_QRTZ_TRIGGERS" table="QRTZ_SIMPLE_TRIGGERS" schema="dbo" catalog="shark" columns="TRIGGER_NAME,TRIGGER_GROUP"/>
-      <exported-key name="FK_QRTZ_TRIGGER_LISTENERS_QRTZ_TRIGGERS" table="QRTZ_TRIGGER_LISTENERS" schema="dbo" catalog="shark" columns="TRIGGER_NAME,TRIGGER_GROUP"/>
       <index name="idx_qrtz_t_next_fire_time" unique="false" columns="NEXT_FIRE_TIME"/>
       <index name="idx_qrtz_t_nf_st" unique="false" columns="TRIGGER_STATE,NEXT_FIRE_TIME"/>
       <index name="idx_qrtz_t_state" unique="false" columns="TRIGGER_STATE"/>
@@ -432,13 +410,6 @@
       <foreign-key name="SHKActivities_State" columns="State" ref-table="SHKActivityStates" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="SHKActivities_Process" columns="Process" ref-table="SHKProcesses" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="SHKActivities_TheResource" columns="TheResource" ref-table="SHKResourcesTable" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKActivityData_Activity" table="SHKActivityData" schema="dbo" catalog="shark" columns="Activity"/>
-      <exported-key name="SHKActivityDataWOB_Activity" table="SHKActivityDataWOB" schema="dbo" catalog="shark" columns="Activity"/>
-      <exported-key name="SHKAndJoinTable_BlockActivity" table="SHKAndJoinTable" schema="dbo" catalog="shark" columns="BlockActivity"/>
-      <exported-key name="SHKAndJoinTable_Activity" table="SHKAndJoinTable" schema="dbo" catalog="shark" columns="Activity"/>
-      <exported-key name="SHKAssignmentsTable_Activity" table="SHKAssignmentsTable" schema="dbo" catalog="shark" columns="Activity"/>
-      <exported-key name="SHKDeadlines_Activity" table="SHKDeadlines" schema="dbo" catalog="shark" columns="Activity"/>
-      <exported-key name="SHKProcessRequesters_ActivityRequester" table="SHKProcessRequesters" schema="dbo" catalog="shark" columns="ActivityRequester"/>
       <index name="I1_SHKActivities" unique="true" columns="Id"/>
       <index name="I2_SHKActivities" unique="false" columns="Process,ActivitySetDefinitionId,ActivityDefinitionId"/>
       <index name="I3_SHKActivities" unique="false" columns="Process,State"/>
@@ -491,7 +462,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKActivityDataWOB_oid" columns="oid"/>
       <foreign-key name="SHKActivityDataWOB_Activity" columns="Activity" ref-table="SHKActivities" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKActivityDataBLOBs_ActivityDataWOB" table="SHKActivityDataBLOBs" schema="dbo" catalog="shark" columns="ActivityDataWOB"/>
       <index name="I1_SHKActivityDataWOB" unique="true" columns="CNT"/>
       <index name="I2_SHKActivityDataWOB" unique="true" columns="Activity,VariableDefinitionId,OrdNo"/>
     </table>
@@ -564,7 +534,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKActivityHistoryInfo_oid" columns="oid"/>
-      <exported-key name="SHKActivityHistoryDetails_ActivityHistoryInfo" table="SHKActivityHistoryDetails" schema="dbo" catalog="shark" columns="ActivityHistoryInfo"/>
       <index name="I1_SHKActivityHistoryInfo" unique="true" columns="ActivityId"/>
       <index name="I2_SHKActivityHistoryInfo" unique="false" columns="ProcessId"/>
     </table>
@@ -574,8 +543,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKActivityStateEventAudits_oid" columns="oid"/>
-      <exported-key name="SHKStateEventAudits_OldActivityState" table="SHKStateEventAudits" schema="dbo" catalog="shark" columns="OldActivityState"/>
-      <exported-key name="SHKStateEventAudits_NewActivityState" table="SHKStateEventAudits" schema="dbo" catalog="shark" columns="NewActivityState"/>
       <index name="I1_SHKActivityStateEventAudits" unique="true" columns="KeyValue"/>
       <index name="I2_SHKActivityStateEventAudits" unique="true" columns="Name"/>
     </table>
@@ -585,7 +552,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKActivityStates_oid" columns="oid"/>
-      <exported-key name="SHKActivities_State" table="SHKActivities" schema="dbo" catalog="shark" columns="State"/>
       <index name="I1_SHKActivityStates" unique="true" columns="KeyValue"/>
       <index name="I2_SHKActivityStates" unique="true" columns="Name"/>
     </table>
@@ -714,10 +680,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKDataEventAudits_oid" columns="oid"/>
       <foreign-key name="SHKDataEventAudits_TheType" columns="TheType" ref-table="SHKEventTypes" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKNewEventAuditData_DataEventAudit" table="SHKNewEventAuditData" schema="dbo" catalog="shark" columns="DataEventAudit"/>
-      <exported-key name="SHKNewEventAuditDataWOB_DataEventAudit" table="SHKNewEventAuditDataWOB" schema="dbo" catalog="shark" columns="DataEventAudit"/>
-      <exported-key name="SHKOldEventAuditData_DataEventAudit" table="SHKOldEventAuditData" schema="dbo" catalog="shark" columns="DataEventAudit"/>
-      <exported-key name="SHKOldEventAuditDataWOB_DataEventAudit" table="SHKOldEventAuditDataWOB" schema="dbo" catalog="shark" columns="DataEventAudit"/>
       <index name="I1_SHKDataEventAudits" unique="true" columns="CNT"/>
     </table>
     <table name="SHKDeadlines" schema="dbo" catalog="shark" type="TABLE">
@@ -744,10 +706,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKEventTypes_oid" columns="oid"/>
-      <exported-key name="SHKAssignmentEventAudits_TheType" table="SHKAssignmentEventAudits" schema="dbo" catalog="shark" columns="TheType"/>
-      <exported-key name="SHKCreateProcessEventAudits_TheType" table="SHKCreateProcessEventAudits" schema="dbo" catalog="shark" columns="TheType"/>
-      <exported-key name="SHKDataEventAudits_TheType" table="SHKDataEventAudits" schema="dbo" catalog="shark" columns="TheType"/>
-      <exported-key name="SHKStateEventAudits_TheType" table="SHKStateEventAudits" schema="dbo" catalog="shark" columns="TheType"/>
       <index name="I1_SHKEventTypes" unique="true" columns="KeyValue"/>
       <index name="I2_SHKEventTypes" unique="true" columns="Name"/>
     </table>
@@ -768,9 +726,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKGroupTable_oid" columns="oid"/>
-      <exported-key name="SHKGroupGroupTable_sub_gid" table="SHKGroupGroupTable" schema="dbo" catalog="shark" columns="sub_gid"/>
-      <exported-key name="SHKGroupGroupTable_groupid" table="SHKGroupGroupTable" schema="dbo" catalog="shark" columns="groupid"/>
-      <exported-key name="SHKUserGroupTable_groupid" table="SHKUserGroupTable" schema="dbo" catalog="shark" columns="groupid"/>
       <index name="I1_SHKGroupTable" unique="true" columns="groupid"/>
     </table>
     <table name="SHKGroupUser" schema="dbo" catalog="shark" type="TABLE">
@@ -778,8 +733,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKGroupUser_oid" columns="oid"/>
-      <exported-key name="SHKGroupUserPackLevelPart_USEROID" table="SHKGroupUserPackLevelPart" schema="dbo" catalog="shark" columns="USEROID"/>
-      <exported-key name="SHKGroupUserProcLevelPart_USEROID" table="SHKGroupUserProcLevelPart" schema="dbo" catalog="shark" columns="USEROID"/>
       <index name="I1_SHKGroupUser" unique="true" columns="USERNAME"/>
     </table>
     <table name="SHKGroupUserPackLevelPart" schema="dbo" catalog="shark" type="TABLE">
@@ -848,7 +801,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKNewEventAuditDataWOB_oid" columns="oid"/>
       <foreign-key name="SHKNewEventAuditDataWOB_DataEventAudit" columns="DataEventAudit" ref-table="SHKDataEventAudits" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKNewEventAuditDataBLOBs_NewEventAuditDataWOB" table="SHKNewEventAuditDataBLOBs" schema="dbo" catalog="shark" columns="NewEventAuditDataWOB"/>
       <index name="I1_SHKNewEventAuditDataWOB" unique="true" columns="CNT"/>
       <index name="I2_SHKNewEventAuditDataWOB" unique="true" columns="DataEventAudit,VariableDefinitionId,OrdNo"/>
     </table>
@@ -865,8 +817,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKNormalUser_oid" columns="oid"/>
-      <exported-key name="SHKUserPackLevelPart_USEROID" table="SHKUserPackLevelPart" schema="dbo" catalog="shark" columns="USEROID"/>
-      <exported-key name="SHKUserProcLevelParticipant_USEROID" table="SHKUserProcLevelParticipant" schema="dbo" catalog="shark" columns="USEROID"/>
       <index name="I1_SHKNormalUser" unique="true" columns="USERNAME"/>
     </table>
     <table name="SHKOldEventAuditData" schema="dbo" catalog="shark" type="TABLE">
@@ -915,7 +865,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKOldEventAuditDataWOB_oid" columns="oid"/>
       <foreign-key name="SHKOldEventAuditDataWOB_DataEventAudit" columns="DataEventAudit" ref-table="SHKDataEventAudits" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKOldEventAuditDataBLOBs_OldEventAuditDataWOB" table="SHKOldEventAuditDataBLOBs" schema="dbo" catalog="shark" columns="OldEventAuditDataWOB"/>
       <index name="I1_SHKOldEventAuditDataWOB" unique="true" columns="CNT"/>
       <index name="I2_SHKOldEventAuditDataWOB" unique="true" columns="DataEventAudit,VariableDefinitionId,OrdNo"/>
     </table>
@@ -926,8 +875,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKPackLevelParticipant_oid" columns="oid"/>
       <foreign-key name="SHKPackLevelParticipant_PACKAGEOID" columns="PACKAGEOID" ref-table="SHKXPDLParticipantPackage" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKGroupUserPackLevelPart_PARTICIPANTOID" table="SHKGroupUserPackLevelPart" schema="dbo" catalog="shark" columns="PARTICIPANTOID"/>
-      <exported-key name="SHKUserPackLevelPart_PARTICIPANTOID" table="SHKUserPackLevelPart" schema="dbo" catalog="shark" columns="PARTICIPANTOID"/>
       <index name="I1_SHKPackLevelParticipant" unique="true" columns="PARTICIPANT_ID,PACKAGEOID"/>
     </table>
     <table name="SHKPackLevelXPDLApp" schema="dbo" catalog="shark" type="TABLE">
@@ -937,10 +884,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKPackLevelXPDLApp_oid" columns="oid"/>
       <foreign-key name="SHKPackLevelXPDLApp_PACKAGEOID" columns="PACKAGEOID" ref-table="SHKXPDLApplicationPackage" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppDetUsr_XPDL_APPOID" table="SHKPackLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppDetail_XPDL_APPOID" table="SHKPackLevelXPDLAppTAAppDetail" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppUser_XPDL_APPOID" table="SHKPackLevelXPDLAppTAAppUser" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKPackLevelXPDLAppToolAgntApp_XPDL_APPOID" table="SHKPackLevelXPDLAppToolAgntApp" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
       <index name="I1_SHKPackLevelXPDLApp" unique="true" columns="APPLICATION_ID,PACKAGEOID"/>
     </table>
     <table name="SHKPackLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" type="TABLE">
@@ -990,8 +933,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcLevelParticipant_oid" columns="oid"/>
       <foreign-key name="SHKProcLevelParticipant_PROCESSOID" columns="PROCESSOID" ref-table="SHKXPDLParticipantProcess" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKGroupUserProcLevelPart_PARTICIPANTOID" table="SHKGroupUserProcLevelPart" schema="dbo" catalog="shark" columns="PARTICIPANTOID"/>
-      <exported-key name="SHKUserProcLevelParticipant_PARTICIPANTOID" table="SHKUserProcLevelParticipant" schema="dbo" catalog="shark" columns="PARTICIPANTOID"/>
       <index name="I1_SHKProcLevelParticipant" unique="true" columns="PARTICIPANT_ID,PROCESSOID"/>
     </table>
     <table name="SHKProcLevelXPDLApp" schema="dbo" catalog="shark" type="TABLE">
@@ -1001,10 +942,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcLevelXPDLApp_oid" columns="oid"/>
       <foreign-key name="SHKProcLevelXPDLApp_PROCESSOID" columns="PROCESSOID" ref-table="SHKXPDLApplicationProcess" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppDetUsr_XPDL_APPOID" table="SHKProcLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppDetail_XPDL_APPOID" table="SHKProcLevelXPDLAppTAAppDetail" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppUser_XPDL_APPOID" table="SHKProcLevelXPDLAppTAAppUser" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
-      <exported-key name="SHKProcLevelXPDLAppToolAgntApp_XPDL_APPOID" table="SHKProcLevelXPDLAppToolAgntApp" schema="dbo" catalog="shark" columns="XPDL_APPOID"/>
       <index name="I1_SHKProcLevelXPDLApp" unique="true" columns="APPLICATION_ID,PROCESSOID"/>
     </table>
     <table name="SHKProcLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" type="TABLE">
@@ -1093,7 +1030,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcessDataWOB_oid" columns="oid"/>
       <foreign-key name="SHKProcessDataWOB_Process" columns="Process" ref-table="SHKProcesses" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKProcessDataBLOBs_ProcessDataWOB" table="SHKProcessDataBLOBs" schema="dbo" catalog="shark" columns="ProcessDataWOB"/>
       <index name="I1_SHKProcessDataWOB" unique="true" columns="CNT"/>
       <index name="I2_SHKProcessDataWOB" unique="true" columns="Process,VariableDefinitionId,OrdNo"/>
     </table>
@@ -1108,7 +1044,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcessDefinitions_oid" columns="oid"/>
-      <exported-key name="SHKProcesses_ProcessDefinition" table="SHKProcesses" schema="dbo" catalog="shark" columns="ProcessDefinition"/>
       <index name="I1_SHKProcessDefinitions" unique="true" columns="Name"/>
     </table>
     <table name="SHKProcessHistoryDetails" schema="dbo" catalog="shark" type="TABLE">
@@ -1176,7 +1111,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcessHistoryInfo_oid" columns="oid"/>
-      <exported-key name="SHKProcessHistoryDetails_ProcessHistoryInfo" table="SHKProcessHistoryDetails" schema="dbo" catalog="shark" columns="ProcessHistoryInfo"/>
       <index name="I1_SHKProcessHistoryInfo" unique="true" columns="ProcessId"/>
     </table>
     <table name="SHKProcessRequesters" schema="dbo" catalog="shark" type="TABLE">
@@ -1198,8 +1132,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcessStateEventAudits_oid" columns="oid"/>
-      <exported-key name="SHKStateEventAudits_OldProcessState" table="SHKStateEventAudits" schema="dbo" catalog="shark" columns="OldProcessState"/>
-      <exported-key name="SHKStateEventAudits_NewProcessState" table="SHKStateEventAudits" schema="dbo" catalog="shark" columns="NewProcessState"/>
       <index name="I1_SHKProcessStateEventAudits" unique="true" columns="KeyValue"/>
       <index name="I2_SHKProcessStateEventAudits" unique="true" columns="Name"/>
     </table>
@@ -1209,7 +1141,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKProcessStates_oid" columns="oid"/>
-      <exported-key name="SHKProcesses_State" table="SHKProcesses" schema="dbo" catalog="shark" columns="State"/>
       <index name="I1_SHKProcessStates" unique="true" columns="KeyValue"/>
       <index name="I2_SHKProcessStates" unique="true" columns="Name"/>
     </table>
@@ -1239,11 +1170,6 @@
       <primary-key name="SHKProcesses_oid" columns="oid"/>
       <foreign-key name="SHKProcesses_ProcessDefinition" columns="ProcessDefinition" ref-table="SHKProcessDefinitions" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="SHKProcesses_State" columns="State" ref-table="SHKProcessStates" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKActivities_Process" table="SHKActivities" schema="dbo" catalog="shark" columns="Process"/>
-      <exported-key name="SHKAndJoinTable_Process" table="SHKAndJoinTable" schema="dbo" catalog="shark" columns="Process"/>
-      <exported-key name="SHKDeadlines_Process" table="SHKDeadlines" schema="dbo" catalog="shark" columns="Process"/>
-      <exported-key name="SHKProcessData_Process" table="SHKProcessData" schema="dbo" catalog="shark" columns="Process"/>
-      <exported-key name="SHKProcessDataWOB_Process" table="SHKProcessDataWOB" schema="dbo" catalog="shark" columns="Process"/>
       <index name="I1_SHKProcesses" unique="true" columns="Id"/>
       <index name="I2_SHKProcesses" unique="false" columns="ProcessDefinition"/>
       <index name="I3_SHKProcesses" unique="false" columns="State"/>
@@ -1256,9 +1182,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKResourcesTable_oid" columns="oid"/>
-      <exported-key name="SHKActivities_TheResource" table="SHKActivities" schema="dbo" catalog="shark" columns="TheResource"/>
-      <exported-key name="SHKAssignmentsTable_TheResource" table="SHKAssignmentsTable" schema="dbo" catalog="shark" columns="TheResource"/>
-      <exported-key name="SHKProcessRequesters_ResourceRequester" table="SHKProcessRequesters" schema="dbo" catalog="shark" columns="ResourceRequester"/>
       <index name="I1_SHKResourcesTable" unique="true" columns="Username"/>
     </table>
     <table name="SHKStateEventAudits" schema="dbo" catalog="shark" type="TABLE">
@@ -1299,10 +1222,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKToolAgentApp_oid" columns="oid"/>
-      <exported-key name="SHKPackLevelXPDLAppToolAgntApp_TOOLAGENTOID" table="SHKPackLevelXPDLAppToolAgntApp" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKProcLevelXPDLAppToolAgntApp_TOOLAGENTOID" table="SHKProcLevelXPDLAppToolAgntApp" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKToolAgentAppDetail_TOOLAGENT_APPOID" table="SHKToolAgentAppDetail" schema="dbo" catalog="shark" columns="TOOLAGENT_APPOID"/>
-      <exported-key name="SHKToolAgentAppUser_TOOLAGENT_APPOID" table="SHKToolAgentAppUser" schema="dbo" catalog="shark" columns="TOOLAGENT_APPOID"/>
       <index name="I1_SHKToolAgentApp" unique="true" columns="TOOL_AGENT_NAME,APP_NAME"/>
     </table>
     <table name="SHKToolAgentAppDetail" schema="dbo" catalog="shark" type="TABLE">
@@ -1312,9 +1231,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKToolAgentAppDetail_oid" columns="oid"/>
       <foreign-key name="SHKToolAgentAppDetail_TOOLAGENT_APPOID" columns="TOOLAGENT_APPOID" ref-table="SHKToolAgentApp" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppDetail_TOOLAGENTOID" table="SHKPackLevelXPDLAppTAAppDetail" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppDetail_TOOLAGENTOID" table="SHKProcLevelXPDLAppTAAppDetail" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKToolAgentAppDetailUser_TOOLAGENT_APPOID" table="SHKToolAgentAppDetailUser" schema="dbo" catalog="shark" columns="TOOLAGENT_APPOID"/>
       <index name="I1_SHKToolAgentAppDetail" unique="true" columns="APP_MODE,TOOLAGENT_APPOID"/>
     </table>
     <table name="SHKToolAgentAppDetailUser" schema="dbo" catalog="shark" type="TABLE">
@@ -1325,8 +1241,6 @@
       <primary-key name="SHKToolAgentAppDetailUser_oid" columns="oid"/>
       <foreign-key name="SHKToolAgentAppDetailUser_TOOLAGENT_APPOID" columns="TOOLAGENT_APPOID" ref-table="SHKToolAgentAppDetail" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="SHKToolAgentAppDetailUser_USEROID" columns="USEROID" ref-table="SHKToolAgentUser" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppDetUsr_TOOLAGENTOID" table="SHKPackLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppDetUsr_TOOLAGENTOID" table="SHKProcLevelXPDLAppTAAppDetUsr" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
       <index name="I1_SHKToolAgentAppDetailUser" unique="true" columns="TOOLAGENT_APPOID,USEROID"/>
     </table>
     <table name="SHKToolAgentAppUser" schema="dbo" catalog="shark" type="TABLE">
@@ -1337,8 +1251,6 @@
       <primary-key name="SHKToolAgentAppUser_oid" columns="oid"/>
       <foreign-key name="SHKToolAgentAppUser_TOOLAGENT_APPOID" columns="TOOLAGENT_APPOID" ref-table="SHKToolAgentApp" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="SHKToolAgentAppUser_USEROID" columns="USEROID" ref-table="SHKToolAgentUser" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKPackLevelXPDLAppTAAppUser_TOOLAGENTOID" table="SHKPackLevelXPDLAppTAAppUser" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
-      <exported-key name="SHKProcLevelXPDLAppTAAppUser_TOOLAGENTOID" table="SHKProcLevelXPDLAppTAAppUser" schema="dbo" catalog="shark" columns="TOOLAGENTOID"/>
       <index name="I1_SHKToolAgentAppUser" unique="true" columns="TOOLAGENT_APPOID,USEROID"/>
     </table>
     <table name="SHKToolAgentUser" schema="dbo" catalog="shark" type="TABLE">
@@ -1347,8 +1259,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKToolAgentUser_oid" columns="oid"/>
-      <exported-key name="SHKToolAgentAppDetailUser_USEROID" table="SHKToolAgentAppDetailUser" schema="dbo" catalog="shark" columns="USEROID"/>
-      <exported-key name="SHKToolAgentAppUser_USEROID" table="SHKToolAgentAppUser" schema="dbo" catalog="shark" columns="USEROID"/>
       <index name="I1_SHKToolAgentUser" unique="true" columns="USERNAME"/>
     </table>
     <table name="SHKUserGroupTable" schema="dbo" catalog="shark" type="TABLE">
@@ -1390,7 +1300,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKUserTable_oid" columns="oid"/>
-      <exported-key name="SHKUserGroupTable_userid" table="SHKUserGroupTable" schema="dbo" catalog="shark" columns="userid"/>
       <index name="I1_SHKUserTable" unique="true" columns="userid"/>
     </table>
     <table name="SHKXPDLApplicationPackage" schema="dbo" catalog="shark" type="TABLE">
@@ -1398,8 +1307,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLApplicationPackage_oid" columns="oid"/>
-      <exported-key name="SHKPackLevelXPDLApp_PACKAGEOID" table="SHKPackLevelXPDLApp" schema="dbo" catalog="shark" columns="PACKAGEOID"/>
-      <exported-key name="SHKXPDLApplicationProcess_PACKAGEOID" table="SHKXPDLApplicationProcess" schema="dbo" catalog="shark" columns="PACKAGEOID"/>
       <index name="I1_SHKXPDLApplicationPackage" unique="true" columns="PACKAGE_ID"/>
     </table>
     <table name="SHKXPDLApplicationProcess" schema="dbo" catalog="shark" type="TABLE">
@@ -1409,7 +1316,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLApplicationProcess_oid" columns="oid"/>
       <foreign-key name="SHKXPDLApplicationProcess_PACKAGEOID" columns="PACKAGEOID" ref-table="SHKXPDLApplicationPackage" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKProcLevelXPDLApp_PROCESSOID" table="SHKProcLevelXPDLApp" schema="dbo" catalog="shark" columns="PROCESSOID"/>
       <index name="I1_SHKXPDLApplicationProcess" unique="true" columns="PROCESS_ID,PACKAGEOID"/>
     </table>
     <table name="SHKXPDLData" schema="dbo" catalog="shark" type="TABLE">
@@ -1433,7 +1339,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLHistory_oid" columns="oid"/>
-      <exported-key name="SHKXPDLHistoryData_XPDLHistory" table="SHKXPDLHistoryData" schema="dbo" catalog="shark" columns="XPDLHistory"/>
       <index name="I1_SHKXPDLHistory" unique="true" columns="XPDLId,XPDLVersion"/>
     </table>
     <table name="SHKXPDLHistoryData" schema="dbo" catalog="shark" type="TABLE">
@@ -1452,8 +1357,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLParticipantPackage_oid" columns="oid"/>
-      <exported-key name="SHKPackLevelParticipant_PACKAGEOID" table="SHKPackLevelParticipant" schema="dbo" catalog="shark" columns="PACKAGEOID"/>
-      <exported-key name="SHKXPDLParticipantProcess_PACKAGEOID" table="SHKXPDLParticipantProcess" schema="dbo" catalog="shark" columns="PACKAGEOID"/>
       <index name="I1_SHKXPDLParticipantPackage" unique="true" columns="PACKAGE_ID"/>
     </table>
     <table name="SHKXPDLParticipantProcess" schema="dbo" catalog="shark" type="TABLE">
@@ -1463,7 +1366,6 @@
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLParticipantProcess_oid" columns="oid"/>
       <foreign-key name="SHKXPDLParticipantProcess_PACKAGEOID" columns="PACKAGEOID" ref-table="SHKXPDLParticipantPackage" ref-schema="dbo" ref-catalog="shark" ref-columns="oid" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="SHKProcLevelParticipant_PROCESSOID" table="SHKProcLevelParticipant" schema="dbo" catalog="shark" columns="PROCESSOID"/>
       <index name="I1_SHKXPDLParticipantProcess" unique="true" columns="PROCESS_ID,PACKAGEOID"/>
     </table>
     <table name="SHKXPDLReferences" schema="dbo" catalog="shark" type="TABLE">
@@ -1484,8 +1386,6 @@
       <column name="oid" sqlType="decimal" precision="19" scale="0" nullable="false" jdbcType="3"/>
       <column name="version" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <primary-key name="SHKXPDLS_oid" columns="oid"/>
-      <exported-key name="SHKXPDLData_XPDL" table="SHKXPDLData" schema="dbo" catalog="shark" columns="XPDL"/>
-      <exported-key name="SHKXPDLReferences_ReferringXPDL" table="SHKXPDLReferences" schema="dbo" catalog="shark" columns="ReferringXPDL"/>
       <index name="I1_SHKXPDLS" unique="true" columns="XPDLId,XPDLVersion"/>
     </table>
     <table name="SharkCardNOView" schema="dbo" catalog="shark" type="VIEW">
@@ -2275,8 +2175,6 @@
       <primary-key name="PK_BUILD" columns="ID"/>
       <foreign-key name="FK_BUILD_REFERENCE_PROJECT" columns="ProjectID" ref-table="Project" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_BUILD_REFERENCE_SECTION" columns="SectionID" ref-table="Section" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_EMPTYHOU_REFERENCE_BUILD" table="EmptyHouse" schema="dbo" catalog="DGHouseInfo" columns="BuildID"/>
-      <exported-key name="FK_PORJECTC_REFERENCE_BUILD" table="PorjectCardAndBuild" schema="dbo" catalog="DGHouseInfo" columns="Build"/>
       <index name="AK_KEY_2_BUILD" unique="true" columns="NO"/>
       <index name="IX_Build" unique="true" columns="BuildNO,MapNO,BlockNO"/>
       <index name="_WA_Sys_Area_22401542" unique="false" columns="Area"/>
@@ -2352,7 +2250,6 @@
       <primary-key name="PK_DEMPLOYEE" columns="ID"/>
       <foreign-key name="FK_DEMPLOYE_REFERENCE_DEVELOPE" columns="Developer" ref-table="Developer" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_DEMPLOYE_REFERENCE_OWNERINF" columns="Owner" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_NEWHOUSE_REFERENCE_DEMPLOYE" table="NewHouseContract" schema="dbo" catalog="DGHouseInfo" columns="DEmployee"/>
       <index name="AK_KEY_2_DEMPLOYE" unique="true" columns="NO"/>
       <index name="_WA_Sys_Complaints_03317E3D" unique="false" columns="Complaints"/>
       <index name="_WA_Sys_CreateDate_03317E3D" unique="false" columns="CreateDate"/>
@@ -2405,8 +2302,6 @@
       <column name="RecordDate" sqlType="datetime" precision="23" scale="3" nullable="true" jdbcType="93"/>
       <primary-key name="PK_DEVELOPER" columns="ID"/>
       <foreign-key name="FK_DEVELOPE_REFERENCE_OWNERINF" columns="OwnerID" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_DEMPLOYE_REFERENCE_DEVELOPE" table="DEmployee" schema="dbo" catalog="DGHouseInfo" columns="Developer"/>
-      <exported-key name="FK_PROJECT_REFERENCE_DEVELOPE" table="Project" schema="dbo" catalog="DGHouseInfo" columns="DeveloperID"/>
       <index name="AK_KEY_2_DEVELOPE" unique="true" columns="NO"/>
       <index name="_WA_Sys_Address_7A3223E8" unique="false" columns="Address"/>
       <index name="_WA_Sys_ChildrenCompany_7A3223E8" unique="false" columns="ChildrenCompany"/>
@@ -2447,7 +2342,6 @@
       <column name="DisNO" sqlType="varchar" precision="50" scale="0" nullable="true" jdbcType="12"/>
       <column name="ProvinceCityID" sqlType="varchar" precision="32" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_DISTRICT" columns="ID"/>
-      <exported-key name="FK_SECTION_REFERENCE_DISTRICT" table="Section" schema="dbo" catalog="DGHouseInfo" columns="DistrictID"/>
       <index name="AK_KEY_2_DISTRICT" unique="true" columns="NO"/>
       <index name="_WA_Sys_DisNO_07F6335A" unique="false" columns="DisNO"/>
       <index name="_WA_Sys_memo_07F6335A" unique="false" columns="memo"/>
@@ -2658,12 +2552,6 @@
       <column name="DownRoom" sqlType="bit" precision="1" scale="0" nullable="true" jdbcType="-7" def="KDAp"/>
       <column name="IsImport" sqlType="bit" precision="1" scale="0" nullable="false" jdbcType="-7" def="KDAp"/>
       <primary-key name="PK_HOUSE" columns="ID"/>
-      <exported-key name="FK_HOUSEAND_REFERENCE_HOUSE" table="HouseAndCard" schema="dbo" catalog="DGHouseInfo" columns="HouseID"/>
-      <exported-key name="FK_HOUSERECORD_REFERENCE_HOUSE" table="HouseAndRecordOwner" schema="dbo" catalog="DGHouseInfo" columns="HouseID"/>
-      <exported-key name="FK_HOUSESTA_REFERENCE_HOUSE" table="HouseState" schema="dbo" catalog="DGHouseInfo" columns="HouseID"/>
-      <exported-key name="FK_NEWHOUSE_REFERENCE_HOUSE" table="NewHouseContract" schema="dbo" catalog="DGHouseInfo" columns="House"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_HOUSE2" table="OldHouseContract" schema="dbo" catalog="DGHouseInfo" columns="House"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_HOUSE" table="OldHouseRelease" schema="dbo" catalog="DGHouseInfo" columns="House"/>
       <index name="AK_KEY_2_HOUSE" unique="true" columns="NO"/>
       <index name="_WA_Sys_CommArea_373B3228" unique="false" columns="CommArea"/>
       <index name="_WA_Sys_CommParam_373B3228" unique="false" columns="CommParam"/>
@@ -2770,7 +2658,6 @@
       <column name="KEYCODE" sqlType="varchar" precision="12" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_HOUSECARD" columns="ID"/>
       <foreign-key name="FK_HOUSECAR_REFERENCE_OWNERINF" columns="OwnerID" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_HOUSEAND_REFERENCE_HOUSECAR" table="HouseAndCard" schema="dbo" catalog="DGHouseInfo" columns="CardID"/>
       <index name="_WA_Sys_BizID_2022C2A6" unique="false" columns="BizID"/>
       <index name="_WA_Sys_BusinessID_2022C2A6" unique="false" columns="BusinessID"/>
       <index name="_WA_Sys_Cancel_2022C2A6" unique="false" columns="Cancel"/>
@@ -2839,8 +2726,6 @@
       <primary-key name="PK_IEMPLOYEE" columns="ID"/>
       <foreign-key name="FK_IEMPLOYE_REFERENCE_INTERMED" columns="Intermediary" ref-table="Intermediary" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_IEMPLOYE_REFERENCE_OWNERINF" columns="Owner" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_IEMPLOYE2" table="OldHouseContract" schema="dbo" catalog="DGHouseInfo" columns="IEmployee"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_IEMPLOYE" table="OldHouseRelease" schema="dbo" catalog="DGHouseInfo" columns="IEmployee"/>
       <index name="AK_KEY_2_IEMPLOYE" unique="true" columns="NO"/>
     </table>
     <table name="Intermediary" schema="dbo" catalog="DGHouseInfo" type="TABLE">
@@ -2875,7 +2760,6 @@
       <column name="ChildrenCompany" sqlType="varchar" precision="200" scale="0" nullable="true" jdbcType="12"/>
       <column name="Manager" sqlType="varchar" precision="20" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_INTERMEDIARY" columns="ID"/>
-      <exported-key name="FK_IEMPLOYE_REFERENCE_INTERMED" table="IEmployee" schema="dbo" catalog="DGHouseInfo" columns="Intermediary"/>
       <index name="AK_KEY_2_INTERMED" unique="true" columns="NO"/>
     </table>
     <table name="LandInfo" schema="dbo" catalog="DGHouseInfo" type="TABLE">
@@ -2949,7 +2833,6 @@
       <column name="DateTo" sqlType="datetime" precision="23" scale="3" nullable="true" jdbcType="93"/>
       <column name="Manager" sqlType="varchar" precision="20" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_MCOMPANY" columns="ID"/>
-      <exported-key name="FK_SMSUBCOM_REFERENCE_MCOMPANY" table="SMSubCompany" schema="dbo" catalog="DGHouseInfo" columns="MCompany"/>
       <index name="AK_KEY_2_MCOMPANY" unique="true" columns="NO"/>
     </table>
     <table name="MappingCorporation" schema="dbo" catalog="DGHouseInfo" type="TABLE">
@@ -3037,7 +2920,6 @@
       <foreign-key name="FK_OLDHOUSE_REFERENCE_OLDHOUSE2" columns="Release" ref-table="OldHouseRelease" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_OLDHOUSE_REFERENCE_OWNERINF2" columns="Buyer" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_OLDHOUSE_REFERENCE_OWNERINF3" columns="Seller" ref-table="OwnerInfo" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_OLDHOUSE" table="OldHouseContractAndOwner" schema="dbo" catalog="DGHouseInfo" columns="Record"/>
       <index name="AK_KEY_2_OLDHOUSE2" unique="true" columns="NO"/>
     </table>
     <table name="OldHouseContractAndOwner" schema="dbo" catalog="DGHouseInfo" type="TABLE">
@@ -3068,7 +2950,6 @@
       <primary-key name="PK_OLDHOUSERELEASE" columns="ID"/>
       <foreign-key name="FK_OLDHOUSE_REFERENCE_HOUSE" columns="House" ref-table="House" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_OLDHOUSE_REFERENCE_IEMPLOYE" columns="IEmployee" ref-table="IEmployee" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_OLDHOUSE2" table="OldHouseContract" schema="dbo" catalog="DGHouseInfo" columns="Release"/>
       <index name="AK_KEY_2_OLDHOUSE" unique="true" columns="NO"/>
     </table>
     <table name="OwnerGroup" schema="dbo" catalog="DGHouseInfo" type="TABLE">
@@ -3103,16 +2984,6 @@
       <column name="Domicile" sqlType="bigint" precision="19" scale="0" nullable="true" jdbcType="-5"/>
       <column name="Nationality" sqlType="bigint" precision="19" scale="0" nullable="true" jdbcType="-5"/>
       <primary-key name="PK_OWNERINFO" columns="ID"/>
-      <exported-key name="FK_DEMPLOYE_REFERENCE_OWNERINF" table="DEmployee" schema="dbo" catalog="DGHouseInfo" columns="Owner"/>
-      <exported-key name="FK_DEVELOPE_REFERENCE_OWNERINF" table="Developer" schema="dbo" catalog="DGHouseInfo" columns="OwnerID"/>
-      <exported-key name="FK_ECEMPLOY_REFERENCE_OWNERINF" table="ECEmployee" schema="dbo" catalog="DGHouseInfo" columns="Owner"/>
-      <exported-key name="FK_HOUSEAND_REFERENCE_OWNERINF" table="HouseAndRecordOwner" schema="dbo" catalog="DGHouseInfo" columns="OwnerID"/>
-      <exported-key name="FK_HOUSECAR_REFERENCE_OWNERINF" table="HouseCard" schema="dbo" catalog="DGHouseInfo" columns="OwnerID"/>
-      <exported-key name="FK_IEMPLOYE_REFERENCE_OWNERINF" table="IEmployee" schema="dbo" catalog="DGHouseInfo" columns="Owner"/>
-      <exported-key name="FK_NEWHOUSE_REFERENCE_OWNERINF" table="NewHouseContract" schema="dbo" catalog="DGHouseInfo" columns="Owner"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_OWNERINF2" table="OldHouseContract" schema="dbo" catalog="DGHouseInfo" columns="Buyer"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_OWNERINF3" table="OldHouseContract" schema="dbo" catalog="DGHouseInfo" columns="Seller"/>
-      <exported-key name="FK_OLDHOUSE_REFERENCE_OWNERINF" table="OldHouseContractAndOwner" schema="dbo" catalog="DGHouseInfo" columns="Owner"/>
       <index name="AK_KEY_2_OWNERINF" unique="true" columns="NO"/>
       <index name="_WA_Sys_Address_25DB9BFC" unique="false" columns="Address"/>
       <index name="_WA_Sys_Birthday_25DB9BFC" unique="false" columns="Birthday"/>
@@ -3247,9 +3118,6 @@
       <primary-key name="PK_PROJECT" columns="ID"/>
       <foreign-key name="FK_PROJECT_REFERENCE_DEVELOPE" columns="DeveloperID" ref-table="Developer" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
       <foreign-key name="FK_PROJECT_REFERENCE_SECTION" columns="SectionID" ref-table="Section" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_BUILD_REFERENCE_PROJECT" table="Build" schema="dbo" catalog="DGHouseInfo" columns="ProjectID"/>
-      <exported-key name="FK_PROJECTA_REFERENCE_PROJECT" table="ProjectAndCard" schema="dbo" catalog="DGHouseInfo" columns="Project"/>
-      <exported-key name="FK_PROJECTC_REFERENCE_PROJECT" table="ProjectCreateProcess" schema="dbo" catalog="DGHouseInfo" columns="project"/>
       <index name="AK_KEY_2_PROJECT" unique="true" columns="NO"/>
       <index name="_WA_Sys_Address_084B3915" unique="false" columns="Address"/>
       <index name="_WA_Sys_Area_084B3915" unique="false" columns="Area"/>
@@ -3351,7 +3219,6 @@
       <column name="CardNO" sqlType="varchar" precision="50" scale="0" nullable="true" jdbcType="12"/>
       <column name="KEYCODE" sqlType="varchar" precision="12" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_PROJECTCARD" columns="ID"/>
-      <exported-key name="FK_PORJECTC_REFERENCE_PROJECTC" table="PorjectCardAndBuild" schema="dbo" catalog="DGHouseInfo" columns="ProjectCard"/>
       <index name="_WA_Sys_BizID_047AA831" unique="false" columns="BizID"/>
       <index name="_WA_Sys_BuildCount_047AA831" unique="false" columns="BuildCount"/>
       <index name="_WA_Sys_BusinessID_047AA831" unique="false" columns="BusinessID"/>
@@ -3417,11 +3284,6 @@
       <column name="Memo" sqlType="varchar" precision="200" scale="0" nullable="true" jdbcType="12"/>
       <primary-key name="PK_SECTION" columns="ID"/>
       <foreign-key name="FK_SECTION_REFERENCE_DISTRICT" columns="DistrictID" ref-table="District" ref-schema="dbo" ref-catalog="DGHouseInfo" ref-columns="ID" update-rule="1" delete-rule="1" deferrability="2"/>
-      <exported-key name="FK_BUILD_REFERENCE_SECTION" table="Build" schema="dbo" catalog="DGHouseInfo" columns="SectionID"/>
-      <exported-key name="FK_OWNERGRO_REFERENCE_SECTION" table="OwnerGroup" schema="dbo" catalog="DGHouseInfo" columns="Section"/>
-      <exported-key name="FK_POOLBUIL_REFERENCE_SECTION" table="PoolBuild" schema="dbo" catalog="DGHouseInfo" columns="SectionID"/>
-      <exported-key name="FK_PROJECT_REFERENCE_SECTION" table="Project" schema="dbo" catalog="DGHouseInfo" columns="SectionID"/>
-      <exported-key name="FK_SMSUBCOM_REFERENCE_SECTION" table="SMSubCompany" schema="dbo" catalog="DGHouseInfo" columns="Section"/>
       <index name="AK_KEY_2_SECTION" unique="true" columns="NO"/>
       <index name="_WA_Sys_Address_628FA481" unique="false" columns="Address"/>
       <index name="_WA_Sys_CreateDate_628FA481" unique="false" columns="CreateDate"/>
@@ -4009,5 +3871,8 @@
         <parameter name="@RETURN_VALUE" sqlType="int" precision="10" scale="0" nullable="false" jdbcType="4" type="5" index="-1"/>
       </prototype>
     </procedure>
+  </data-source>
+  <data-source name="SQL Server (jTds) - fang_chan_dg@192.168.199.231" uuid="c6208c03-b999-4fe3-be18-3617b347c59f">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
   </data-source>
 </component>

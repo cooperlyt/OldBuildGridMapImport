@@ -59,7 +59,7 @@ public class BmpToImg {
         }
     }
 
-    private static final String SRC_DIR = "/root/Documents/IDCardPictureDir";
+    private static final String SRC_DIR = "/home/ftp/person";
 
     private static final String DESC_DIR= "/root/Documents/personImg/";
 
@@ -69,34 +69,41 @@ public class BmpToImg {
         File root = new File(SRC_DIR);
         File[] files = root.listFiles();
         for(File f: files){
-            if (f.isFile()){
-                if ("BMP".equals(getExtensionName(f.getName()))){
-                    Iterator iter = ImageIO.getImageWritersByFormatName("jpeg");
+            try {
 
-                    ImageWriter writer = (ImageWriter)iter.next();
-                    ImageWriteParam iwp = writer.getDefaultWriteParam();
-                    iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                    iwp.setCompressionQuality(1);   // an integer between 0 and 1
-                    File file = new File(DESC_DIR + getFileNameNoEx(f.getName()) + ".jpg");
-                    FileImageOutputStream output = new FileImageOutputStream(file);
-                    writer.setOutput(output);
-                    FileInputStream in = new FileInputStream(f.getAbsolutePath());
+                if (f.isFile()) {
+                    if ("BMP".equals(getExtensionName(f.getName()))) {
+                        Iterator iter = ImageIO.getImageWritersByFormatName("jpeg");
 
-                    BufferedImage bufferedImage = ImageIO.read(in);
-                    IIOImage image = new IIOImage(bufferedImage, null, null);
-                    writer.write(null, image, iwp);
-                    writer.dispose();
+                        ImageWriter writer = (ImageWriter) iter.next();
+                        ImageWriteParam iwp = writer.getDefaultWriteParam();
+                        iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                        iwp.setCompressionQuality(1);   // an integer between 0 and 1
+                        File file = new File(DESC_DIR + getFileNameNoEx(f.getName()) + ".jpg");
+                        FileImageOutputStream output = new FileImageOutputStream(file);
+                        writer.setOutput(output);
+                        FileInputStream in = new FileInputStream(f.getAbsolutePath());
 
-                    in.close();
-                }else if ("JPG".equals(getExtensionName(f.getName())) || "JPEG".equals(getExtensionName(f.getName()))){
-                    try {
-                        copyFile(f,new File(DESC_DIR + f.getName()));
-                    } catch (IOException e) {
+                        BufferedImage bufferedImage = ImageIO.read(in);
+                        IIOImage image = new IIOImage(bufferedImage, null, null);
+                        writer.write(null, image, iwp);
+                        writer.dispose();
 
-                        e.printStackTrace();
-                        return;
+                        in.close();
+                    } else if ("JPG".equals(getExtensionName(f.getName())) || "JPEG".equals(getExtensionName(f.getName()))) {
+                        try {
+                            copyFile(f, new File(DESC_DIR + f.getName()));
+                        } catch (IOException e) {
+
+                            e.printStackTrace();
+                            return;
+                        }
                     }
+
                 }
+            }catch (Exception e){
+
+                System.out.println("error file:" + f.getName());
 
             }
         }

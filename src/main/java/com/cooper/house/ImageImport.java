@@ -13,7 +13,7 @@ import java.sql.*;
 public class ImageImport {
 
 
-    private static final String MASTER_ADDRESS = "http://192.168.1.220:9333";
+    private static final String MASTER_ADDRESS = "http://192.168.1.8:9333";
 
     private static final String HOUSE_DB_URL = "jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
@@ -123,7 +123,9 @@ public class ImageImport {
                 System.out.println("" + count + "/" + i  + "              " + ( new Double(i).doubleValue() / new Double(count).doubleValue()  * 100) + "%");
 
 
-                String srcPath = bizRs.getString(2).replace(OLD_PATH,NEW_PATH);
+               // String srcPath = bizRs.getString(2).replace(OLD_PATH,NEW_PATH);
+
+                String srcPath = "/home/ftp/" + bizRs.getString(2) + ".jpg";
                 replaceFile(bizRs.getString(1),srcPath);
                 i++;
             }

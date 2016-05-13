@@ -12,7 +12,7 @@ import java.sql.*;
 public class ChangeBusinessCode {
 
 
-    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.4:1433/DGHOUSERECORD";
+    private static final String RECORD_DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHOUSEINFO";
 
     private static final String OUT_FILE_PATH = "/Users/cooper/Documents/RECORDBIZ.sql";
     private static Connection houseConn;
@@ -66,12 +66,12 @@ public class ChangeBusinessCode {
 
 
         try {
-            sqlWriter.write("SET SESSION FOREIGN_KEY_CHECKS=0;");
+
 
             Statement statement = houseConn.createStatement();
 
 
-            ResultSet bizRs = statement.executeQuery("SELECT  Business.NameID, Business.RecordBizNO FROM Business");
+            ResultSet bizRs = statement.executeQuery("SELECT  ID,NO FROM DEVELOPER ");
 
 
 
@@ -80,58 +80,16 @@ public class ChangeBusinessCode {
 
             while (bizRs.next()) {
 
-                String id = bizRs.getString(2);
+                String id = "D" + bizRs.getString(2);
                 String oid = bizRs.getString(1);
 
 
-                sqlWriter.write(csql("BUSINESS_OWNER","ID",oid,id));
-                sqlWriter.write(csql("MORTGAEGE_REGISTE","OWNER",oid,id));
-                sqlWriter.write(csql("HOUSE","MAIN_OWNER",oid,id));
-                sqlWriter.write(csql("HOUSE","ID",oid,id));
-                sqlWriter.write(csql("BUSINESS_HOUSE","START_HOUSE",oid,id));
-                sqlWriter.write(csql("BUSINESS_HOUSE","AFTER_HOUSE",oid,id));
-                sqlWriter.write(csql("HOUSE_RECORD","HOUSE",oid,id));
-                sqlWriter.write(csql("HOUSE_POOL","HOUSE",oid,id));
+                sqlWriter.write(csql("HOUSE","DEVELOPER_CODE",oid,id));
 
 
 
 
 
-
-
-//                sqlWriter.write(csql("TASK_OPER","BUSINESS",oid,id));
-//
-//                sqlWriter.write(csql("BUSINESS_EMP","BUSINESS_ID",oid,id));
-//
-//                sqlWriter.write(csql("PROCESS_MESSAGES","BUSINESS_ID",oid,id));
-//
-//                sqlWriter.write(csql("MAPPING_CORP","BUSINESS_ID",oid,id));
-//
-//
-//                sqlWriter.write(csql("HOUSE_CLOSE_CANCEL","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("CLOSE_HOUSE","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("EVALUATE","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("PROJECT","BUSINESS",oid,id));
-//                sqlWriter.write(csql("RECORD_STORE","BUSINESS",oid,id));
-//
-//
-//                sqlWriter.write(csql("MAKE_CARD","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("MORTGAEGE_REGISTE","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("BUSINESS_OWNER","BUSINESS",oid,id));
-//                sqlWriter.write(csql("BUSINESS_POOL","BUSINESS",oid,id));
-//                sqlWriter.write(csql("HOUSE_CARD_PATCH","BUSINESS",oid,id));
-//                sqlWriter.write(csql("PROJECT_MORTGAGE","BUSINESS",oid,id));
-//                sqlWriter.write(csql("SALE_INFO","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("REASON","BUISINESS_ID",oid,id));
-//                sqlWriter.write(csql("BUSINESS_PERSION","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("CONTRACT_OWNER","BUSINESS",oid,id));
-//                sqlWriter.write(csql("BUSINESS_HOUSE","BUSINESS_ID",oid,id));
-//
-//                sqlWriter.write(csql("BUSINESS_MONEY","BUSINESS",oid,id));
-//                sqlWriter.write(csql("FACT_MONEYINFO","BUSINESS",oid,id));
-//                sqlWriter.write(csql("CARD","BUSINESS_ID",oid,id));
-//                sqlWriter.write(csql("OWNER_BUSINESS","ID",oid,id));
-//                sqlWriter.write(csql("OWNER_BUSINESS","SELECT_BUSINESS",oid,id));
 
 
 

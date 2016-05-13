@@ -8,6 +8,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
@@ -34,9 +35,9 @@ public class PutPersonImg {
 
     private static final String SRC_DIR = "/root/Documents/personImg";
 
-    private static final String MASTER_ADDRESS = "http://192.168.1.220:9333";
+    private static final String MASTER_ADDRESS = "http://192.168.1.8:9333";
 
-    private static final String TT_SERVER_ADDRESS= "http://192.168.1.220:1978/";
+    private static final String TT_SERVER_ADDRESS= "http://192.168.1.8:1978/";
 
     public static String getFileNameNoEx(String filename) {
         if ((filename != null) && (filename.length() > 0)) {
@@ -60,17 +61,42 @@ public class PutPersonImg {
                 String key = getFileNameNoEx(f.getName()).trim();
                 key = key.substring(1);
 
-
-                WeedFSClient client = WeedFSClientBuilder.createBuilder().setMasterUrl(new URL(MASTER_ADDRESS)).build();
-                Assignation a = client.assign(new AssignParams());
-                client.write(a.weedFSFile,a.location,f);
+                try {
+                    if (get(TT_SERVER_ADDRESS + key) != 200) {
 
 
-                System.out.println(post(TT_SERVER_ADDRESS + key, a.weedFSFile.fid));
+                        WeedFSClient client = WeedFSClientBuilder.createBuilder().setMasterUrl(new URL(MASTER_ADDRESS)).build();
+                        Assignation a = client.assign(new AssignParams());
+                        client.write(a.weedFSFile, a.location, f);
 
+
+                        System.out.println("put person " + key + ":" + post(TT_SERVER_ADDRESS + key, a.weedFSFile.fid));
+                    } else {
+
+                        System.out.println("dump person: " + key);
+                    }
+                }catch (Exception e){
+                    System.out.println("error:" + key);
+                }
             }
         }
 
+
+    }
+
+
+    public static int  get(String url){
+        HttpClient client = HttpClientBuilder.create().build();
+
+        HttpGet put = new HttpGet(url);
+
+        try {
+            HttpResponse httpResponse = client.execute(put);
+             return httpResponse.getStatusLine().getStatusCode() ;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 404;
+        }
 
     }
 
@@ -82,7 +108,7 @@ public class PutPersonImg {
                         StringEntity s = new StringEntity(data,"UTF-8");
                         s.setContentEncoding("UTF-8");
                         s.setContentType("text/html");
-                   put.setEntity(s);
+                    put.setEntity(s);
 
                        HttpResponse res = client.execute(put);
                    return res.getStatusLine().getStatusCode();

@@ -18,12 +18,12 @@ import java.util.List;
 public class MSDataBaseExport {
 
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.200:1433/DGHouseInfo";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.199.231:1433/fang_chan_dg";
 
 
-    private static final String WARN_FILE_PATH="";
+    private static final String WARN_FILE_PATH="/Users/cooper/Documents/oldImport.log";
 
-    private static final String SQL_FILE_PATH="";
+    private static final String SQL_FILE_PATH="/Users/cooper/Documents/oldRecord.sql";
 
 
 
@@ -41,7 +41,7 @@ public class MSDataBaseExport {
             conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
-            ResultSet hs = statement.executeQuery("select count(*) FROM (select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao) ");
+            ResultSet hs = statement.executeQuery("select count(*) FROM (select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao) v");
             hs.next();
             long count = hs.getLong(1);
 
@@ -102,23 +102,23 @@ public class MSDataBaseExport {
 
     private static void genRecord(String blockNumber, String buildNumber, String houseNumber) {
         try {
-            String idCondition = " and ";
+            String idCondition = " ";
             if (blockNumber == null || blockNumber.trim().equals("")) {
-                idCondition += " (ch_qiuhao is null  or LTRIM(RTRIM(ch_qiuhao)) = '') ";
+                idCondition += " and (ch_qiuhao is null  or LTRIM(RTRIM(ch_qiuhao)) = '') ";
             } else {
-                idCondition += " ch_qiuhao = " + Q.p(blockNumber);
+                idCondition += " and ch_qiuhao = " + Q.p(blockNumber);
             }
 
             if (buildNumber == null || buildNumber.trim().equals("")) {
-                idCondition += " (ch_zhuanghao is null  or LTRIM(RTRIM(ch_zhuanghao)) = '') ";
+                idCondition += " and (ch_zhuanghao is null  or LTRIM(RTRIM(ch_zhuanghao)) = '') ";
             } else {
-                idCondition += " ch_zhuanghao = " + Q.p(buildNumber);
+                idCondition += " and ch_zhuanghao = " + Q.p(buildNumber);
             }
 
             if (houseNumber == null || houseNumber.trim().equals("")) {
-                idCondition += " (ch_fanghao is null  or LTRIM(RTRIM(ch_fanghao)) = '') ";
+                idCondition += " and (ch_fanghao is null  or LTRIM(RTRIM(ch_fanghao)) = '') ";
             } else {
-                idCondition += " ch_fanghao = " + Q.p(houseNumber);
+                idCondition += " and ch_fanghao = " + Q.p(houseNumber);
             }
 
             idCondition += " order by gd_date";
@@ -142,7 +142,7 @@ public class MSDataBaseExport {
                     //41
                     "     sl_dyq_dlr_dianhua as '现金融机构代理人电话',sl_fyxztzs as '协助执行通知书',sl_tx_bgq as '查封法院',sl_fypjs as '法律文书',ch_qiuhao as '丘号'," +
                     //46
-                    "     ch_zhuanghao as '幢号',ch_fanghao as '房号',ch_jiegou as '结构',ch_zongceng as '总层数',ch_ceng as '所在层'," +
+                    "ch_zhuanghao as '幢号',ch_fanghao as '房号',ch_jiegou as '结构',ch_zongceng as '总层数',ch_ceng as '所在层'," +
                     //51
                     "     ch_shejiyongtu as '设计用途',ch_laiyuan as '产权来源',ch_mj_fentan '分摊面积',ch_dymj as '抵押面积',y.keycode as '业务ID'," +
                     //56
@@ -166,6 +166,7 @@ public class MSDataBaseExport {
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs,c_GuiDang as gd " +
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                     "       and y.keycode=sz.keycode and  y.keycode=pg.keycode and y.keycode=gd.keycode and yw_mc_biaoshi <> '12' and yw_mc_biaoshi <> '14' and yw_jd_biaoshi = '0' " + idCondition);
+
 
 
             List<BizOut> out = new ArrayList<>();
@@ -210,6 +211,7 @@ public class MSDataBaseExport {
             }
 
 
+            System.out.println(sql);
             sqlWriter.write(sql);
             sqlWriter.newLine();
             sqlWriter.flush();
@@ -230,7 +232,7 @@ public class MSDataBaseExport {
 
         String defineId;
 
-        String out;
+        String out ="";
 
         String keyCode;
 
@@ -545,7 +547,7 @@ public class MSDataBaseExport {
         @Override
         protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
             if (rs.getString(78) != null && !"".equals(rs.getString(78).trim())){
-                String[] files= rs.getString(78).split("/n");
+                String[] files= rs.getString(78).split("\n");
                 for(int i = 0 ; i < files.length; i++){
                     out.out += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES("
                             + Q.v(Q.p(rs.getString(55) + "-" + i),Q.p(rs.getString(55)), Q.p(files[i]) , "true","false",String.valueOf(i)) + ");";
@@ -563,7 +565,7 @@ public class MSDataBaseExport {
                 out.out += "INSERT INTO FACT_MONEYINFO(ID,FACT_TIME,PAYMENT_NO,BUSINESS) VALUES("
                 + Q.v(Q.p(rs.getString(55)),Q.pm(rs.getTimestamp(32)),Q.pm("-"),Q.p(rs.getString(55))) +
                         ");INSERT INTO BUSINESS_MONEY(ID,TYPE_NAME,MONEY_TYPE_ID,CHECK_MONEY,SHOULD_MONEY,FACT_MONEY,BUSINESS,FEE,PRI) VALUES("
-                        + Q.v(Q.p(rs.getString(55)),Q.p("收费导入"),Q.p("BIZIMPORT"),Q.p(""),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(80)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),String.valueOf(1)) + ");";
+                        + Q.v(Q.p(rs.getString(55)),Q.p("收费导入"),Q.p("BIZIMPORT"),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(80)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),String.valueOf(1)) + ");";
             }
         }
     }
@@ -641,7 +643,7 @@ public class MSDataBaseExport {
             }
             out.out += " INSERT INTO OWNER_BUSINESS(ID,VERSION,SOURCE,MEMO,STATUS,DEFINE_NAME,DEFINE_ID,SELECT_BUSINESS,CREATE_TIME,APPLY_TIME,CHECK_TIME,REG_TIME,RECORD_TIME,RECORDED,TYPE) VALUES("
                     + Q.v(Q.pm(rs.getString(55)),"1",Q.pm("BIZ_IMPORT"),Q.p(rs.getString(1)), Q.pm("COMPLETE"),Q.pm(rs.getString(60)),Q.pm(out.defineId),Q.p(selectKeyCode),
-                    Q.pm(rs.getTimestamp(12)),Q.pm(rs.getTimestamp(12)),Q.p(rs.getTimestamp(75)), Q.p(rs.getTimestamp(73)),Q.p(rs.getTimestamp(95)),Q.p(true), Q.pm("NORMAL_BIZ")) + "); /n";
+                    Q.pm(rs.getTimestamp(12)),Q.pm(rs.getTimestamp(12)),Q.p(rs.getTimestamp(75)), Q.p(rs.getTimestamp(73)),Q.p(rs.getTimestamp(95)),Q.p(true), Q.pm("NORMAL_BIZ")) + ");";
 
 
             //评估
@@ -890,7 +892,7 @@ public class MSDataBaseExport {
                 oOwnerID = rs.getString(55)  + "-s";
                 String cardId = null;
                 if (rs.getString(2) != null && !"".equals(rs.getString(2))) {
-                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-s"), Q.pm(rs.getString(2)), Q.p("OWNER_RSHIP"), Q.p(rs.getString(55)), "true") + ") " +
+                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-s"), Q.pm(rs.getString(2)), Q.p("OWNER_RSHIP"), Q.p(rs.getString(55)), "true") + "); " +
                             " INSERT INTO CARD_INFO(ID,MEMO) VALUES(" + Q.v( Q.p(rs.getString(55) + "-s") , Q.p(rs.getString(69)))+ ");";
                     cardId = rs.getString(55) + "-s";
                 }
@@ -916,8 +918,8 @@ public class MSDataBaseExport {
                 String cardId = null;
                 if (rs.getString(68) != null && !rs.getString(68).trim().equals("")){
                     cardId = rs.getString(55) + "-o";
-                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE,ROOT_ADDRESS) VALUES(" + Q.v(Q.p(cardId), Q.pm(rs.getString(68)), Q.p( Arrays.asList(PREPARE_BIZ).contains(out.defineId) ? "NOTICE" : (Arrays.asList(MO_PREPARE_BIZ).contains(out.defineId) ? "NOTICE_MORTGAGE" : "OWNER_RSHIP") ), Q.p(rs.getString(55)), "true") + ") " +
-                            " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69)) ,Q.p(rs.getString(37))) + ");";
+                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(cardId), Q.pm(rs.getString(68)), Q.p( Arrays.asList(PREPARE_BIZ).contains(out.defineId) ? "NOTICE" : (Arrays.asList(MO_PREPARE_BIZ).contains(out.defineId) ? "NOTICE_MORTGAGE" : "OWNER_RSHIP") ), Q.p(rs.getString(55)), "true") + "); " +
+                            " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69)) ) + ");";
                 }
 
                 String oCardType = rs.getString(58);
@@ -935,8 +937,8 @@ public class MSDataBaseExport {
                 }else{
                     CardType = "OTHER";
                 }
-                out.out += "INSERT INTO BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD) VALUES(" + Q.v(Q.p(rs.getString(55)), Q.pm(rs.getString(56)), Q.pm(CardType) ,
-                        Q.pm(rs.getString(57)),Q.p(rs.getString(55)),Q.p(cardId)) + ");";
+                out.out += "INSERT INTO BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD,ROOT_ADDRESS) VALUES(" + Q.v(Q.p(rs.getString(55)), Q.pm(rs.getString(56)), Q.pm(CardType) ,
+                        Q.pm(rs.getString(57)),Q.p(rs.getString(55)),Q.p(cardId),Q.p(rs.getString(37))) + ");";
 
 
                 //抵押业务
@@ -946,13 +948,13 @@ public class MSDataBaseExport {
 
                         if (Arrays.asList(OLD_CARD_BIN).contains(out.defineId)) {
                             if (rs.getString(25) != null &&  !"".equals(rs.getString(25).trim())) {
-                                out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(25)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + ") " +
+                                out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(25)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + "); " +
                                         " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
                                 oldCardId = rs.getString(55) + "-t";
                             }
                         } else {
                             if (rs.getString(67) != null &&  !"".equals(rs.getString(67).trim())) {
-                                out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(67)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + ") " +
+                                out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(67)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + "); " +
                                         " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
                                 oldCardId = rs.getString(55) + "-t";
                             }
@@ -1098,7 +1100,7 @@ public class MSDataBaseExport {
             //---------------
 
             out.out += " INSERT INTO BUSINESS_HOUSE(ID,HOUSE_CODE,BUSINESS_ID,START_HOUSE,AFTER_HOUSE,CANCELED) VALUES("
-                    + Q.v(Q.pm(rs.getString(55)),Q.pm(houseCode),Q.pm(rs.getString(55)),Q.pm(rs.getString(55)  + "-s"),Q.pm(rs.getString(55)),Q.p(false)) + "); /n";
+                    + Q.v(Q.pm(rs.getString(55)),Q.pm(houseCode),Q.pm(rs.getString(55)),Q.pm(rs.getString(55)  + "-s"),Q.pm(rs.getString(55)),Q.p(false)) + ");";
 
         }
 

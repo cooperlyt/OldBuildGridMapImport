@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,7 +41,11 @@ public class MSDataBaseExport {
             conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
-            ResultSet hs = statement.executeQuery("select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao");
+            ResultSet hs = statement.executeQuery("select count(*) FROM (select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao) ");
+            hs.next();
+            long count = hs.getLong(1);
+
+            hs = statement.executeQuery("select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao");
             File file = new File(SQL_FILE_PATH);
             if (file.exists()) {
                 file.delete();
@@ -65,17 +70,25 @@ public class MSDataBaseExport {
             try {
                 file.createNewFile();
                 FileWriter fw = new FileWriter(file.getAbsoluteFile());
-                sqlWriter = new BufferedWriter(fw);
+                warnWriter = new BufferedWriter(fw);
             } catch (IOException e) {
                 System.out.println("日志 文件创建失败");
                 e.printStackTrace();
                 return;
             }
 
+            long curCount = 0;
 
 
             while (hs.next()) {
+                long time = new java.util.Date().getTime();
                 genRecord(hs.getString(1), hs.getString(2), hs.getString(3));
+                curCount++;
+                System.out.println(String.valueOf(count) + "/" + curCount + "    " + (hs.getString(1) + "-" + hs.getString(2) + "-" + hs.getString(3)) + "   " + (new java.util.Date().getTime() - time) + "ms" + "  " + (curCount / count * 100) + "%");
+
+
+
+                break;
             }
 
 
@@ -149,16 +162,60 @@ public class MSDataBaseExport {
                     //91
                     "ch_td_synxs as '土地使用年限始',ch_td_synxz as '土地使用年限止', ch_td_mianji as '土地面积', gd_worker as  '归档人', gd_date as '归档时间'" +
                     //96
-                    ",ch_downFloorCount as '地下总层数',ch_upFloorCount as '地上总层数'" +
+                    ",ch_downFloorCount as '地下总层数',ch_upFloorCount as '地上总层数',sl_dailiren as '现产权(抵押人)代理人' " +
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs,c_GuiDang as gd " +
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                     "       and y.keycode=sz.keycode and  y.keycode=pg.keycode and y.keycode=gd.keycode and yw_mc_biaoshi <> '12' and yw_mc_biaoshi <> '14' and yw_jd_biaoshi = '0' " + idCondition);
 
 
-            List<String> out = new ArrayList<>();
+            List<BizOut> out = new ArrayList<>();
+            List<HouseStatus> statuses = new ArrayList<>();
+            String sql = "";
+            String lastHouseID =null;
+            String houseCode = null;
             while (hs.next()) {
                 BizOut biz = new BizOut(hs.getString(61).trim(),hs.getString(63));
+                begin.doit(biz,hs,out);
+                if(biz.houseStatus != null){
+                    if (biz.isAddStatus){
+                        statuses.add(biz.houseStatus);
+                    }else {
+                        for(int i = statuses.size() - 1; i >= 0 ; i--){
+                            if(biz.houseStatus.equals(statuses.get(i))){
+                                statuses.remove(i);
+                                break;
+                            }
+                        }
+                    }
+                }
+                out.add(biz);
+                sql += biz.out;
+                lastHouseID = hs.getString(55);
+
+
+                houseCode = (hs.getString(45) == null ? "" : hs.getString(45).trim()) + "-" +
+                        (hs.getString(46) == null ? "" : hs.getString(46).trim()) + "-" + (hs.getString(47) == null ? "" : hs.getString(47).trim());
             }
+            if (lastHouseID != null) {
+
+                String masterStatus = null;
+
+                if (statuses.size() > 0){
+                    Collections.sort(statuses, HouseStatus.StatusComparator.getInstance());
+                    masterStatus = statuses.get(0).name();
+                }
+                sql += "INSERT INTO HOUSE_RECORD(HOUSE_CODE,HOUSE,HOUSE_STATUS) VALUES("
+                 + Q.v(Q.p(houseCode),Q.p(lastHouseID),Q.p(masterStatus)) +
+                ");";
+            }
+
+
+            sqlWriter.write(sql);
+            sqlWriter.newLine();
+            sqlWriter.flush();
+
+
+
 
         } catch (Exception e) {
             System.err.println("Cannot connect to database server");
@@ -176,6 +233,10 @@ public class MSDataBaseExport {
         String out;
 
         String keyCode;
+
+        HouseStatus houseStatus = null;
+
+        boolean isAddStatus = true;
 
         public BizOut(String d,String keyCode) {
             this.keyCode = keyCode;
@@ -320,9 +381,10 @@ public class MSDataBaseExport {
         protected abstract void gensql(BizOut out, ResultSet rs,List<BizOut> befor) throws SQLException, IOException;
     }
 
+    private static TableGen begin;
 
     static {
-        TableGen begin = new OwnerBusinessGen();
+        begin = new OwnerBusinessGen();
         TableGen cur = begin;
         cur.setNext(new HouseBusinessGen());
         cur = cur.getNext();
@@ -330,8 +392,98 @@ public class MSDataBaseExport {
         cur.setNext(new CurCloseGen());
         cur = cur.getNext();
 
+        cur.setNext(new TaskOperGen());
+        cur = cur.getNext();
+
+//        cur.setNext(new FileGen());
+//        cur = cur.getNext();
+
+        cur.setNext(new PersonGen());
+        cur = cur.getNext();
+
+        cur.setNext(new FeeGen());
+        cur = cur.getNext();
+
+        cur.setNext(new SubstatusGen());
+        cur = cur.getNext();
+
     }
 
+
+    public static class SubstatusGen extends TableGen{
+
+        @Override
+        protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
+            String addStatus = null;
+            boolean isAdd = true;
+            if ("WP30".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP31".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP40".equals(out.defineId)){addStatus="INIT_REG";}
+            else if("WP102".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP52".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP53".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP54".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP55".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP91".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP101".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP1010".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP104".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP41".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP56".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP57".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP58".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP59".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP60".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP61".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP62".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP63".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP65".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP66".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP67".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP71".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP72".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP86".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP87".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP110".equals(out.defineId)){addStatus="DESTROY";}
+            else if("WP38".equals(out.defineId)){addStatus="DESTROY";}
+            else if("WP9".equals(out.defineId)){addStatus="PLEDGE";}
+            else if("WP12".equals(out.defineId)){isAdd=false;addStatus="PLEDGE";}
+            else if("WP13".equals(out.defineId)){addStatus="PLEDGE";}
+            else if("WP14".equals(out.defineId)){addStatus="PLEDGE";}
+            else if("WP17".equals(out.defineId)){isAdd=false;addStatus="PLEDGE";}
+            else if("WP18".equals(out.defineId)){addStatus="PROJECT_PLEDGE";}
+            else if("WP21".equals(out.defineId)){isAdd=false;addStatus="PROJECT_PLEDGE";}
+            else if("WP44".equals(out.defineId)){addStatus="SALE_REGISTER";}
+            else if("WP46".equals(out.defineId)){isAdd=false;addStatus="SALE_REGISTER";}
+            else if("WP1".equals(out.defineId)){addStatus="SALE_MORTGAGE_REGISTER";}
+            else if("WP4".equals(out.defineId)){isAdd=false;addStatus="SALE_MORTGAGE_REGISTER";}
+            else if("WP69".equals(out.defineId)){addStatus="DIVERT_REGISTER";}
+            else if("WP70".equals(out.defineId)){isAdd=false;addStatus="DIVERT_REGISTER";}
+            else if("WP5".equals(out.defineId)){addStatus="DIVERT_MORTGAGE_REGISTER";}
+            else if("WP8".equals(out.defineId)){isAdd=false;addStatus="DIVERT_MORTGAGE_REGISTER";}
+            else if("WPD203".equals(out.defineId)){addStatus="DESTROY";}
+            else if("WP33".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP32".equals(out.defineId)){addStatus="OWNERED";}
+            else if("WP73".equals(out.defineId)){addStatus="COURT_CLOSE";}
+            else if("WP74".equals(out.defineId)){isAdd=false;addStatus="COURT_CLOSE";}
+            else if("WP36".equals(out.defineId)){addStatus="DIFFICULTY";}
+            else if("WP37".equals(out.defineId)){isAdd=false;addStatus="DIFFICULTY";}
+            else if("WP23".equals(out.defineId)){addStatus="DIFFICULTY";}
+            else if("WP24".equals(out.defineId)){isAdd=false;addStatus="DIFFICULTY";}
+            else if("WP28".equals(out.defineId)){addStatus="DIFFICULTY";}
+            else if("WP29".equals(out.defineId)){isAdd=false;addStatus="DIFFICULTY";}
+
+
+            if (addStatus != null){
+                out.out += "INSERT INTO ADD_HOUSE_STATUS(ID,BUSINESS,STATUS,IS_REMOVE) VALUES("
+                        + Q.v(Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(addStatus),Q.p(isAdd)) +
+                        ");";
+                out.houseStatus = HouseStatus.valueOf(addStatus);
+                out.isAddStatus = isAdd;
+            }
+
+        }
+    }
 
     public static class CurCloseGen extends TableGen{
 
@@ -347,7 +499,122 @@ public class MSDataBaseExport {
         }
     }
 
+    public static class TaskOperGen extends TableGen{
 
+        @Override
+        protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
+            if(rs.getString(65) != null && !rs.getString(65).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "sj"),Q.p("CARD_PRINTER"),Q.p("-"),Q.pm(rs.getString(65)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(66))) + ");";
+            }
+
+
+            if(rs.getString(11) != null && !rs.getString(11).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "jl"),Q.p("CREATE_EMP"),Q.p("-"),Q.pm(rs.getString(11)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(12))) + ");";
+
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "sl"),Q.p("APPLY_EMP"),Q.p("-"),Q.pm(rs.getString(11)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(12))) + ");";
+            }
+
+            if(rs.getString(81) != null && !rs.getString(81).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "sf"),Q.p("MONEY_EMP"),Q.p("-"),Q.pm(rs.getString(81)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(82))) + ");";
+            }
+
+            if(rs.getString(72) != null && !rs.getString(72).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "db"),Q.p("REG_EMP"),Q.p("-"),Q.pm(rs.getString(72)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(73))) + ");";
+            }
+
+            if(rs.getString(74) != null && !rs.getString(74).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "sh"),Q.p("CHECK_EMP"),Q.p("-"),Q.pm(rs.getString(74)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(75))) + ");";
+            }
+
+            if(rs.getString(76) != null && !rs.getString(76).trim().equals("")){
+                out.out += "INSERT INTO BUSINESS_EMP(ID,TYPE,EMP_CODE,EMP_NAME,BUSINESS_ID,OPER_TIME) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "cs"),Q.p("FIRST_CHECK"),Q.p("-"),Q.pm(rs.getString(76)),Q.pm(rs.getString(55)),Q.pm(rs.getTimestamp(77))) + ");";
+            }
+
+        }
+    }
+
+    public static class FileGen extends TableGen{
+
+        @Override
+        protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
+            if (rs.getString(78) != null && !"".equals(rs.getString(78).trim())){
+                String[] files= rs.getString(78).split("/n");
+                for(int i = 0 ; i < files.length; i++){
+                    out.out += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY) VALUES("
+                            + Q.v(Q.p(rs.getString(55) + "-" + i),Q.p(rs.getString(55)), Q.p(files[i]) , "true","false",String.valueOf(i)) + ");";
+                }
+
+            }
+        }
+    }
+
+    public static class FeeGen extends TableGen{
+
+        @Override
+        protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
+            if (rs.getBigDecimal(79) != null){
+                out.out += "INSERT INTO FACT_MONEYINFO(ID,FACT_TIME,PAYMENT_NO,BUSINESS) VALUES("
+                + Q.v(Q.p(rs.getString(55)),Q.pm(rs.getTimestamp(32)),Q.pm("-"),Q.p(rs.getString(55))) +
+                        ");INSERT INTO BUSINESS_MONEY(ID,TYPE_NAME,MONEY_TYPE_ID,CHECK_MONEY,SHOULD_MONEY,FACT_MONEY,BUSINESS,FEE,PRI) VALUES("
+                        + Q.v(Q.p(rs.getString(55)),Q.p("收费导入"),Q.p("BIZIMPORT"),Q.p(""),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(79)),Q.pm(rs.getBigDecimal(80)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),String.valueOf(1)) + ");";
+            }
+        }
+    }
+
+    public static class PersonGen extends TableGen{
+
+
+        @Override
+        protected void gensql(BizOut out, ResultSet rs, List<BizOut> befor) throws SQLException, IOException {
+
+            if (!"WP73".equals(out.defineId) && !"WP74".equals(out.defineId) && rs.getString(7) != null && !"".equals(rs.getString(7).trim())){
+                out.out += "INSERT INTO BUSINESS_PERSION(ID,ID_NO,ID_TYPE,NAME,TYPE,BUSINESS_ID,PHONE) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "-sp"),Q.pm(rs.getString(8)),Q.p("身份证".equals(rs.getString(9)) ? "MASTER_ID" : "OTHER"),Q.pm(rs.getString(7)),Q.p("SELL_ENTRUST"),Q.p(rs.getString(55)),Q.p(rs.getString(10))) + ");";
+            }
+
+            if (rs.getString(27) != null && !"".equals(rs.getString(27).trim())){
+                out.out += "INSERT INTO BUSINESS_PERSION(ID,ID_NO,ID_TYPE,NAME,TYPE,BUSINESS_ID,PHONE) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "-zw"),
+                        Q.pm(rs.getString(28)),
+                        Q.p("身份证".equals(rs.getString(29)) ? "MASTER_ID" : ( "护照".equals(rs.getString(29)) ? "PASSPORT" : "OTHER") ),
+                        Q.pm(rs.getString(27)),Q.p("MORTGAGE_OBLIGOR"),Q.p(rs.getString(55)),Q.p(rs.getString(30))) + ");";
+            }
+
+            if (rs.getString(38) != null && !"".equals(rs.getString(38).trim())){
+                out.out += "INSERT INTO BUSINESS_PERSION(ID,ID_NO,ID_TYPE,NAME,TYPE,BUSINESS_ID,PHONE) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "-jr"),
+                        Q.pm(rs.getString(40)),
+                        Q.p("身份证".equals(rs.getString(39)) ? "MASTER_ID" : ( "护照".equals(rs.getString(39)) ? "PASSPORT" : "OTHER") ),
+                        Q.pm(rs.getString(38)),Q.p("MORTGAGE_OBLIGEE"),Q.p(rs.getString(55)),Q.p(rs.getString(41))) + ");";
+            }
+
+            if (rs.getString(98) != null && !"".equals(rs.getString(98).trim())){
+                String oType = "OWNER_ENTRUST" ;
+                if (Arrays.asList(M_PERSON_BIZ_ID).contains(out.defineId)){
+                    oType = "MORTGAGE";
+                }
+
+                out.out += "INSERT INTO BUSINESS_PERSION(ID,ID_NO,ID_TYPE,NAME,TYPE,BUSINESS_ID,PHONE) VALUES("
+                        + Q.v(Q.p(rs.getString(55) + "-cd"),
+                        Q.pm(rs.getString(15)),
+                        Q.p("身份证".equals(rs.getString(16)) ? "MASTER_ID" : ( "护照".equals(rs.getString(16)) ? "PASSPORT" : "OTHER") ),
+                        Q.pm(rs.getString(98)),Q.p(oType),Q.p(rs.getString(55)),Q.p(rs.getString(17))) + ");";
+            }
+
+
+        }
+
+        private static final String[] M_PERSON_BIZ_ID ={
+                "WP9","WP10","WP12","WP13","WP14","WP15","WP17","WP18","WP19","WP21","WP1","WP2","WP4","WP5","WP6","WP8"
+        };
+    }
 
 
     public static class OwnerBusinessGen extends TableGen{
@@ -649,8 +916,8 @@ public class MSDataBaseExport {
                 String cardId = null;
                 if (rs.getString(68) != null && !rs.getString(68).trim().equals("")){
                     cardId = rs.getString(55) + "-o";
-                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(cardId), Q.pm(rs.getString(68)), Q.p( Arrays.asList(PREPARE_BIZ).contains(out.defineId) ? "NOTICE" : (Arrays.asList(MO_PREPARE_BIZ).contains(out.defineId) ? "NOTICE_MORTGAGE" : "OWNER_RSHIP") ), Q.p(rs.getString(55)), "true") + ") " +
-                            " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69)) ) + ");";
+                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE,ROOT_ADDRESS) VALUES(" + Q.v(Q.p(cardId), Q.pm(rs.getString(68)), Q.p( Arrays.asList(PREPARE_BIZ).contains(out.defineId) ? "NOTICE" : (Arrays.asList(MO_PREPARE_BIZ).contains(out.defineId) ? "NOTICE_MORTGAGE" : "OWNER_RSHIP") ), Q.p(rs.getString(55)), "true") + ") " +
+                            " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69)) ,Q.p(rs.getString(37))) + ");";
                 }
 
                 String oCardType = rs.getString(58);

@@ -96,7 +96,7 @@ public class RecordImport {
 //    private static final String SUCCESS_FILE_PATH = "/Users/cooper/Documents/statusError.log";
 
 
-    private static final String BEGIN_DATE = "2016-5-14";
+    private static final String BEGIN_DATE = "2016-6-13";
 
     private static Date CONTINUE_DATE;
 
@@ -442,47 +442,47 @@ public class RecordImport {
 
 
 
-
-                rs = sD.executeQuery("select NO,Cabinet,box from " +
-                        "       (select db.RecordBizNO,db.box,db.Cabinet,rb.Business,rb.Record from " +
-                        "              DGHouseRecord..Business as db left join DGHouseRecord..RecordandBiz as rb on db.id = rb.business) as a " +
-                        "       left join DGHouseRecord..Record as rd on a.Record=rd.id WHERE RecordBizNo = " + Q.p(id));
-
-                String recordCode = null;
-                String cab = null;
-                String box = null;
-                if (rs.next()){
-                    recordCode = rs.getString(1);
-                    cab = rs.getString(2);
-                    box = rs.getString(3);
-
-                    businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,RECORD_CODE,IN_ROOM,CREATE_TIME) VALUES("
-                            + Q.v(Q.p(id),Q.p(id),Q.pm(recordCode),Q.p(cab != null && box != null),Q.pm(bizRs.getTimestamp(6)))
-                            + ");";
-                }
-
-                rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
-                        "where bizid = " + Q.p(bizRs.getString(8)));
-
-                int pi = 1;
-                while (rs.next()){
-                    businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY,RECORD_STORE) VALUES(" +
-
-                            Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false), String.valueOf(pi++),(recordCode == null ? "NULL": Q.p(id)))
-                            + ");";
-                    if (cab != null && box != null)
-                        businessOtherInfo += "INSERT INTO RECORD_LOCAL(ID,FRAME,CABINET,BOX,RECORD_CODE) VALUES("+
-                            Q.v(Q.p(rs.getString(1)), Q.p("1"),Q.pm(cab),Q.pm(box),Q.p(recordCode + (pi - 1)))
-                            +");";
-                    ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));
-                    while (rs2.next()){
-                        businessOtherInfo += "INSERT INTO UPLOAD_FILE(FILE_NAME,EMP_NAME,EMP_CODE,MD5,BUSINESS_FILE_ID,ID,UPLOAD_TIME) VALUES(" +
-
-                                Q.v(Q.p(rs2.getString(1)), Q.p(rs2.getString(2)), Q.p(rs2.getString(3)), Q.pm(rs2.getString(4)),Q.p(rs.getString(1)),Q.p(rs2.getString(5)),Q.p(rs2.getTimestamp(6)))
-                                + ");";
-                    }
-
-                }
+//
+//                rs = sD.executeQuery("select NO,Cabinet,box from " +
+//                        "       (select db.RecordBizNO,db.box,db.Cabinet,rb.Business,rb.Record from " +
+//                        "              DGHouseRecord..Business as db left join DGHouseRecord..RecordandBiz as rb on db.id = rb.business) as a " +
+//                        "       left join DGHouseRecord..Record as rd on a.Record=rd.id WHERE RecordBizNo = " + Q.p(id));
+//
+//                String recordCode = null;
+//                String cab = null;
+//                String box = null;
+//                if (rs.next()){
+//                    recordCode = rs.getString(1);
+//                    cab = rs.getString(2);
+//                    box = rs.getString(3);
+//
+//                    businessOtherInfo += "INSERT INTO RECORD_STORE(ID,BUSINESS,RECORD_CODE,IN_ROOM,CREATE_TIME) VALUES("
+//                            + Q.v(Q.p(id),Q.p(id),Q.pm(recordCode),Q.p(cab != null && box != null),Q.pm(bizRs.getTimestamp(6)))
+//                            + ");";
+//                }
+//
+//                rs = sD.executeQuery("select ID,DocType from shark..DGBizDoc " +
+//                        "where bizid = " + Q.p(bizRs.getString(8)));
+//
+//                int pi = 1;
+//                while (rs.next()){
+//                    businessOtherInfo += "INSERT INTO BUSINESS_FILE(ID,BUSINESS_ID,NAME,NO_FILE,IMPORTANT,PRIORITY,RECORD_STORE) VALUES(" +
+//
+//                            Q.v(Q.p(rs.getString(1)) , Q.p(id), Q.p(rs.getString(2)), Q.p(false), Q.p(false), String.valueOf(pi++),(recordCode == null ? "NULL": Q.p(id)))
+//                            + ");";
+//                    if (cab != null && box != null)
+//                        businessOtherInfo += "INSERT INTO RECORD_LOCAL(ID,FRAME,CABINET,BOX,RECORD_CODE) VALUES("+
+//                            Q.v(Q.p(rs.getString(1)), Q.p("1"),Q.pm(cab),Q.pm(box),Q.p(recordCode + (pi - 1)))
+//                            +");";
+//                    ResultSet rs2 = hD.executeQuery("select FileName,e.Name,e.NO,MD5Code,bf.ID,UpdateDate from shark..DGBizFile bf LEFT JOIN shark..DGEmployee e on e.ID = bf.EmployeeID where DocId =" + Q.p(rs.getString(1)));
+//                    while (rs2.next()){
+//                        businessOtherInfo += "INSERT INTO UPLOAD_FILE(FILE_NAME,EMP_NAME,EMP_CODE,MD5,BUSINESS_FILE_ID,ID,UPLOAD_TIME) VALUES(" +
+//
+//                                Q.v(Q.p(rs2.getString(1)), Q.p(rs2.getString(2)), Q.p(rs2.getString(3)), Q.pm(rs2.getString(4)),Q.p(rs.getString(1)),Q.p(rs2.getString(5)),Q.p(rs2.getTimestamp(6)))
+//                                + ");";
+//                    }
+//
+//                }
 
 
                 rs = sD.executeQuery("select e.NO,e.Name,RegisterTime,e2.NO,e2.Name,FinalTime from DGHouseRecord..Business b left join DGEmployee e on e.ID = b.Finalworker left join DGEmployee e2 on e2.ID = b.enrolworker where (Finalworker is not null or enrolworker is not null) and  RecordBizNO = " + Q.p(id));

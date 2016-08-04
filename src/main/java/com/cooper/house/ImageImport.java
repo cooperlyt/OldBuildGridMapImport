@@ -13,7 +13,7 @@ import java.sql.*;
 public class ImageImport {
 
 
-    private static final String MASTER_ADDRESS = "http://192.168.1.8:9333";
+    private static final String MASTER_ADDRESS = "http://192.168.1.7:9333";
 
     private static final String HOUSE_DB_URL = "jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 

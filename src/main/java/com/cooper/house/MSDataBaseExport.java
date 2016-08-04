@@ -18,7 +18,7 @@ import java.util.List;
 public class MSDataBaseExport {
 
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.199.231:1433/fang_chan_dg";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.100:1433/fang_chan_dg";
 
 
     private static final String WARN_FILE_PATH="/Users/cooper/Documents/oldImport.log";
@@ -38,7 +38,7 @@ public class MSDataBaseExport {
         try {
 
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
+            conn = DriverManager.getConnection(DB_URL, "sa", "mingshuifangchan");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
             ResultSet hs = statement.executeQuery("select count(*) FROM (select fj_qiuhao,fj_zhuanghao,fj_fanghao from c_fangji GROUP BY fj_qiuhao,fj_zhuanghao,fj_fanghao) v");
@@ -88,7 +88,7 @@ public class MSDataBaseExport {
 
 
 
-                break;
+               // break;
             }
 
 

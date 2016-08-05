@@ -121,7 +121,7 @@ public class MSDataBaseExport {
                 idCondition += " and ch_fanghao = " + Q.p(houseNumber);
             }
 
-            idCondition += " order by gd_date";
+            idCondition += " order by cast(y.keycode  as bigint)";
 
             Statement statement = conn.createStatement();
             ResultSet hs = statement.executeQuery("select sl_beizhu as '业务备注 ',sl_ycq_zheng as '原产权证号',sl_ycqr as '原产权人',sl_ycqr_card as '原产权人（金融机构）证件号',sl_ycqr_card_type as '原产权人（金融机构）证件类型'," +
@@ -165,7 +165,7 @@ public class MSDataBaseExport {
                     ",ch_downFloorCount as '地下总层数',ch_upFloorCount as '地上总层数',sl_dailiren as '现产权(抵押人)代理人' " +
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs,c_GuiDang as gd " +
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
-                    "       and y.keycode=sz.keycode and  y.keycode=pg.keycode and y.keycode=gd.keycode and yw_mc_biaoshi <> '12' and yw_mc_biaoshi <> '14' and yw_jd_biaoshi = '0' " + idCondition);
+                    "       and y.keycode=sz.keycode and  y.keycode=pg.keycode and y.keycode=gd.keycode and yw_mc_biaoshi <> '12' and yw_mc_biaoshi <> '14' and (yw_jd_biaoshi = '0' or yw_jd_biaoshi='13') " + idCondition);
 
 
 

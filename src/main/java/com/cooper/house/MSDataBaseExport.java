@@ -21,9 +21,9 @@ public class MSDataBaseExport {
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.100:1433/fang_chan_dg";
 
 
-    private static final String WARN_FILE_PATH="/Users/cooper/Documents/oldImport.log";
+    private static final String WARN_FILE_PATH="/root/Documents/oldImport.log";
 
-    private static final String SQL_FILE_PATH="/Users/cooper/Documents/oldRecord.sql";
+    private static final String SQL_FILE_PATH="/root/Documents/oldRecord.sql";
 
 
 
@@ -175,7 +175,7 @@ public class MSDataBaseExport {
             String lastHouseID =null;
             String houseCode = null;
             while (hs.next()) {
-                BizOut biz = new BizOut(hs.getString(61).trim(),hs.getString(63));
+                BizOut biz = new BizOut(hs.getString(61).trim(),hs.getString(55));
                 begin.doit(biz,hs,out);
                 if(biz.houseStatus != null){
                     if (biz.isAddStatus){
@@ -211,7 +211,7 @@ public class MSDataBaseExport {
             }
 
 
-            System.out.println(sql);
+           // System.out.println(sql);
             sqlWriter.write(sql);
             sqlWriter.newLine();
             sqlWriter.flush();
@@ -629,6 +629,9 @@ public class MSDataBaseExport {
             if (selectKeyCode != null){
                 boolean find = false;
                 for(BizOut bb: befor){
+                    //System.out.println("1:" + bb);
+                    //System.out.println("2:" + bb.keyCode);
+                    //System.out.println("3:" + selectKeyCode);
                     if (bb.keyCode.equals(selectKeyCode)){
                         find = true;
                         break;
@@ -949,13 +952,13 @@ public class MSDataBaseExport {
                         if (Arrays.asList(OLD_CARD_BIN).contains(out.defineId)) {
                             if (rs.getString(25) != null &&  !"".equals(rs.getString(25).trim())) {
                                 out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(25)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + "); " +
-                                        " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
+                                        " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
                                 oldCardId = rs.getString(55) + "-t";
                             }
                         } else {
                             if (rs.getString(67) != null &&  !"".equals(rs.getString(67).trim())) {
                                 out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"), Q.pm(rs.getString(67)), Q.p( "MORTGAGE_CARD" ), Q.p(rs.getString(55)), "true") + "); " +
-                                        " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(cardId),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
+                                        " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(rs.getString(55) + "-t"),Q.p(rs.getString(71)) ,Q.p(rs.getString(69))) + ");";
                                 oldCardId = rs.getString(55) + "-t";
                             }
                         }
@@ -970,7 +973,7 @@ public class MSDataBaseExport {
                     }
 
                     out.out += "INSERT INTO MORTGAEGE_REGISTE(HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,TIME_AREA_TYPE,ID,BUSINESS_ID,FIN,OWNER,ORG_NAME) VALUES(" +
-                            Q.v(Q.pm(rs.getBigDecimal(87)),Q.p(rs.getString(34)),Q.p(rs.getString(26)),Q.pm(rs.getTimestamp(32)),Q.pm(rs.getTimestamp(33)),Q.pm(rs.getBigDecimal(54)),Q.p("DATE_TIME"),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p("明水县房产管理处")) + ");";
+                            Q.v(Q.pm(rs.getBigDecimal(87)),Q.p(rs.getString(34)),Q.p(rs.getString(26)),Q.pm(rs.getTimestamp(32)),Q.pm(rs.getTimestamp(33)),Q.pm(rs.getBigDecimal(54)),Q.p("DATE_TIME"),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p("明水县房产管理处")) + ");";
                 }
 
             }
@@ -992,11 +995,32 @@ public class MSDataBaseExport {
                 String cardId = null;
                 if (hs.getString(2) != null && !hs.getString(2).trim().equals("")){
 
-                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-" + i), Q.pm(hs.getString(2)), Q.p( "POOL_RSHIP" ), Q.p(rs.getString(55)), "true") + ") " +
+                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-" + i), Q.pm(hs.getString(2)), Q.p( "POOL_RSHIP" ), Q.p(rs.getString(55)), "true") + "); " +
                             " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(rs.getString(55) + "-" + i),Q.p(hs.getString(8)), Q.p(hs.getString(4)) ) + ");";
                 }
+
+                String relation = null;
+                String odata= hs.getString(6);
+                if (odata != null){
+                    if (odata.trim().equals("父子")){
+                        relation = "3852";
+                    }else if(odata.trim().equals("夫妻") || odata.trim().equals("夫妻关系")){
+                        relation = "215";
+                    }else if(odata.trim().equals("姐弟")){
+                        relation = "4410";
+                    }else if(odata.trim().equals("母女")){
+                        relation = "3850";
+                    }else if(odata.trim().equals("父女")){
+                        relation = "3853";
+                    }else if(odata.trim().equals("母子")){
+                        relation = "3851";
+                    }else if(odata.trim().equals("姐妹")){
+                        relation = "217";
+                    }
+                }
+
                 out.out += "INSERT INTO BUSINESS_POOL(ID,NAME,ID_TYPE,ID_NO,RELATION,PERC,CREATE_TIME,MEMO,BUSINESS,CARD) VALUES(" +
-                        Q.v(Q.p(rs.getString(55) + "-g-" + i),Q.pm(hs.getString(3)),Q.p(hs.getString("MASTER_ID")),Q.pm(hs.getString(7)),Q.p(hs.getString(5)),Q.p(rs.getTimestamp(95)),Q.p(hs.getString(4)),Q.p(rs.getString(55)),Q.p(cardId) ) + ");" +
+                        Q.v(Q.p(rs.getString(55) + "-g-" + i),Q.pm(hs.getString(3)),Q.p("MASTER_ID"),Q.pm(hs.getString(7)),Q.p(relation),Q.p(hs.getString(5)),Q.p(rs.getTimestamp(95)),Q.p(hs.getString(4)),Q.p(rs.getString(55)),Q.p(cardId) ) + ");" +
                         " INSERT INTO HOUSE_POOL(HOUSE,POOL) VALUES(" +
                         Q.v(Q.p(rs.getString(55)),Q.p(rs.getString(55) + "-g-" + i)) +");";
 

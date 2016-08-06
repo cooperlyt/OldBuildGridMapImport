@@ -78,7 +78,7 @@ public class MSDataBaseExport {
             }
 
             long curCount = 0;
-
+          //  genRecord("8-76z-252","7","252");
 
             while (hs.next()) {
                 long time = new java.util.Date().getTime();
@@ -891,6 +891,7 @@ public class MSDataBaseExport {
 
             // ----- start house
             String oOwnerID = null;
+
             if (rs.getString(3) != null && !rs.getString(3).trim().equals("")){
                 oOwnerID = rs.getString(55)  + "-s";
                 String cardId = null;
@@ -916,7 +917,6 @@ public class MSDataBaseExport {
             //----- after house
 
             oOwnerID = null;
-
             if(rs.getString(56) != null && !rs.getString(56).trim().equals("")){
                 String cardId = null;
                 if (rs.getString(68) != null && !rs.getString(68).trim().equals("")){
@@ -943,9 +943,11 @@ public class MSDataBaseExport {
                 out.out += "INSERT INTO BUSINESS_OWNER(ID,NAME,ID_TYPE,ID_NO,BUSINESS,OWNER_CARD,ROOT_ADDRESS) VALUES(" + Q.v(Q.p(rs.getString(55)), Q.pm(rs.getString(56)), Q.pm(CardType) ,
                         Q.pm(rs.getString(57)),Q.p(rs.getString(55)),Q.p(cardId),Q.p(rs.getString(37))) + ");";
 
-
+                oOwnerID = rs.getString(55);
                 //抵押业务
                 if (Arrays.asList(MO_BIZIDS).contains(out.defineId)){
+
+
 
                     String oldCardId = null;
 
@@ -964,16 +966,18 @@ public class MSDataBaseExport {
                         }
 
 
+
+
                     if (rs.getString(21) == null || rs.getString(21).trim().equals("")){
                         out.out += "INSERT INTO FINANCIAL(ID,NAME,CODE,FINANCIAL_TYPE,ID_TYPE,CREATE_TIME,CARD) VALUES(" +
-                                Q.v(Q.p(rs.getString(55)),Q.pm(rs.getString(21)),Q.pm(rs.getString(4)),Q.p("FINANCE_CORP"),Q.p("身份证".equals(rs.getString(5)) ? "MASTER_ID" : "OTHER"),Q.p(rs.getTimestamp(95)),Q.p(oldCardId)) + ");";
+                                Q.v(Q.p(rs.getString(55)),Q.pm("-"),Q.pm(rs.getString(4)),Q.p("FINANCE_CORP"),Q.p("身份证".equals(rs.getString(5)) ? "MASTER_ID" : "OTHER"),Q.p(rs.getTimestamp(95)),Q.p(oldCardId)) + ");";
                     }else {
                         out.out += "INSERT INTO FINANCIAL(ID,NAME,CODE,FINANCIAL_TYPE,ID_TYPE,CREATE_TIME,CARD) VALUES(" +
-                                Q.v(Q.p(rs.getString(55)),Q.pm("-"),Q.pm(rs.getString(4)),Q.p("FINANCE_CORP"),Q.p("身份证".equals(rs.getString(5)) ? "MASTER_ID" : "OTHER"),Q.p(rs.getTimestamp(95)),Q.p(oldCardId)) + ");";
+                                Q.v(Q.p(rs.getString(55)),Q.pm(rs.getString(21)),Q.pm(rs.getString(4)),Q.p("FINANCE_CORP"),Q.p("身份证".equals(rs.getString(5)) ? "MASTER_ID" : "OTHER"),Q.p(rs.getTimestamp(95)),Q.p(oldCardId)) + ");";
                     }
 
-                    out.out += "INSERT INTO MORTGAEGE_REGISTE(HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,TIME_AREA_TYPE,ID,BUSINESS_ID,FIN,OWNER,ORG_NAME) VALUES(" +
-                            Q.v(Q.pm(rs.getBigDecimal(87)),Q.p(rs.getString(34)),Q.p(rs.getString(26)),Q.pm(rs.getTimestamp(32)),Q.pm(rs.getTimestamp(33)),Q.pm(rs.getBigDecimal(54)),Q.p("DATE_TIME"),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p("明水县房产管理处")) + ");";
+                      out.out += "INSERT INTO MORTGAEGE_REGISTE(HIGHEST_MOUNT_MONEY,WARRANT_SCOPE,INTEREST_TYPE,MORTGAGE_DUE_TIME_S,MORTGAGE_TIME,MORTGAGE_AREA,TIME_AREA_TYPE,ID,BUSINESS_ID,FIN,OWNER,ORG_NAME) VALUES(" +
+                            Q.v(Q.pm(rs.getBigDecimal(87)),Q.p(rs.getString(34)),Q.pm(rs.getString(26)),Q.pm(rs.getTimestamp(32)),Q.pm(rs.getTimestamp(33)),Q.pm(rs.getBigDecimal(54)),Q.p("DATE_TIME"),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p("明水县房产管理处")) + ");";
                 }
 
             }

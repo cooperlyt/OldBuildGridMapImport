@@ -18,6 +18,7 @@ import java.util.List;
 public class MSDataBaseExport {
 
 
+
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.1.100:1433/fang_chan_dg";
 
 
@@ -32,6 +33,12 @@ public class MSDataBaseExport {
     private static BufferedWriter warnWriter;
 
     private static Connection conn;
+
+
+    private static final String AFTER_SQL="update HOUSE h LEFT JOIN BUSINESS_HOUSE bh on bh.START_HOUSE=h.ID left join OWNER_BUSINESS ob on ob.ID=bh.BUSINESS_ID left join HOUSE af on af.ID=bh.AFTER_HOUSE set h.MAIN_OWNER=af.MAIN_OWNER  where ob.ID is not null and ob.DEFINE_ID in ('WP9','WP10','WP12','WP13','WP14','WP15','WP17','WP18','WP19','WP21','WP1','WP2','WP4','WP5','WP6','WP8');" +
+            "UPDATE HOUSE h left JOIN BUSINESS_HOUSE bh on bh.AFTER_HOUSE = h.ID left join OWNER_BUSINESS ob on ob.ID=bh.BUSINESS_ID set h.NOITCE_OWNER = h.MAIN_OWNER where ob.ID is not null and ob.DEFINE_ID in ('WP44','WP45','WP103');" +
+            " update HOUSE h left JOIN BUSINESS_HOUSE bh on bh.AFTER_HOUSE = h.ID set h.NOITCE_OWNER=(select MAX(bo3.ID)  from  BUSINESS_HOUSE bh3 left join BUSINESS_OWNER bo3 on bo3.BUSINESS = bh3.BUSINESS_ID  where bh3.BUSINESS_ID=(select MAX(CAST(bh2.BUSINESS_ID AS INT)) from  BUSINESS_HOUSE  bh2 left join OWNER_BUSINESS ob2 on ob2.ID=bh2.BUSINESS_ID where bh2.HOUSE_CODE=bh.HOUSE_CODE and ob2.DEFINE_ID in ('WP44','WP45','WP103'))) where bh.ID is not null and (select count(*) from BUSINESS_HOUSE bh1 left join OWNER_BUSINESS ob1 on ob1.ID=bh1.BUSINESS_ID where bh1.HOUSE_CODE=h.HOUSE_CODE and ob1.DEFINE_ID in ('WP44','WP45','WP103')) > 0 ;" ;
+
 
     public static void main(String args[]) {
 
@@ -78,19 +85,22 @@ public class MSDataBaseExport {
             }
 
             long curCount = 0;
-          //  genRecord("8-76z-252","7","252");
+            genRecord("1-82z-232","6","232");
 
-            while (hs.next()) {
-                long time = new java.util.Date().getTime();
-                genRecord(hs.getString(1), hs.getString(2), hs.getString(3));
-                curCount++;
-                System.out.println(String.valueOf(count) + "/" + curCount + "    " + (hs.getString(1) + "-" + hs.getString(2) + "-" + hs.getString(3)) + "   " + (new java.util.Date().getTime() - time) + "ms" + "  " + (curCount / count * 100) + "%");
+//            while (hs.next()) {
+//                long time = new java.util.Date().getTime();
+//                genRecord(hs.getString(1), hs.getString(2), hs.getString(3));
+//                curCount++;
+//                System.out.println(String.valueOf(count) + "/" + curCount + "    " + (hs.getString(1) + "-" + hs.getString(2) + "-" + hs.getString(3)) + "   " + (new java.util.Date().getTime() - time) + "ms" + "  " + (curCount / count * 100) + "%");
+//
+//
+//
+//               // break;
+//            }
 
 
-
-               // break;
-            }
-
+            sqlWriter.write(AFTER_SQL);
+            sqlWriter.flush();
 
         } catch (Exception e) {
             System.err.println("Cannot connect to database server");
@@ -478,7 +488,7 @@ public class MSDataBaseExport {
 
             if (addStatus != null){
                 out.out += "INSERT INTO ADD_HOUSE_STATUS(ID,BUSINESS,STATUS,IS_REMOVE) VALUES("
-                        + Q.v(Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(addStatus),Q.p(isAdd)) +
+                        + Q.v(Q.p(rs.getString(55)),Q.p(rs.getString(55)),Q.p(addStatus),Q.p(!isAdd)) +
                         ");";
                 out.houseStatus = HouseStatus.valueOf(addStatus);
                 out.isAddStatus = isAdd;
@@ -998,8 +1008,8 @@ public class MSDataBaseExport {
             while (hs.next()){
                 String cardId = null;
                 if (hs.getString(2) != null && !hs.getString(2).trim().equals("")){
-
-                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(rs.getString(55) + "-" + i), Q.pm(hs.getString(2)), Q.p( "POOL_RSHIP" ), Q.p(rs.getString(55)), "true") + "); " +
+                    cardId = rs.getString(55) + "-" + i;
+                    out.out += "INSERT INTO MAKE_CARD(ID,NUMBER,TYPE,BUSINESS_ID,ENABLE) VALUES(" + Q.v(Q.p(cardId), Q.pm(hs.getString(2)), Q.p( "POOL_RSHIP" ), Q.p(rs.getString(55)), "true") + "); " +
                             " INSERT INTO CARD_INFO(ID,CODE,MEMO) VALUES(" + Q.v(Q.p(rs.getString(55) + "-" + i),Q.p(hs.getString(8)), Q.p(hs.getString(4)) ) + ");";
                 }
 

@@ -1,8 +1,10 @@
 package com.cooper.house;
 
+import javafx.scene.input.DataFormat;
+
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by cooper on 10/13/15.
@@ -124,6 +126,12 @@ public class Q {
             }
         }
         return result;
+
+    }
+    public static String nowFormatTime(){
+        Date createTime = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return simpleDateFormat.format(createTime);
 
     }
 

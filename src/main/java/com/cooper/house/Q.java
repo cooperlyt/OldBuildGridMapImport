@@ -116,6 +116,43 @@ public class Q {
             return "'OTHER'";
     }
 
+    public static String changeHouseType(int HouseType){
+
+        if( HouseType==206 ){
+            return "'206'";
+        }else if( HouseType==781){
+            return "'781'";
+        }else if( HouseType==782){
+            return "'782'";
+        }else if( HouseType==783){
+            return "'783'";
+        }else if(HouseType==1946) {
+            return "'1946'";
+        } else if(HouseType==2773){
+            return "'2773'";
+        }else
+            return "NULL";
+
+    }
+
+    public static String changeUseType(int UseType){
+
+        if( UseType==0){
+            return "'未知'";
+        }else
+            return "'"+String.valueOf(UseType)+"'";
+
+    }
+
+    public static String changeStructure(int Structure){
+
+        if( Structure==0){
+            return "'未知'";
+        }else
+            return "'"+String.valueOf(Structure)+"'";
+
+    }
+
     public static String v(String... values){
         String result = null;
         for(String value: values){

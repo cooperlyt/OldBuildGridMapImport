@@ -1,20 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="3823427819">
+  <component name="DataSourceManagerImpl" format="xml" hash="3692353005">
     <data-source source="LOCAL" name="SQL Server - shark@192.168.1.200" uuid="c001214f-bac5-4af2-99ce-346f114d0be0">
       <driver-ref>sqlserver.jtds</driver-ref>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:jtds:sqlserver://192.168.1.200:1433/shark</jdbc-url>
+      <libraries />
     </data-source>
     <data-source source="LOCAL" name="SQL Server - dghouseinfo@192.168.1.200" uuid="ae82a2a8-3dcf-40e5-9254-0e3436672eb5">
       <driver-ref>sqlserver.jtds</driver-ref>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:jtds:sqlserver://192.168.1.200:1433/dghouseinfo</jdbc-url>
+      <libraries />
     </data-source>
     <data-source source="LOCAL" name="SQL Server (jTds) - fang_chan_dg@192.168.199.231" uuid="c6208c03-b999-4fe3-be18-3617b347c59f">
       <driver-ref>sqlserver.jtds</driver-ref>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:jtds:sqlserver://192.168.199.231:1433/fang_chan_dg</jdbc-url>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="SQL Server - @192.168.0.200 [2]" uuid="82160a67-0b63-4f75-bb93-4ef8c2bc01f8">
+      <driver-ref>sqlserver.jtds</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:jtds:sqlserver://192.168.0.200:1433</jdbc-url>
+      <user-name>sa</user-name>
+      <user-password>dfcedfcddfd9dfc5dfccdfde</user-password>
+      <libraries />
+    </data-source>
+    <data-source source="LOCAL" name="MySQL - @localhost" uuid="449e7773-bc53-4323-b08a-30f9496911c7">
+      <driver-ref>mysql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3306</jdbc-url>
+      <user-name>root</user-name>
+      <user-password>dfcedfcddfd9dfc5dfccdfde</user-password>
+      <driver-properties>
+        <property name="zeroDateTimeBehavior" value="convertToNull" />
+        <property name="tinyInt1isBit" value="false" />
+      </driver-properties>
+      <libraries>
+        <library>
+          <url>file://D:/MySQL_DRIVE/mysql-connector-java-5.1.31-bin.jar</url>
+        </library>
+      </libraries>
     </data-source>
   </component>
 </project>
+

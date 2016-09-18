@@ -359,7 +359,7 @@ public class HouseInfo {
                 if(!EXCEPTION_BUILD_NO.contains(srt.getString("bno"))) {
                     if (!EXCEPTION_HOUSE_NO.contains(srt.getString("No"))) {
 
-                        sqlWriter.write("(" + Q.v(Q.p(srt.getString("No")), Q.p(srt.getString("bno")), Q.p(srt.getString("HouseOrder"))
+                        sqlWriter.write("(" + Q.v(Q.p(srt.getString("No")), Q.p("N"+srt.getString("bno")), Q.p(srt.getString("HouseOrder"))
                                 , Q.p(srt.getString("UnitName")), Q.pm(srt.getString("InFloorName")), Q.pm(srt.getBigDecimal("HouseArea"))
                                 , Q.p(srt.getBigDecimal("UseArea")), Q.p(srt.getBigDecimal("CommArea")), Q.p(srt.getBigDecimal("ShineArea"))
                                 , Q.p(srt.getBigDecimal("LoftArea")), Q.p(srt.getBigDecimal("CommParam"))

@@ -134,6 +134,37 @@ public class Q {
             return "NULL";
 
     }
+    public static String lockHouseDescription(int HouseState){
+
+        if( HouseState==99 ){
+            return "'在老系统中房屋状态为：查封'";
+        }else if( HouseState==116){
+            return "'在老系统中房屋状态为：房屋已注销(灭籍)'";
+        }else if( HouseState==115){
+            return "'在老系统中房屋状态为：声明作废'";
+        }else if( HouseState==119){
+            return "'在老系统中房屋状态为：异议'";
+        }else if(HouseState==890) {
+            return "'在老系统中房屋状态为：在建工程抵押'";
+        } else if(HouseState==117){
+            return "'在老系统中房屋状态为：房屋状态为抵押'";
+        }else if(HouseState==127) {
+            return "'在老系统中房屋状态为：房屋状态为不可售'";
+        }else
+            return "'未知'";
+
+    }
+
+    public static String defineName(String defineID){
+
+        if( defineID.equals("WP42") ){
+            return "'商品房合同备案登记'";
+        }else if( defineID.equals("WP43")){
+            return "'撤销商品房合同备案登记'";
+        }else
+            return "'未知'";
+
+    }
 
     public static String changeUseType(int UseType){
 

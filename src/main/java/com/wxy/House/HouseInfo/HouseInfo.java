@@ -21,6 +21,8 @@ public class HouseInfo {
 
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseInfo";
 
+    private static final String HOUSE_DB_URL = "jdbc:mysql://127.0.0.1:3306/HOUSE_INFO";
+
     private static Connection houseInfoConn;
 
     private static BufferedWriter sqlWriter;
@@ -32,6 +34,7 @@ public class HouseInfo {
     private static ResultSet resultSet;
 
     private static Set<String> EXCEPTION_BUILD_NO = new HashSet<>();
+
     private static Set<String> EXCEPTION_HOUSE_NO = new HashSet<>();
 
 
@@ -49,7 +52,7 @@ public class HouseInfo {
             file.createNewFile();
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             sqlWriter = new BufferedWriter(fw);
-            sqlWriter.write("use HOUSE_INFO;");
+            sqlWriter.write("USE HOUSE_INFO;");
             sqlWriter.newLine();
             sqlWriter.write("INSERT MAPPING_CORPORATION (ID, NAME, PYCODE, VERSION, ATTACH_ID, DESTROYED, CREATE_TIME) VALUES ('1','东港市测绘中心',null,0,null,false,'2016-09-07');");
             sqlWriter.flush();
@@ -389,9 +392,6 @@ public class HouseInfo {
 
 
     }
-
-
-
 
 
 

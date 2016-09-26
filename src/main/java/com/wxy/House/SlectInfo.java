@@ -66,10 +66,10 @@ public class SlectInfo {
 
         if (IDorNo!=null && !IDorNo.equals("")) {
             ResultSet hs = sD.executeQuery("select * from OwnerInfo where ID='" + IDorNo + "'");
-            System.out.println("select * from OwnerInfo where ID='" + IDorNo + "'");
+            //System.out.println("select * from OwnerInfo where ID='" + IDorNo + "'");
             hs.last();
             int rsCount = hs.getRow();
-            System.out.println("rsCount--"+rsCount);
+            //System.out.println("rsCount--"+rsCount);
             if (rsCount > 0) {
                 hs.first();
                 return hs;

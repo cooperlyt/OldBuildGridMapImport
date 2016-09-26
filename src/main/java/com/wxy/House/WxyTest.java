@@ -20,6 +20,8 @@ public class WxyTest {
 
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseInfo";
 
+    private static final String DB_RECORD_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseRecord";
+
     private static Connection conn;
 
     private static BufferedWriter sqlWriter;
@@ -52,10 +54,10 @@ public class WxyTest {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            conn = DriverManager.getConnection(DB_URL, "sa", "dgsoft");
+            conn = DriverManager.getConnection(DB_RECORD_URL, "sa", "dgsoft");
             System.out.println("Connection successful");
             Statement statement = conn.createStatement();
-            ResultSet districtRs = statement.executeQuery("SELECT * FROM District");
+            ResultSet districtRs = statement.executeQuery("SELECT * FROM HouseHistroy where NO='B292N1-1-01'");
 
 //            Date CreateTime = new Date();
 //            SimpleDateFormat sFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -63,13 +65,13 @@ public class WxyTest {
 
             sqlWriter.write("INSERT DISTRICT (ID, NAME, SHORT_NAME, VERSION, CREATE_TIME) VALUES " );
             while (districtRs.next()){
-                sqlWriter.write("("+Q.v(Q.p(districtRs.getString("No")),Q.p(districtRs.getString("Name")),Q.p("东"),Q.p("0"),Q.p(Q.nowFormatTime())));
-               if(districtRs.isLast()) {
-                   sqlWriter.write(");");
-               }else {
-                   sqlWriter.write("),");
-               }
-
+//                sqlWriter.write("("+Q.v(Q.p(districtRs.getString("No")),Q.p(districtRs.getString("Name")),Q.p("东"),Q.p("0"),Q.p(Q.nowFormatTime())));
+//               if(districtRs.isLast()) {
+//                   sqlWriter.write(");");
+//               }else {
+//                   sqlWriter.write("),");
+//               }
+                System.out.println(districtRs.getString("MappingDate"));
             }
 
 

@@ -134,6 +134,17 @@ public class Q {
             return "NULL";
 
     }
+
+    public static String changePayType(int HouseType){
+        if( HouseType==177 ){
+            return "'ALL_PAY'";
+        }else if( HouseType==178){
+            return "'DEBIT_PAY'";
+        }else if( HouseType==179){
+            return "'PART_PAY'";
+        }else
+            return "NULL";
+    }
     public static String lockHouseDescription(int HouseState){
 
         if( HouseState==99 ){

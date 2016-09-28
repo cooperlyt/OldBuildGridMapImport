@@ -217,7 +217,7 @@ public class HouseOwnerRecord {
                     " left join Developer as p on c.DeveloperID=p.id) as d"+
                     " left join Section as hs on d.sectionid=hs.id) as e"+
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='140076')");
+                    " where (e.bno='7319')");
 
 
             rstHouse.last();
@@ -233,9 +233,9 @@ public class HouseOwnerRecord {
 
 
 
-                    ResultSet rstRecortBa = statementRecord.executeQuery("select * from DGHouseRecord..Business as db left join " +
+                    ResultSet rstRecortBa = statementRecord.executeQuery("select db.id as dbid,* from DGHouseRecord..Business as db left join " +
                             "HouseHistroy as hh on db.id=hh.Business where nameid not like '%WP50' and  " +
-                            "nameid not like '%WP51' and  nameid not like '%WP85' and " +
+                            "workid not like '%WP51' and  workid not like '%WP85' and " +
                             "(workid like '%WP42' or workid like '%WP43' ) and hh.no= '"+rstHouse.getString("No")+"' order by botime");
 
                     rstRecortBa.last();
@@ -294,13 +294,13 @@ public class HouseOwnerRecord {
                                 String barIDorNO;
 
                                 if (DEFINE_ID.equals("WP42")) {//判断是备案人还是撤案人
-                                    if (rstRecortBa.getString("workid").contains("WP")) {//判断是否老库导入数据
+                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
                                         barIDorNO = SlectInfo.svs(statementRecordch, "record_people", rstRecortBa.getString("RecordBizNO"));
                                     } else {
                                         barIDorNO = rstRecortBa.getString("MainOwner");
                                     }
                                 }else {
-                                    if (rstRecortBa.getString("workid").contains("WP")) {//判断是否老库导入数据
+                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
                                         barIDorNO = SlectInfo.svs(statementRecordch, "re_record_people", rstRecortBa.getString("RecordBizNO"));
                                     } else {
                                         barIDorNO = rstRecortBa.getString("MainOwner");
@@ -356,7 +356,7 @@ public class HouseOwnerRecord {
                                             ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
                                             ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
                                             ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(rstRecortBa.getString("mappingDate")!="1899-12-30 00:00:00.0"?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
+                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
                                             ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
                                             ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
                                             ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
@@ -379,7 +379,6 @@ public class HouseOwnerRecord {
                                             "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
                                             "OLD_OWNER, NOITCE_OWNER) VALUES");
 
-
                                     sqlWriter.write("(" + Q.v(Q.p(lastBizid),Q.pm(rstRecortBa.getString("HouseOrder"))
                                             ,Q.pm(rstHouse.getString("UnitName")),Q.pm(rstHouse.getString("InFloorName"))
                                             ,Q.pm(rstHouse.getBigDecimal("HouseArea")),Q.pm(rstHouse.getBigDecimal("UseArea"))
@@ -387,7 +386,8 @@ public class HouseOwnerRecord {
                                             ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
                                             ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
                                             ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(rstRecortBa.getString("mappingDate")!="1899-12-30 00:00:00.0"?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
+                                            ,Q.pm(rstRecortBa.getString("HouseStation"))
+                                            ,Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
                                             ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
                                             ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
                                             ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
@@ -395,12 +395,11 @@ public class HouseOwnerRecord {
                                             ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                             ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
                                             ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                            ,Q.pm(rstHouse.getString("BuildName")),"Null","Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
+                                            ,Q.pm(rstHouse.getString("BuildName")),"Null",rstRecortBa.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")):"Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
                                     sqlWriter.newLine();
 
                                     //----HOUSE_REG_INFO
                                     sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
-
                                     sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("HousePorperty"))
                                             ,Q.pm(rstRecortBa.getString("HouseFrom"))+ ");"));
                                     sqlWriter.newLine();
@@ -408,7 +407,6 @@ public class HouseOwnerRecord {
                                     //---SALE_INFO
 
                                     sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
-
                                     sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.changePayType(rstRecortBa.getInt("PayType"))
                                             ,Q.pm(rstRecortBa.getBigDecimal("SumPrice")),Q.pm(rstRecortBa.getString("RecordBizNO"))+ ");"));
                                     sqlWriter.newLine();
@@ -416,10 +414,18 @@ public class HouseOwnerRecord {
 
                                     //--- BUSINESS_HOUSE
                                     sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED) VALUES ");
-
                                     sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("NO"))
                                             ,Q.pm(rstRecortBa.getString("RecordBizNO")),Q.p(stratBizid),Q.p(lastBizid),"True" + ");"));
                                     sqlWriter.newLine();
+
+                                    //=------ BUSINESS_POOL HOUSE_POOL
+                                    String dbid;
+                                    //if
+                                    //ResultSet poolResultSet = statementHousech.executeQuery("");
+
+
+
+
 
 
 
@@ -449,7 +455,7 @@ public class HouseOwnerRecord {
                                             ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
                                             ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
                                             ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(rstRecortBa.getString("mappingDate")!="1899-12-30 00:00:00.0"?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
+                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
                                             ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
                                             ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
                                             ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
@@ -457,7 +463,7 @@ public class HouseOwnerRecord {
                                             ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                             ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
                                             ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                            ,Q.pm(rstHouse.getString("BuildName")),"Null","Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
+                                            ,Q.pm(rstHouse.getString("BuildName")),"Null",rstRecortBa.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")):"Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
                                     sqlWriter.newLine();
 
 
@@ -535,7 +541,7 @@ public class HouseOwnerRecord {
                     }else{
                         rstRecortBa = statementRecord.executeQuery("select * from DGHouseRecord..Business as db left join " +
                                 "HouseHistroy as hh on db.id=hh.Business where nameid not like '%WP50' and  " +
-                                "nameid not like '%WP51' and  nameid not like '%WP85' and " +
+                                "workid not like '%WP51' and  workid not like '%WP85' and " +
                                 "(workid NOT like '%WP42' AND  workid NOT like '%WP43') and hh.no= '"+rstHouse.getString("No")+"' order by botime");
                         rstRecortBa.last();
                        int ybaCount = rstRecortBa.getRow();
@@ -585,7 +591,7 @@ public class HouseOwnerRecord {
                                     ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
                                     ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
                                     ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                    ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(rstRecortBa.getString("mappingDate")!="1899-12-30 00:00:00.0"?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
+                                    ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
                                     ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
                                     ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
                                     ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
@@ -616,7 +622,7 @@ public class HouseOwnerRecord {
                                     ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
                                     ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
                                     ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                    ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(rstRecortBa.getString("mappingDate")!="1899-12-30 00:00:00.0"?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
+                                    ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
                                     ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
                                     ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
                                     ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
@@ -624,7 +630,7 @@ public class HouseOwnerRecord {
                                     ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                     ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
                                     ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                    ,Q.pm(rstHouse.getString("BuildName")),"Null","Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
+                                    ,Q.pm(rstHouse.getString("BuildName")),"Null",rstRecortBa.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")):"Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
                             sqlWriter.newLine();
 
                             //----HOUSE_REG_INFO

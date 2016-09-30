@@ -145,6 +145,25 @@ public class Q {
         }else
             return "NULL";
     }
+
+
+    public static String changePoolMemo(int poolmemo){
+        if( poolmemo==218){
+            return "'TOGETHER_OWNER'";
+        }else if( poolmemo==219){
+            return "'SHARE_OWNER'";
+        }else if( poolmemo==221){
+            return "'SINGLE_OWNER'";
+        }else if (poolmemo==222){
+            return "'TOGETHER_OWNER'";
+        }else
+            return "NULL";
+    }
+
+
+
+
+
     public static String lockHouseDescription(int HouseState){
 
         if( HouseState==99 ){

@@ -26,9 +26,14 @@ public class HouseOwnerRecord {
 
     private static final String DB_HOUSE_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseInfo";
 
+    private static final String DB_SHARK_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/shark";
+
+
     private static Connection recordConnection;
 
     private static Connection houseConnection;
+
+    private static Connection sharkConnection;
 
     private static BufferedWriter sqlWriter;
 
@@ -48,6 +53,8 @@ public class HouseOwnerRecord {
     private static Statement statementHouse;
 
     private static Statement statementHousech;
+
+    private static Statement statementShark;
 
     private static ResultSet recordResultSet;
 
@@ -104,6 +111,18 @@ public class HouseOwnerRecord {
             recordConnection = DriverManager.getConnection(DB_RECORD_URL, "sa", "dgsoft");
             statementRecord = recordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementRecordch = recordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            System.out.println("recordConnection successful");
+        } catch (Exception e) {
+            System.out.println("recordConnection is errer");
+            e.printStackTrace();
+            return;
+        }
+
+
+        try {
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            sharkConnection = DriverManager.getConnection(DB_SHARK_URL, "sa", "dgsoft");
+            statementShark = sharkConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             System.out.println("recordConnection successful");
         } catch (Exception e) {
             System.out.println("recordConnection is errer");
@@ -245,301 +264,438 @@ public class HouseOwnerRecord {
                     rstRecortBa.beforeFirst();
                     String stratBizid,lastBizid = null;
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
-                    if (baCount>0) {//按房号循环，
-                        while (rstRecortBa.next()) {
+                    //按房号循环，
+                    if (baCount>0) while (rstRecortBa.next()) {
 
-                            System.out.println("RecordBizNO" + rstRecortBa.getString("RecordBizNO"));
+                        System.out.println("RecordBizNO" + rstRecortBa.getString("RecordBizNO"));
 
 
-                            if (!EXCEPTION_biz_NO.contains(rstRecortBa.getString("RecordBizNO"))) {
+                        if (!EXCEPTION_biz_NO.contains(rstRecortBa.getString("RecordBizNO"))) {
 
-                                String[] temp;
-                                if (rstRecortBa.getString("workid").contains("A")){
-                                    temp = rstRecortBa.getString("workid").split("_");
+                            String[] temp;
+                            if (rstRecortBa.getString("workid").contains("A")) {
+                                temp = rstRecortBa.getString("workid").split("_");
 
-                                }else {
-                                    temp = rstRecortBa.getString("workid").split("#");
+                            } else {
+                                temp = rstRecortBa.getString("workid").split("#");
+                            }
+                            DEFINE_ID = temp[temp.length - 1];
+                            selectbizid = null;
+                            if (DEFINE_ID.equals("WP42") || DEFINE_ID.equals("WP43")) {
+                                if (DEFINE_ID.equals("WP42")) {
+                                    bizid = rstRecortBa.getString("RecordBizNO");
                                 }
-                                DEFINE_ID = temp[temp.length - 1];
-                                selectbizid = null;
-                                if (DEFINE_ID.equals("WP42") || DEFINE_ID.equals("WP43")) {
-                                    if (DEFINE_ID.equals("WP42")) {
-                                        bizid = rstRecortBa.getString("RecordBizNO");
-                                    }
-                                    if (DEFINE_ID.equals("WP43")) {
-                                        if (rstRecortBa.getString("SelectBiz") == null) {
-                                            selectbizid = bizid;
+                                if (DEFINE_ID.equals("WP43")) {
+                                    if (rstRecortBa.getString("SelectBiz") == null) {
+                                        selectbizid = bizid;
+                                    } else {
+                                        ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortBa.getString("SelectBiz") + "'");
+                                        rstRecortbiz.next();
+                                        if (rstRecortbiz.getString("RecordBizNO") != null) {
+                                            selectbizid = rstRecortbiz.getString("RecordBizNO");
                                         } else {
-                                            ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortBa.getString("SelectBiz") + "'");
-                                            rstRecortbiz.next();
-                                            if (rstRecortbiz.getString("RecordBizNO") != null) {
-                                                selectbizid = rstRecortbiz.getString("RecordBizNO");
-                                            } else {
-                                                System.out.println("not find SelectBiz---" + rstRecortBa.getString("SelectBiz"));
-                                                haveHouseStateNotBizWriter.write("此SelectBiz没有找到对应的业务，为空--房屋编号"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO"));
-                                                haveHouseStateNotBizWriter.newLine();
-                                                haveHouseStateNotBizWriter.flush();
-                                            }
+                                            System.out.println("not find SelectBiz---" + rstRecortBa.getString("SelectBiz"));
+                                            haveHouseStateNotBizWriter.write("此SelectBiz没有找到对应的业务，为空--房屋编号" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO"));
+                                            haveHouseStateNotBizWriter.newLine();
+                                            haveHouseStateNotBizWriter.flush();
                                         }
                                     }
-                                    sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS, CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortBa.getString("MEMO"))
-                                            , "'COMPLETE'", Q.defineName(DEFINE_ID), Q.pm(DEFINE_ID), "0", Q.p(selectbizid), Q.p(rstRecortBa.getTimestamp("BOTime"))
-                                            , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
-                                    sqlWriter.newLine();
-
                                 }
-                                //==========备案人=============================
-
-                                String barIDorNO;
-
-                                if (DEFINE_ID.equals("WP42")) {//判断是备案人还是撤案人
-                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
-                                        barIDorNO = SlectInfo.svs(statementRecordch, "record_people", rstRecortBa.getString("RecordBizNO"));
-                                    } else {
-                                        barIDorNO = rstRecortBa.getString("MainOwner");
-                                    }
-                                }else {
-                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
-                                        barIDorNO = SlectInfo.svs(statementRecordch, "re_record_people", rstRecortBa.getString("RecordBizNO"));
-                                    } else {
-                                        barIDorNO = rstRecortBa.getString("MainOwner");
-                                    }
-
-                                }
-
-
-                                System.out.println("备案人---"+barIDorNO);
-                                ResultSet barResultSet = SlectInfo.bar(statementHousech,barIDorNO);
-                                if (barResultSet!=null){
-
-                                    sqlWriter.write("INSERT CONTRACT_OWNER (ID, CONTRACT_NUMBER, NAME, " +
-                                            "ID_TYPE, ID_NO, PHONE, ADDRESS, " +
-                                            "BUSINESS, CONTRACT_DATE, TYPE, HOUSE_CODE) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("CompactNO"))
-                                            ,Q.pm(barResultSet.getString("Name")),Q.pCardType(barResultSet.getInt("IDType")), Q.pm(barResultSet.getString("IDNO"))
-                                            ,Q.p(barResultSet.getString("Phone")),Q.p(barResultSet.getString("Address"))
-                                            ,Q.p(rstRecortBa.getString("RecordBizNO")), Q.p(rstRecortBa.getTimestamp("BOTime"))
-                                            ,"'MAP_SELL'",Q.p(rstRecortBa.getString("No"))  + ");"));
-                                    sqlWriter.newLine();
-
-                                }else{
-                                    haveHouseStateNotBizWriter.write("此业务没有查到备案人信息房屋编号--"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO"));
-                                    haveHouseStateNotBizWriter.newLine();
-                                    haveHouseStateNotBizWriter.flush();
-                                }
-
-                                //==========beforeHouse afterHouse=============================
-
-
-                                //stratBizid=rstRecortBa.getString("RecordBizNO");
-                                //==========beforeHouse
-                                if (isFirst){
-                                    stratBizid = rstRecortBa.getString("RecordBizNO")+"-s";
-                                    lastBizid =rstRecortBa.getString("RecordBizNO");
-
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
-                                            "OLD_OWNER, NOITCE_OWNER) VALUES");
-
-                                    sqlWriter.write("(" + Q.v(Q.p(stratBizid),Q.pm(rstRecortBa.getString("HouseOrder"))
-                                            ,Q.pm(rstHouse.getString("UnitName")),Q.pm(rstHouse.getString("InFloorName"))
-                                            ,Q.pm(rstHouse.getBigDecimal("HouseArea")),Q.pm(rstHouse.getBigDecimal("UseArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("CommParam")),Q.pm(rstHouse.getBigDecimal("ShineArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
-                                            ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
-                                            ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
-                                            ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
-                                            ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
-                                            ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
-                                            ,Q.p(rstHouse.getString("BuildType")),Q.pm("N"+rstHouse.getString("hpno")),Q.pm(rstHouse.getString("hpnmae"))
-                                            ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
-                                            ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
-                                            ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                            ,Q.pm(rstHouse.getString("BuildName")),"Null","Null","Null","Null","Null","Null","Null","Null"  + ");"));
-                                    sqlWriter.newLine();
-
-
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
-                                            "OLD_OWNER, NOITCE_OWNER) VALUES");
-
-                                    sqlWriter.write("(" + Q.v(Q.p(lastBizid),Q.pm(rstRecortBa.getString("HouseOrder"))
-                                            ,Q.pm(rstHouse.getString("UnitName")),Q.pm(rstHouse.getString("InFloorName"))
-                                            ,Q.pm(rstHouse.getBigDecimal("HouseArea")),Q.pm(rstHouse.getBigDecimal("UseArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("CommParam")),Q.pm(rstHouse.getBigDecimal("ShineArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
-                                            ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
-                                            ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation"))
-                                            ,Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
-                                            ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
-                                            ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
-                                            ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
-                                            ,Q.p(rstHouse.getString("BuildType")),Q.pm("N"+rstHouse.getString("hpno")),Q.pm(rstHouse.getString("hpnmae"))
-                                            ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
-                                            ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
-                                            ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                            ,Q.pm(rstHouse.getString("BuildName")),"Null",rstRecortBa.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")):"Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
-                                    sqlWriter.newLine();
-
-                                    //----HOUSE_REG_INFO
-                                    sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("HousePorperty"))
-                                            ,Q.pm(rstRecortBa.getString("HouseFrom"))+ ");"));
-                                    sqlWriter.newLine();
-
-                                    //---SALE_INFO
-
-                                    sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.changePayType(rstRecortBa.getInt("PayType"))
-                                            ,Q.pm(rstRecortBa.getBigDecimal("SumPrice")),Q.pm(rstRecortBa.getString("RecordBizNO"))+ ");"));
-                                    sqlWriter.newLine();
-
-
-                                    //--- BUSINESS_HOUSE
-                                    sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("NO"))
-                                            ,Q.pm(rstRecortBa.getString("RecordBizNO")),Q.p(stratBizid),Q.p(lastBizid),"True" + ");"));
-                                    sqlWriter.newLine();
-
-                                    //=------ BUSINESS_POOL HOUSE_POOL
-                                    String dbid;
-                                    //if
-                                    //ResultSet poolResultSet = statementHousech.executeQuery("");
-
-
-
-
-
-
-
-
-
-
-                                }else{
-                                    stratBizid = lastBizid;
-                                    lastBizid = rstRecortBa.getString("RecordBizNO");
-                                   // afterHouse=============================
-
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
-                                            "OLD_OWNER, NOITCE_OWNER) VALUES");
-
-                                    sqlWriter.write("(" + Q.v(Q.p(lastBizid),Q.pm(rstRecortBa.getString("HouseOrder"))
-                                            ,Q.pm(rstHouse.getString("UnitName")),Q.pm(rstHouse.getString("InFloorName"))
-                                            ,Q.pm(rstHouse.getBigDecimal("HouseArea")),Q.pm(rstHouse.getBigDecimal("UseArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("CommParam")),Q.pm(rstHouse.getBigDecimal("ShineArea"))
-                                            ,Q.pm(rstHouse.getBigDecimal("LoftArea")),Q.pm(rstHouse.getBigDecimal("CommArea"))
-                                            ,Q.changeHouseType(rstHouse.getInt("HouseType")),rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
-                                            ,rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
-                                            ,Q.pm(rstRecortBa.getString("HouseStation")),Q.pm(rstRecortBa.getString("mappingDate")!=null?(!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0")?rstRecortBa.getString("mappingDate"):rstRecortBa.getString("ChangeDate")):rstRecortBa.getString("ChangeDate"))
-                                            ,Q.pm(rstRecortBa.getString("No")),"False",Q.pm("N"+rstHouse.getString("bno")),Q.pm(rstHouse.getString("MapNo")),Q.pm(rstHouse.getString("BlockNo"))
-                                            ,Q.pm(rstHouse.getString("BuildNo")),Q.pm(rstRecortBa.getString("DoorNo")),rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
-                                            ,rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1","0"
-                                            ,Q.p(rstHouse.getString("BuildType")),Q.pm("N"+rstHouse.getString("hpno")),Q.pm(rstHouse.getString("hpnmae"))
-                                            ,rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
-                                            ,Q.pm("N"+rstHouse.getString("pno")),Q.pm(rstHouse.getString("pname")),Q.pm("N"+rstHouse.getString("hsno"))
-                                            ,Q.pm(rstHouse.getString("hsname")),Q.pm("N"+rstHouse.getString("hdno")),Q.pm(rstHouse.getString("hdname"))
-                                            ,Q.pm(rstHouse.getString("BuildName")),"Null",rstRecortBa.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")):"Null","Null","Null","Null",Q.p(rstRecortBa.getString("RecordBizNO")),"Null","Null"  + ");"));
-                                    sqlWriter.newLine();
-
-
-                                    //----HOUSE_REG_INFO
-                                    sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
-
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("HousePorperty"))
-                                            ,Q.pm(rstRecortBa.getString("HouseFrom"))+ ");"));
-                                    sqlWriter.newLine();
-
-
-                                    //---SALE_INFO
-
-                                    sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
-
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),rstRecortBa.getString("PayType")!=null?Q.changePayType(rstRecortBa.getInt("PayType")):"NULL"
-                                            ,Q.pm(rstRecortBa.getBigDecimal("SumPrice")),Q.pm(rstRecortBa.getString("RecordBizNO"))+ ");"));
-                                    sqlWriter.newLine();
-
-                                    //--- BUSINESS_HOUSE
-                                    sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED) VALUES ");
-
-                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(rstRecortBa.getString("NO"))
-                                            ,Q.pm(rstRecortBa.getString("RecordBizNO")),Q.p(stratBizid),Q.p(lastBizid),"True" + ");"));
-                                    sqlWriter.newLine();
-
-
-                                }
-                                //===ADD_HOUSE_STATUS
-                                boolean IS_REMOVE = true,HOUSE_STATUS = false;
-                                if (DEFINE_ID.equals("WP42")){
-                                    IS_REMOVE = false;
-                                    HOUSE_STATUS = true;
-                                }
-                                sqlWriter.write("INSERT ADD_HOUSE_STATUS (ID, BUSINESS, STATUS, IS_REMOVE) VALUES  ");
-
-                                sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")),Q.p(rstRecortBa.getString("RecordBizNO"))
-                                        ,Q.p("CONTRACTS_RECORD"),Q.p(IS_REMOVE) + ");"));
+                                sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS, CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortBa.getString("MEMO"))
+                                        , "'COMPLETE'", Q.defineName(DEFINE_ID), Q.pm(DEFINE_ID), "0", Q.p(selectbizid), Q.p(rstRecortBa.getTimestamp("BOTime"))
+                                        , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
                                 sqlWriter.newLine();
 
-                                //==== HOUSE_RECORD
-                                if (rstRecortBa.isLast() && HOUSE_STATUS){
+                            }
+                            //==========备案人=============================
 
-                                    sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS) VALUES ");
+                            String barIDorNO;
 
-                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("No")),Q.p(rstRecortBa.getString("RecordBizNO"))
-                                            ,Q.p("CONTRACTS_RECORD")+ ");"));
-                                    sqlWriter.newLine();
-
+                            if (DEFINE_ID.equals("WP42")) {//判断是备案人还是撤案人
+                                if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
+                                    barIDorNO = SlectInfo.svs(statementRecordch, "record_people", rstRecortBa.getString("RecordBizNO"));
+                                } else {
+                                    barIDorNO = rstRecortBa.getString("MainOwner");
                                 }
-                                //===== HOUSE_REG_INFO
+                            } else {
+                                if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否老库导入数据
+                                    barIDorNO = SlectInfo.svs(statementRecordch, "re_record_people", rstRecortBa.getString("RecordBizNO"));
+                                } else {
+                                    barIDorNO = rstRecortBa.getString("MainOwner");
+                                }
+
+                            }
 
 
+                            System.out.println("备案人---" + barIDorNO);
+                            ResultSet barResultSet = SlectInfo.bar(statementHousech, barIDorNO);
+                            if (barResultSet != null) {
 
+                                sqlWriter.write("INSERT CONTRACT_OWNER (ID, CONTRACT_NUMBER, NAME, " +
+                                        "ID_TYPE, ID_NO, PHONE, ADDRESS, " +
+                                        "BUSINESS, CONTRACT_DATE, TYPE, HOUSE_CODE) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.pm(rstRecortBa.getString("CompactNO"))
+                                        , Q.pm(barResultSet.getString("Name")), Q.pCardType(barResultSet.getInt("IDType")), Q.pm(barResultSet.getString("IDNO"))
+                                        , Q.p(barResultSet.getString("Phone")), Q.p(barResultSet.getString("Address"))
+                                        , Q.p(rstRecortBa.getString("RecordBizNO")), Q.p(rstRecortBa.getTimestamp("BOTime"))
+                                        , "'MAP_SELL'", Q.p(rstRecortBa.getString("No")) + ");"));
+                                sqlWriter.newLine();
 
-
-
-
-
-
-
-
-                                isFirst = false;
-                                EXCEPTION_biz_NO.add(rstRecortBa.getString("RecordBizNO"));
-                                sqlWriter.flush();
-                            }else{
-                                haveHouseStateNotBizWriter.write("此房屋编号有重复HouseHistroy房屋编号--"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO"));
+                            } else {
+                                haveHouseStateNotBizWriter.write("此业务没有查到备案人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO"));
                                 haveHouseStateNotBizWriter.newLine();
                                 haveHouseStateNotBizWriter.flush();
-                                System.out.println("此房屋编号有重复HouseHistroy房屋编号--"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO"));
                             }
+
+                            //==========beforeHouse afterHouse=============================
+
+
+                            //stratBizid=rstRecortBa.getString("RecordBizNO");
+                            //==========beforeHouse
+                            if (isFirst) {
+                                stratBizid = rstRecortBa.getString("RecordBizNO") + "-s";
+                                lastBizid = rstRecortBa.getString("RecordBizNO");
+
+                                sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                        "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                        "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                        "MAP_TIME,HOUSE_CODE, " +
+                                        "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                        "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                        "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                        " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                        "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
+                                        "OLD_OWNER, NOITCE_OWNER) VALUES");
+
+                                sqlWriter.write("(" + Q.v(Q.p(stratBizid), Q.pm(rstRecortBa.getString("HouseOrder"))
+                                        , Q.pm(rstHouse.getString("UnitName")), Q.pm(rstHouse.getString("InFloorName"))
+                                        , Q.pm(rstHouse.getBigDecimal("HouseArea")), Q.pm(rstHouse.getBigDecimal("UseArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("CommParam")), Q.pm(rstHouse.getBigDecimal("ShineArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("LoftArea")), Q.pm(rstHouse.getBigDecimal("CommArea"))
+                                        , Q.changeHouseType(rstHouse.getInt("HouseType")), rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                        , rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
+                                        , Q.pm(rstRecortBa.getString("HouseStation")), Q.pm(rstRecortBa.getString("mappingDate") != null ? (!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortBa.getString("mappingDate") : rstRecortBa.getString("ChangeDate")) : rstRecortBa.getString("ChangeDate"))
+                                        , Q.pm(rstRecortBa.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                        , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstRecortBa.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                        , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                        , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                        , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                        , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                        , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                        , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "Null", "Null", "Null" + ");"));
+                                sqlWriter.newLine();
+
+
+                                sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                        "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                        "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                        "MAP_TIME,HOUSE_CODE, " +
+                                        "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                        "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                        "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                        " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                        "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
+                                        "OLD_OWNER, NOITCE_OWNER) VALUES");
+
+                                sqlWriter.write("(" + Q.v(Q.p(lastBizid), Q.pm(rstRecortBa.getString("HouseOrder"))
+                                        , Q.pm(rstHouse.getString("UnitName")), Q.pm(rstHouse.getString("InFloorName"))
+                                        , Q.pm(rstHouse.getBigDecimal("HouseArea")), Q.pm(rstHouse.getBigDecimal("UseArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("CommParam")), Q.pm(rstHouse.getBigDecimal("ShineArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("LoftArea")), Q.pm(rstHouse.getBigDecimal("CommArea"))
+                                        , Q.changeHouseType(rstHouse.getInt("HouseType")), rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                        , rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
+                                        , Q.pm(rstRecortBa.getString("HouseStation"))
+                                        , Q.pm(rstRecortBa.getString("mappingDate") != null ? (!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortBa.getString("mappingDate") : rstRecortBa.getString("ChangeDate")) : rstRecortBa.getString("ChangeDate"))
+                                        , Q.pm(rstRecortBa.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                        , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstRecortBa.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                        , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                        , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                        , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                        , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                        , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                        , Q.pm(rstHouse.getString("BuildName")), "Null", rstRecortBa.getString("PoolMemo") != null ? Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")) : "Null", "Null", "Null", "Null", Q.p(rstRecortBa.getString("RecordBizNO")), "Null", "Null" + ");"));
+                                sqlWriter.newLine();
+
+                                //----HOUSE_REG_INFO
+                                sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.pm(rstRecortBa.getString("HousePorperty"))
+                                        , Q.pm(rstRecortBa.getString("HouseFrom")) + ");"));
+                                sqlWriter.newLine();
+
+                                //---SALE_INFO
+
+                                sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.changePayType(rstRecortBa.getInt("PayType"))
+                                        , Q.pm(rstRecortBa.getBigDecimal("SumPrice")), Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                sqlWriter.newLine();
+
+
+                                //--- BUSINESS_HOUSE
+                                sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.pm(rstRecortBa.getString("NO"))
+                                        , Q.pm(rstRecortBa.getString("RecordBizNO")), Q.p(stratBizid), Q.p(lastBizid), "True" + ");"));
+                                sqlWriter.newLine();
+
+                                //=------ BUSINESS_POOL HOUSE_POOL
+                                if (rstRecortBa.getString("Poolmemo") != null &&
+                                        !rstRecortBa.getString("Poolmemo").equals("")
+                                        && rstRecortBa.getInt("Poolmemo") != 0 && rstRecortBa.getInt("Poolmemo") != 221) {
+
+                                    String dbid;
+                                    ResultSet gyrResultSet = null;
+                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否倒库进来的
+                                        dbid = rstRecortBa.getString("dbid");
+                                    } else {
+                                        dbid = rstRecortBa.getString("RecordBizNO");
+                                    }
+                                    gyrResultSet = SlectInfo.gyr(statementHousech, dbid);
+                                    if (gyrResultSet != null) {//系统中houseCard和ownerinfo 有关联
+                                        int j = 0;
+                                        while (gyrResultSet.next()) {
+
+                                            sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                    "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                    Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                    Q.pm(gyrResultSet.getString("IDNO")),
+                                                    gyrResultSet.getString("RELATION") != null ? (gyrResultSet.getInt("RELATION") != 0 ? gyrResultSet.getString("RELATION") : "NULL") : "Null",
+                                                    Q.p(gyrResultSet.getBigDecimal("PoolArea")), Q.p(gyrResultSet.getString("Perc")),
+                                                    Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                    Q.pm(rstRecortBa.getString("Memo")),
+                                                    Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                            sqlWriter.newLine();
+                                            sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                    Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                            sqlWriter.newLine();
+                                            j++;
+                                        }
+                                    } else {//没有关联从工作流里取
+
+                                        gyrResultSet = SlectInfo.skgyr(statementShark, rstRecortBa.getString("Nameid"));
+                                        if (gyrResultSet != null) {
+                                            String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
+                                            int j=0;
+                                            for (String str : skgyqr.split(";")) {
+//                                                System.out.println(str.split(",")[0]);
+//                                                System.out.println(str.split(",")[2]);
+//                                                System.out.println(str.split(",")[3]);
+//                                                System.out.println(str.split(",")[4]);
+                                                gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
+                                                if (gyrResultSet!=null){
+                                                    sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                            "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                            Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                            Q.pm(gyrResultSet.getString("IDNO")),
+                                                            str.split(",")[3] != null ? (!str.split(",")[3].equals("0") ? str.split(",")[3] : "NULL") : "Null",
+                                                            Q.p(str.split(",")[2]), Q.p(str.split(",")[4]),
+                                                            Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                            Q.pm(rstRecortBa.getString("Memo")),
+                                                            Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                                    sqlWriter.newLine();
+                                                    sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                            Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                    sqlWriter.newLine();
+                                                }else{
+                                                    haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                    haveHouseStateNotBizWriter.newLine();
+                                                    haveHouseStateNotBizWriter.flush();
+                                                    System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                                }
+                                                j++;
+                                            }
+                                        } else {
+                                            haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                            haveHouseStateNotBizWriter.newLine();
+                                            haveHouseStateNotBizWriter.flush();
+                                            System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                        }
+                                    }
+                                }
+                            } else {
+                                stratBizid = lastBizid;
+                                lastBizid = rstRecortBa.getString("RecordBizNO");
+                                // afterHouse=============================
+
+                                sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                        "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                        "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                        "MAP_TIME,HOUSE_CODE, " +
+                                        "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                        "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                        "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                        " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                        "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, CONTRACT_OWNER, " +
+                                        "OLD_OWNER, NOITCE_OWNER) VALUES");
+
+                                sqlWriter.write("(" + Q.v(Q.p(lastBizid), Q.pm(rstRecortBa.getString("HouseOrder"))
+                                        , Q.pm(rstHouse.getString("UnitName")), Q.pm(rstHouse.getString("InFloorName"))
+                                        , Q.pm(rstHouse.getBigDecimal("HouseArea")), Q.pm(rstHouse.getBigDecimal("UseArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("CommParam")), Q.pm(rstHouse.getBigDecimal("ShineArea"))
+                                        , Q.pm(rstHouse.getBigDecimal("LoftArea")), Q.pm(rstHouse.getBigDecimal("CommArea"))
+                                        , Q.changeHouseType(rstHouse.getInt("HouseType")), rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                        , rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
+                                        , Q.pm(rstRecortBa.getString("HouseStation")), Q.pm(rstRecortBa.getString("mappingDate") != null ? (!rstRecortBa.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortBa.getString("mappingDate") : rstRecortBa.getString("ChangeDate")) : rstRecortBa.getString("ChangeDate"))
+                                        , Q.pm(rstRecortBa.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                        , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstRecortBa.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                        , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                        , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                        , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                        , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                        , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                        , Q.pm(rstHouse.getString("BuildName")), "Null", rstRecortBa.getString("PoolMemo") != null ? Q.changePoolMemo(rstRecortBa.getInt("PoolMemo")) : "Null", "Null", "Null", "Null", Q.p(rstRecortBa.getString("RecordBizNO")), "Null", "Null" + ");"));
+                                sqlWriter.newLine();
+
+
+                                //----HOUSE_REG_INFO
+                                sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
+
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.pm(rstRecortBa.getString("HousePorperty"))
+                                        , Q.pm(rstRecortBa.getString("HouseFrom")) + ");"));
+                                sqlWriter.newLine();
+
+
+                                //---SALE_INFO
+
+                                sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
+
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), rstRecortBa.getString("PayType") != null ? Q.changePayType(rstRecortBa.getInt("PayType")) : "NULL"
+                                        , Q.pm(rstRecortBa.getBigDecimal("SumPrice")), Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                sqlWriter.newLine();
+
+                                //--- BUSINESS_HOUSE
+                                sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED) VALUES ");
+
+                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")), Q.pm(rstRecortBa.getString("NO"))
+                                        , Q.pm(rstRecortBa.getString("RecordBizNO")), Q.p(stratBizid), Q.p(lastBizid), "True" + ");"));
+                                sqlWriter.newLine();
+
+                                //=------ BUSINESS_POOL HOUSE_POOL
+                                if (rstRecortBa.getString("Poolmemo") != null &&
+                                        !rstRecortBa.getString("Poolmemo").equals("")
+                                        && rstRecortBa.getInt("Poolmemo") != 0 && rstRecortBa.getInt("Poolmemo") != 221) {
+
+                                    String dbid;
+                                    ResultSet gyrResultSet = null;
+                                    if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否倒库进来的
+                                        dbid = rstRecortBa.getString("dbid");
+                                    } else {
+                                        dbid = rstRecortBa.getString("RecordBizNO");
+                                    }
+                                    gyrResultSet = SlectInfo.gyr(statementHousech, dbid);
+                                    if (gyrResultSet != null) {//系统中houseCard和ownerinfo 有关联
+                                        int j = 0;
+                                        while (gyrResultSet.next()) {
+
+                                            sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                    "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                    Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                    Q.pm(gyrResultSet.getString("IDNO")),
+                                                    gyrResultSet.getString("RELATION") != null ? (gyrResultSet.getInt("RELATION") != 0 ? gyrResultSet.getString("RELATION") : "NULL") : "Null",
+                                                    Q.p(gyrResultSet.getBigDecimal("PoolArea")), Q.p(gyrResultSet.getString("Perc")),
+                                                    Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                    Q.pm(rstRecortBa.getString("Memo")),
+                                                    Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                            sqlWriter.newLine();
+                                            sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                    Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                            sqlWriter.newLine();
+                                            j++;
+                                        }
+                                    } else {//没有关联从工作流里取
+
+                                        gyrResultSet = SlectInfo.skgyr(statementShark, rstRecortBa.getString("Nameid"));
+                                        if (gyrResultSet != null) {
+                                            String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
+                                            int j=0;
+                                            for (String str : skgyqr.split(";")) {
+//                                                System.out.println(str.split(",")[0]);
+//                                                System.out.println(str.split(",")[2]);
+//                                                System.out.println(str.split(",")[3]);
+//                                                System.out.println(str.split(",")[4]);
+                                                gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
+                                                if (gyrResultSet!=null){
+                                                    sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                            "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                            Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                            Q.pm(gyrResultSet.getString("IDNO")),
+                                                            str.split(",")[3] != null ? (!str.split(",")[3].equals("0") ? str.split(",")[3] : "NULL") : "Null",
+                                                            Q.p(str.split(",")[2]), Q.p(str.split(",")[4]),
+                                                            Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                            Q.pm(rstRecortBa.getString("Memo")),
+                                                            Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                                    sqlWriter.newLine();
+                                                    sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                            Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                    sqlWriter.newLine();
+                                                }else{
+                                                    haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                    haveHouseStateNotBizWriter.newLine();
+                                                    haveHouseStateNotBizWriter.flush();
+                                                    System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                                }
+                                                j++;
+                                            }
+                                        } else {
+                                            haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                            haveHouseStateNotBizWriter.newLine();
+                                            haveHouseStateNotBizWriter.flush();
+                                            System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                        }
+                                    }
+                                }
+
+
+                            }
+                            //===ADD_HOUSE_STATUS
+                            boolean IS_REMOVE = true, HOUSE_STATUS = false;
+                            if (DEFINE_ID.equals("WP42")) {
+                                IS_REMOVE = false;
+                                HOUSE_STATUS = true;
+                            }
+                            sqlWriter.write("INSERT ADD_HOUSE_STATUS (ID, BUSINESS, STATUS, IS_REMOVE) VALUES  ");
+
+                            sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), Q.p(rstRecortBa.getString("RecordBizNO"))
+                                    , Q.p("CONTRACTS_RECORD"), Q.p(IS_REMOVE) + ");"));
+                            sqlWriter.newLine();
+
+                            //==== HOUSE_RECORD
+                            if (rstRecortBa.isLast() && HOUSE_STATUS) {
+
+                                sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS) VALUES ");
+
+                                sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("No")), Q.p(rstRecortBa.getString("RecordBizNO"))
+                                        , Q.p("CONTRACTS_RECORD") + ");"));
+                                sqlWriter.newLine();
+
+                            }
+
+                            System.out.println(rstRecortBa.getString(""));
+
+
+                            isFirst = false;
+                            EXCEPTION_biz_NO.add(rstRecortBa.getString("RecordBizNO"));
+                            sqlWriter.flush();
+                        } else {
+                            haveHouseStateNotBizWriter.write("此房屋编号有重复HouseHistroy房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                            haveHouseStateNotBizWriter.newLine();
+                            haveHouseStateNotBizWriter.flush();
+                            System.out.println("此房屋编号有重复HouseHistroy房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
                         }
-
-
-                    }else{
-                        rstRecortBa = statementRecord.executeQuery("select * from DGHouseRecord..Business as db left join " +
+                    }
+                    else{
+                        rstRecortBa = statementRecord.executeQuery("select db.id as dbid,* from DGHouseRecord..Business as db left join " +
                                 "HouseHistroy as hh on db.id=hh.Business where nameid not like '%WP50' and  " +
                                 "workid not like '%WP51' and  workid not like '%WP85' and " +
                                 "(workid NOT like '%WP42' AND  workid NOT like '%WP43') and hh.no= '"+rstHouse.getString("No")+"' order by botime");
@@ -667,6 +823,88 @@ public class HouseOwnerRecord {
                             sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS) VALUES ");
                             sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("No")),Q.p(rstRecortBa.getString("RecordBizNO")),Q.p("CONTRACTS_RECORD")+ ");"));
                             sqlWriter.newLine();
+
+
+                            //=------ BUSINESS_POOL HOUSE_POOL
+                            if (rstRecortBa.getString("Poolmemo") != null &&
+                                    !rstRecortBa.getString("Poolmemo").equals("")
+                                    && rstRecortBa.getInt("Poolmemo") != 0 && rstRecortBa.getInt("Poolmemo") != 221) {
+
+                                String dbid;
+                                ResultSet gyrResultSet = null;
+                                if (rstRecortBa.getString("nameid").contains("WP")) {//判断是否倒库进来的
+                                    dbid = rstRecortBa.getString("dbid");
+                                } else {
+                                    dbid = rstRecortBa.getString("RecordBizNO");
+                                }
+                                gyrResultSet = SlectInfo.gyr(statementHousech, dbid);
+                                if (gyrResultSet != null) {//系统中houseCard和ownerinfo 有关联
+                                    int j = 0;
+                                    while (gyrResultSet.next()) {
+
+                                        sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                Q.pm(gyrResultSet.getString("IDNO")),
+                                                gyrResultSet.getString("RELATION") != null ? (gyrResultSet.getInt("RELATION") != 0 ? gyrResultSet.getString("RELATION") : "NULL") : "Null",
+                                                Q.p(gyrResultSet.getBigDecimal("PoolArea")), Q.p(gyrResultSet.getString("Perc")),
+                                                Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                Q.pm(rstRecortBa.getString("Memo")),
+                                                Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                        sqlWriter.newLine();
+                                        sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                        sqlWriter.newLine();
+                                        j++;
+                                    }
+                                } else {//没有关联从工作流里取
+
+                                    gyrResultSet = SlectInfo.skgyr(statementShark, rstRecortBa.getString("Nameid"));
+                                    if (gyrResultSet != null) {
+                                        String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
+                                        int j=0;
+                                        for (String str : skgyqr.split(";")) {
+//                                                System.out.println(str.split(",")[0]);
+//                                                System.out.println(str.split(",")[2]);
+//                                                System.out.println(str.split(",")[3]);
+//                                                System.out.println(str.split(",")[4]);
+                                            gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
+                                            if (gyrResultSet!=null){
+                                                sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
+                                                        "PHONE, CREATE_TIME, MEMO,BUSINESS) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                        Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                        Q.pm(gyrResultSet.getString("IDNO")),
+                                                        str.split(",")[3] != null ? (!str.split(",")[3].equals("0") ? str.split(",")[3] : "NULL") : "Null",
+                                                        Q.p(str.split(",")[2]), Q.p(str.split(",")[4]),
+                                                        Q.p(gyrResultSet.getString("phone")), Q.pm(rstRecortBa.getString("Botime")),
+                                                        Q.pm(rstRecortBa.getString("Memo")),
+                                                        Q.pm(rstRecortBa.getString("RecordBizNO")) + ");"));
+                                                sqlWriter.newLine();
+                                                sqlWriter.write("INSERT HOUSE_POOL (HOUSE, POOL) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortBa.getString("RecordBizNO")),
+                                                        Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                sqlWriter.newLine();
+                                            }else{
+                                                haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                haveHouseStateNotBizWriter.newLine();
+                                                haveHouseStateNotBizWriter.flush();
+                                                System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                            }
+                                            j++;
+                                        }
+                                    } else {
+                                        haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                        haveHouseStateNotBizWriter.newLine();
+                                        haveHouseStateNotBizWriter.flush();
+                                        System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+
+                                    }
+                                }
+                            }
 
 
 

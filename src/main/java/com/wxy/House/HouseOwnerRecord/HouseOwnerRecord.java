@@ -18,7 +18,13 @@ import java.util.Set;
  */
 public class HouseOwnerRecord {
 
+    private static final String BEGIN_DATE = "1990-01-01";
+
     private static final String OUT_PATH_FILE = "/houseOwnerRecord.sql";
+
+    private static final String OUT_PATH_PROJECTFILE = "/houseProjectRecord.sql";
+
+    private static final String OUT_PATH_PROJECTFILE_ERRER = "/houseProjectRecord_errer.sql";
 
     private static final String OUT_PATH_HAVEHOUSESTATENOTBIZ_FILE = "/haveHouseStateNotBiz.sql";
 
@@ -37,12 +43,17 @@ public class HouseOwnerRecord {
 
     private static BufferedWriter sqlWriter;
 
+    private static BufferedWriter sqlPWriter;
+
     private static BufferedWriter haveHouseStateNotBizWriter;
 
     private static File recordFile;
 
     private static File haveHouseStateNotBizFile;
 
+    private static File recordProjectFile;
+
+    private static File recordProjectFileErrer;
 
     private static Statement statementRecord;
 
@@ -73,6 +84,8 @@ public class HouseOwnerRecord {
 
     private static String DEFINE_ID;
 
+    private static String DEFINE_NAME;
+
     private static String bizid;
 
     private static String selectbizid;
@@ -88,6 +101,16 @@ public class HouseOwnerRecord {
             haveHouseStateNotBizFile.delete();
         }
 
+        recordProjectFile = new File(OUT_PATH_PROJECTFILE);
+        if (recordProjectFile.exists()){
+            recordProjectFile.delete();
+        }
+
+        recordProjectFileErrer = new File(OUT_PATH_PROJECTFILE_ERRER);
+        if(recordProjectFileErrer.exists()){
+            recordProjectFileErrer.delete();
+        }
+
         try {
             recordFile.createNewFile();
             FileWriter fw = new FileWriter(recordFile.getAbsoluteFile());
@@ -101,6 +124,19 @@ public class HouseOwnerRecord {
             sqlWriter.flush();
         } catch (IOException e) {
             System.out.println("sql 文件创建失败");
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            recordProjectFile.createNewFile();
+            FileWriter pfw = new FileWriter(recordProjectFile.getAbsoluteFile());
+            sqlPWriter = new BufferedWriter(pfw);
+            sqlPWriter.write("USE HOUSE_OWNER_RECORD;");
+            sqlPWriter.newLine();
+            sqlPWriter.flush();
+        } catch (IOException e) {
+            System.out.println("psql 文件创建失败");
             e.printStackTrace();
             return;
         }
@@ -236,7 +272,7 @@ public class HouseOwnerRecord {
                     " left join Developer as p on c.DeveloperID=p.id) as d"+
                     " left join Section as hs on d.sectionid=hs.id) as e"+
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.bno='7319')");
+                    " where (e.no='12119')");
 
 
             rstHouse.last();
@@ -255,7 +291,7 @@ public class HouseOwnerRecord {
                     ResultSet rstRecortBa = statementRecord.executeQuery("select db.id as dbid,* from DGHouseRecord..Business as db left join " +
                             "HouseHistroy as hh on db.id=hh.Business where nameid not like '%WP50' and  " +
                             "workid not like '%WP51' and  workid not like '%WP85' and " +
-                            "(workid like '%WP42' or workid like '%WP43' ) and hh.no= '"+rstHouse.getString("No")+"' order by botime");
+                            "(workid like '%WP42' or workid like '%WP43' ) and hh.no= '"+rstHouse.getString("No")+"' and db.b>='"+BEGIN_DATE+"' order by botime");
 
                     rstRecortBa.last();
                     int baCount = rstRecortBa.getRow();
@@ -301,10 +337,11 @@ public class HouseOwnerRecord {
                                         }
                                     }
                                 }
-                                sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS, CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
+                                sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
+                                        " CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
                                 sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortBa.getString("MEMO"))
                                         , "'COMPLETE'", Q.defineName(DEFINE_ID), Q.pm(DEFINE_ID), "0", Q.p(selectbizid), Q.p(rstRecortBa.getTimestamp("BOTime"))
-                                        , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
+                                        , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
                                 sqlWriter.newLine();
 
                             }
@@ -680,8 +717,59 @@ public class HouseOwnerRecord {
                                 sqlWriter.newLine();
 
                             }
+                            //BUSINESS_EMP
 
-                            System.out.println(rstRecortBa.getString(""));
+                            ResultSet empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
+                                    " FROM shark..SHKActivities as a left join shark..DGEmployee as de " +
+                                    "on a.resourceid =de.no where ProcessId ='"+rstRecortBa.getString("Nameid") +"' and (a.name='受理' or a.name='复审' or a.name='审批' or a.name='归档')");
+                            empResultSet.last();
+                            int sl = empResultSet.getRow();
+                            String res;
+                            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            if (sl>0){
+                                empResultSet.beforeFirst();;
+                                while (empResultSet.next()){
+                                    long lt = new Long(empResultSet.getLong("LastStateTime"));
+                                    Date date = new Date(lt);
+                                    res = simpleDateFormat1.format(date);
+                                    sqlWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, EMP_NAME, BUSINESS_ID, OPER_TIME) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                            Q.changeBusinessEmpType(empResultSet.getString("jdname")),
+                                            Q.pm(empResultSet.getString("resourceid")),
+                                            Q.pm(empResultSet.getString("dename")),Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(res)
+                                                    + ");"));
+                                    sqlWriter.newLine();
+                                    if (empResultSet.getString("jdname").equals("受理")){
+                                       sqlWriter.write("UPDATE OWNER_BUSINESS SET CREATE_TIME='"+res+"',APPLY_TIME='"+res+"' WHERE ID='"+rstRecortBa.getString("RecordBizNO")+"';");
+                                       sqlWriter.newLine();
+                                    }
+
+                                    if (empResultSet.getString("jdname").equals("复审")){
+                                        sqlWriter.write("UPDATE OWNER_BUSINESS SET CHECK_TIME='"+res+"' WHERE ID='"+rstRecortBa.getString("RecordBizNO")+"';");
+                                        sqlWriter.newLine();
+                                    }
+
+                                }
+
+                            }
+                            //BUSINESS_FILE
+                            ResultSet fileResulset = statementShark.executeQuery("select * from DGBizDoc where BizID='"+rstRecortBa.getString("nameid")+"'");
+                            fileResulset.last();
+                            int feilesl=fileResulset.getRow();
+                            if (feilesl>0){
+                                fileResulset.beforeFirst();
+                                while (fileResulset.next()){
+                                    sqlWriter.write("INSERT BUSINESS_FILE(ID, BUSINESS_ID, NAME, IMPORTANT_CODE, NO_FILE, IMPORTANT, PRIORITY) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.p("N"+rstRecortBa.getString("RecordBizNO")+"-"+fileResulset.getRow()),
+                                            Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(fileResulset.getString("DocType")),
+                                            "'未知'","True","False",Q.pm(String.valueOf(fileResulset.getRow()))+ ");"));
+                                    sqlWriter.newLine();
+                                }
+
+                            }
+
+
+
 
 
                             isFirst = false;
@@ -693,19 +781,20 @@ public class HouseOwnerRecord {
                             haveHouseStateNotBizWriter.flush();
                             System.out.println("此房屋编号有重复HouseHistroy房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
                         }
-                    }
-                    else{
+                    }else{
                         rstRecortBa = statementRecord.executeQuery("select db.id as dbid,* from DGHouseRecord..Business as db left join " +
                                 "HouseHistroy as hh on db.id=hh.Business where nameid not like '%WP50' and  " +
                                 "workid not like '%WP51' and  workid not like '%WP85' and " +
-                                "(workid NOT like '%WP42' AND  workid NOT like '%WP43') and hh.no= '"+rstHouse.getString("No")+"' order by botime");
+                                "(workid NOT like '%WP42' AND  workid NOT like '%WP43') and hh.no= '"+rstHouse.getString("No")+"' and db.b>='"+BEGIN_DATE+"' order by botime");
+
                         rstRecortBa.last();
-                       int ybaCount = rstRecortBa.getRow();
+                        int ybaCount = rstRecortBa.getRow();
                         if (ybaCount>0){
-                            sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS, CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
+                            sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS, " +
+                                    "CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
                             sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortBa.getString("MEMO"))
                                     , "'COMPLETE'","'已备案'", "'WPYBA'", "0", "Null", Q.p(rstRecortBa.getTimestamp("BOTime"))
-                                    , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'")+");");
+                                    , Q.p(rstRecortBa.getTimestamp("BOTime")), "Null", Q.p(rstRecortBa.getTimestamp("BOTime")), Q.p(rstRecortBa.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'")+");");
                             sqlWriter.newLine();
 
 
@@ -905,7 +994,56 @@ public class HouseOwnerRecord {
                                     }
                                 }
                             }
+                            //BUSINESS_EMP======
+                            ResultSet empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
+                                    " FROM shark..SHKActivities as a left join shark..DGEmployee as de " +
+                                    "on a.resourceid =de.no where ProcessId ='"+rstRecortBa.getString("Nameid") +"' and (a.name='受理' or a.name='复审' or a.name='审批' or a.name='归档')");
+                            empResultSet.last();
+                            int sl = empResultSet.getRow();
+                            String res;
+                            SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            if (sl>0){
+                                empResultSet.beforeFirst();;
+                                while (empResultSet.next()){
+                                    long lt = new Long(empResultSet.getLong("LastStateTime"));
+                                    Date date = new Date(lt);
+                                    res = simpleDateFormat1.format(date);
+                                    sqlWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, EMP_NAME, BUSINESS_ID, OPER_TIME) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                            Q.changeBusinessEmpType(empResultSet.getString("jdname")),
+                                            Q.pm(empResultSet.getString("resourceid")),
+                                            Q.pm(empResultSet.getString("dename")),Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(res)
+                                                    + ");"));
+                                    sqlWriter.newLine();
+                                    if (empResultSet.getString("jdname").equals("受理")){
+                                        sqlWriter.write("UPDATE OWNER_BUSINESS set CREATE_TIME='"+res+"',APPLY_TIME='"+res+"' WHERE ID='"+rstRecortBa.getString("RecordBizNO")+"';");
+                                        sqlWriter.newLine();
+                                    }
 
+                                    if (empResultSet.getString("jdname").equals("复审")){
+                                        sqlWriter.write("UPDATE OWNER_BUSINESS set CHECK_TIME='"+res+"' WHERE ID='"+rstRecortBa.getString("RecordBizNO")+"';");
+                                        sqlWriter.newLine();
+                                    }
+
+                                }
+
+                            }
+
+                            //BUSINESS_FILE
+                            ResultSet fileResulset = statementShark.executeQuery("select * from DGBizDoc where BizID='"+rstRecortBa.getString("nameid")+"'");
+                            fileResulset.last();
+                            int feilesl=fileResulset.getRow();
+                            if (feilesl>0){
+                                fileResulset.beforeFirst();
+                                while (fileResulset.next()){
+                                    sqlWriter.write("INSERT BUSINESS_FILE(ID, BUSINESS_ID, NAME, IMPORTANT_CODE, NO_FILE, IMPORTANT, PRIORITY) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.p("N"+rstRecortBa.getString("RecordBizNO")+"-"+fileResulset.getRow()),
+                                            Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(fileResulset.getString("DocType")),
+                                            "'未知'","True","False",Q.pm(String.valueOf(fileResulset.getRow()))+ ");"));
+                                    sqlWriter.newLine();
+                                }
+
+                            }
 
 
 
@@ -941,6 +1079,102 @@ public class HouseOwnerRecord {
             System.out.println("record is complate");
         } catch (Exception e) {
             System.out.println("record is errer");
+            e.printStackTrace();
+            return;
+        }
+
+        //预售许可证信息
+        try {
+            ResultSet rstRecortProject = statementRecord.executeQuery("select * from DGHouseRecord..Business as db where " +
+                    "(nameid like '%WP50' or  nameid like '%WP51') " +
+                    //"and db.b>='"+BEGIN_DATE+"' and RecordBizNO='20111213174' order by botime");
+                    "and db.b>='"+BEGIN_DATE+"' order by botime");
+            rstRecortProject.last();
+            int pjCount=rstRecortProject.getRow(),pi=1;
+
+            System.out.println(pjCount);
+            if (pjCount>0){
+                rstRecortProject.beforeFirst();
+                while (rstRecortProject.next()){
+                    String[] temp;
+                    temp = rstRecortProject.getString("Nameid").split("_");
+                    DEFINE_ID = temp[temp.length - 1];
+                    DEFINE_NAME ="商品房预售（销售）许可证";
+                    String selectBiz=null;
+                    if (DEFINE_ID.equals("WP51")){
+                        ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortProject.getString("selectbiz") + "'");
+                        rstRecortbiz.last();
+                        int pjSelectCount = rstRecortbiz.getRow();
+                        if (pjSelectCount>0){
+                            selectBiz = rstRecortbiz.getString("RecordBizNO");
+                        }
+                    }
+                   //OWNER_BUSINESS======
+                    sqlPWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
+                            " CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
+                    sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortProject.getString("MEMO"))
+                            , "'COMPLETE'", Q.p(DEFINE_NAME), Q.p("WP50"), "0", Q.p(selectBiz), Q.p(rstRecortProject.getTimestamp("BOTime"))
+                            , Q.p(rstRecortProject.getTimestamp("BOTime")), "Null", Q.p(rstRecortProject.getTimestamp("BOTime")), Q.p(rstRecortProject.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
+                    sqlPWriter.newLine();
+
+                    if (selectBiz!=null){
+                        sqlPWriter.write("UPDATE OWNER_BUSINESS SET STATUS='COMPLETE_CANCEL' WHERE ID='"+selectBiz+"';");
+                        sqlPWriter.newLine();
+                    }
+
+                    //BUSINESS_EMP======
+                    ResultSet empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
+                            " FROM shark..SHKActivities as a left join shark..DGEmployee as de " +
+                            "on a.resourceid =de.no where ProcessId ='"+rstRecortProject.getString("Nameid") +"' and (a.name='受理' or a.name='复审' or a.name='审批' or a.name='归档')");
+
+
+                    empResultSet.last();
+                    int sl = empResultSet.getRow();
+                    String res;
+                    SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    if (sl>0){
+                        empResultSet.beforeFirst();;
+                        while (empResultSet.next()){
+                            long lt = new Long(empResultSet.getLong("LastStateTime"));
+                            Date date = new Date(lt);
+                            res = simpleDateFormat1.format(date);
+                            sqlPWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, EMP_NAME, BUSINESS_ID, OPER_TIME) VALUES ");
+                            sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                    Q.changeBusinessEmpType(empResultSet.getString("jdname")),
+                                    Q.pm(empResultSet.getString("resourceid")),
+                                    Q.pm(empResultSet.getString("dename")),Q.pm(rstRecortProject.getString("RecordBizNO")),Q.pm(res)
+                                            + ");"));
+                            sqlPWriter.newLine();
+                            if (empResultSet.getString("jdname").equals("受理")){
+                                sqlPWriter.write("UPDATE OWNER_BUSINESS set CREATE_TIME='"+res+"',APPLY_TIME='"+res+"' WHERE ID='"+rstRecortProject.getString("RecordBizNO")+"';");
+                                sqlPWriter.newLine();
+                            }
+
+                            if (empResultSet.getString("jdname").equals("复审")){
+                                sqlPWriter.write("UPDATE OWNER_BUSINESS set CHECK_TIME='"+res+"' WHERE ID='"+rstRecortProject.getString("RecordBizNO")+"';");
+                                sqlPWriter.newLine();
+                            }
+
+                        }
+
+                    }
+
+
+
+
+
+
+                    sqlPWriter.flush();
+                    pi++;
+                    System.out.println(pi+"-"+pjCount);
+                }
+            }
+
+
+
+            System.out.println("recortProject is complate");
+        } catch (Exception e) {
+            System.out.println("recortProject is errer");
             e.printStackTrace();
             return;
         }

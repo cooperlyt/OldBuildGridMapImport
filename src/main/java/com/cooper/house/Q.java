@@ -159,7 +159,19 @@ public class Q {
         }else
             return "NULL";
     }
-
+    public static String changeBusinessEmpType(String jdname){
+        if (jdname.equals("受理")){
+            return "'APPLY_EMP'";
+        }else if (jdname.equals("复审")){
+            return "'CHECK_EMP'";
+        }else if (jdname.equals("审批")){
+            return "'Last_CHECK_EMP'";
+        }else if (jdname.equals("归档")){
+            return "'RECORD_EMP'";
+        }else {
+            return "'未知'";
+        }
+    }
 
 
 

@@ -47,6 +47,8 @@ public class HouseOwnerRecord {
 
     private static BufferedWriter haveHouseStateNotBizWriter;
 
+    private static BufferedWriter sqlPWriterErree;
+
     private static File recordFile;
 
     private static File haveHouseStateNotBizFile;
@@ -131,6 +133,8 @@ public class HouseOwnerRecord {
         try {
             recordProjectFile.createNewFile();
             FileWriter pfw = new FileWriter(recordProjectFile.getAbsoluteFile());
+            FileWriter Pfwe = new FileWriter(recordProjectFileErrer.getAbsoluteFile());
+            sqlPWriterErree = new BufferedWriter(Pfwe);
             sqlPWriter = new BufferedWriter(pfw);
             sqlPWriter.write("USE HOUSE_OWNER_RECORD;");
             sqlPWriter.newLine();
@@ -1085,10 +1089,22 @@ public class HouseOwnerRecord {
 
         //预售许可证信息
         try {
-            ResultSet rstRecortProject = statementRecord.executeQuery("select * from DGHouseRecord..Business as db where " +
-                    "(nameid like '%WP50' or  nameid like '%WP51') " +
-                    //"and db.b>='"+BEGIN_DATE+"' and RecordBizNO='20111213174' order by botime");
-                    "and db.b>='"+BEGIN_DATE+"' order by botime");
+//            ResultSet rstRecortProject = statementRecord.executeQuery("select * from DGHouseRecord..Business as db where " +
+//                    "(nameid like '%WP50' or  nameid like '%WP51') " +
+//                    //"and db.b>='"+BEGIN_DATE+"' and RecordBizNO='20111213174' order by botime");
+//                    "and db.b>='"+BEGIN_DATE+"' order by botime");
+              ResultSet rstRecortProject = statementRecord.executeQuery("select d.*,p.name as pname,p.no as pno from " +
+                    "(select b.*,dd.name as ddname,dd.no as ddno from " +
+                    "(select a.*,ds.name as dsname,ds.no as dsno,ds.DistrictID from " +
+                    "(select db.*,hp.id as hpid,hp.no as hpno,hp.name as hpname,hp.address as hpaddress,hp.sectionid,hp.developerid " +
+                    "from DGHouseRecord..Business as db left join DGHouseInfo..Project as hp on db.projectid=hp.id) as a " +
+                    "left join DGHouseInfo..Section as ds on a.sectionid=ds.id) as b " +
+                    "left join DGHouseInfo..District as dd on b.DistrictID=dd.id) as d " +
+                    "left join DGHouseInfo..Developer as p on d.developerid=p.id " +
+                    "where (d.nameid like '%WP50' or d.nameid like '%WP51') " +
+                    "and d.b>='"+BEGIN_DATE+"' order by botime");
+                    //"and d.RecordBizNO='20130329219'");
+
             rstRecortProject.last();
             int pjCount=rstRecortProject.getRow(),pi=1;
 
@@ -1155,9 +1171,103 @@ public class HouseOwnerRecord {
                                 sqlPWriter.newLine();
                             }
 
+
                         }
 
                     }
+                    //PROJECT=====
+                    sqlPWriter.write("INSERT PROJECT (ID, PROJECT_CODE, NAME, ADDRESS, DEVELOPER_NAME, DEVELOPER_CODE, SECTION_NAME, SECTION_CODE, DISTRICT_CODE, DISTRICT_NAME, BUSINESS) VALUES ");
+                    sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
+                            Q.pm("N"+rstRecortProject.getString("hpno")),Q.pm(rstRecortProject.getString("hpname")),
+                            Q.pm(rstRecortProject.getString("hpaddress")),Q.pm(rstRecortProject.getString("pname")),
+                            Q.pm("N"+rstRecortProject.getString("pno")),Q.pm(rstRecortProject.getString("dsname")),
+                            Q.pm("N"+rstRecortProject.getString("dsno")),Q.pm(rstRecortProject.getString("ddname")),
+                            Q.pm(rstRecortProject.getString("ddno")),Q.p(rstRecortProject.getString("RecordBizNO"))
+                            + ");"));
+                    sqlPWriter.newLine();
+
+
+                    //PROJECT_SELL_INFO=====
+
+                    ResultSet rstRecortProjectbiz = statementRecordch.executeQuery("select a.*,hp.no as hpno,hp.LandCardNO,hp.LandProperty," +
+                            "hp.luts,hp.luto,hp.landGetMode,hp.landArea,hp.BCLicence,hp.PClicence," +
+                            "hp.USLLicence,hp.YYLicence from (select db.*,hpc.no as hpcno,hpc.printTime," +
+                            "hpc.Cancel,hpc.houseCount,hpc.BuildCount,hpc.sumArea,hpc.useType," +
+                            "hpc.Sellobject,hpc.yearNum,hpc.orderNum,cardNo from DGHouseRecord..Business as db " +
+                            "left join DGHouseInfo..ProjectCard as hpc on db.id=hpc.bizid where (nameid like '%WP50' " +
+                            "or  nameid like '%WP51') and hpc.id is not null) as a left join DGHouseInfo..Project as hp " +
+                            "on a.projectid=hp.id where RecordBizNO='"+rstRecortProject.getString("RecordBizNO")+"'");
+                    rstRecortProjectbiz.last();
+                    int p=rstRecortProjectbiz.getRow();
+                    if (p>0){
+                        sqlPWriter.write("INSERT PROJECT_SELL_INFO (ID, HOUSE_COUNT, BUILD_COUNT, AREA, " +
+                                "USE_TYPE, SELL_OBJECT, TYPE, LAND_CARD_NO, NUMBER, LAND_PROPERTY," +
+                                " BEGIN_USE_TIME, END_USE_TIME, LAND_GET_MODE, LAND_AREA, " +
+                                "LAND_CARD_TYPE, LAND_USE_TYPE, CREATE_CARD_CODE, " +
+                                "CREATE_PREPARE_CARD_CODE, LICENSE_NUMBER, CREATE_LAND_CARD_CODE)" +
+                                " VALUES ");
+                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
+                                Q.p(rstRecortProjectbiz.getString("houseCount")),Q.p(rstRecortProjectbiz.getString("BuildCount")),
+                                Q.p(rstRecortProjectbiz.getBigDecimal("sumArea")),Q.p(rstRecortProjectbiz.getString("useType")),
+                                Q.p(rstRecortProjectbiz.getString("Sellobject")),"'MAP_SELL'",Q.p(rstRecortProjectbiz.getString("LandCardNO")),
+                                "''",!rstRecortProjectbiz.getString("LandProperty").equals("0")?Q.p(rstRecortProjectbiz.getString("LandProperty")):"Null",
+                                rstRecortProjectbiz.getString("luts")!=null?Q.p(rstRecortProjectbiz.getString("luts")):"'1970-01-01 08:00:00.0'",
+                                rstRecortProjectbiz.getString("luto")!=null?Q.p(rstRecortProjectbiz.getString("luto")):"'1970-01-01 08:00:00.0'",
+                                !rstRecortProjectbiz.getString("landGetMode").equals("0")?Q.p(rstRecortProjectbiz.getString("LandProperty")):"Null",
+                                Q.p(rstRecortProjectbiz.getBigDecimal("landArea")),"'landCardType.stateOwned'",
+                                rstRecortProjectbiz.getString("useType")!=null?Q.p(rstRecortProjectbiz.getString("useType")):"''",
+                                rstRecortProjectbiz.getString("BCLicence")!=null?Q.pm(rstRecortProjectbiz.getString("BCLicence")):"''",
+                                rstRecortProjectbiz.getString("PClicence")!=null?Q.pm(rstRecortProjectbiz.getString("PClicence")):"''",
+                                Q.p(rstRecortProjectbiz.getString("YYLicence")),Q.p(rstRecortProjectbiz.getString("USLLicence"))
+                                + ");"));
+                        sqlPWriter.newLine();
+
+                       //PROJECT_CARD=====
+
+                        empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
+                                " FROM shark..SHKActivities as a left join shark..DGEmployee as de " +
+                                "on a.resourceid =de.no where ProcessId ='"+rstRecortProject.getString("Nameid") +"' and (a.name='缮证')");
+                        empResultSet.last();
+                        sl = empResultSet.getRow();
+                        String MAKE_EMP_CODE=null,MAKE_EMP_NAME=null;
+                        if (sl>0) {
+                            MAKE_EMP_CODE = empResultSet.getString("resourceid");
+                            MAKE_EMP_NAME = empResultSet.getString("dename");
+                        }
+                        sqlPWriter.write("INSERT PROJECT_CARD(ID, YEAR_NUMBER, ORDER_NUMBER, PRINT_TIME, MAKE_EMP_CODE, MAKE_EMP_NAME, PROJECT) VALUE ");
+                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
+                                Q.p(rstRecortProjectbiz.getString("yearNum")),Q.p(rstRecortProjectbiz.getString("orderNum")),
+                                rstRecortProjectbiz.getString("printTime")!=null?Q.p(rstRecortProjectbiz.getString("printTime")):"'1970-01-01 08:00:01.0'",
+                                Q.p(MAKE_EMP_CODE),Q.p(MAKE_EMP_NAME),Q.p(rstRecortProject.getString("RecordBizNO"))
+                                        + ");"));
+                        sqlPWriter.newLine();
+
+
+
+
+                    // MAKE_CARD=====
+                        sqlPWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
+                                Q.pm(rstRecortProjectbiz.getString("hpcno")),"'PROJECT_RSHIP'",
+                                Q.p(rstRecortProject.getString("RecordBizNO")),
+                                "True"
+                                 + ");"));
+                        sqlPWriter.newLine();
+
+
+                    }else{
+                        sqlPWriterErree.write("此业务没有查到预售许可证信息--Projectid-" + rstRecortProject.getString("Projectid") + "-业务编号--" + rstRecortProject.getString("RecordBizNO"));
+                        sqlPWriterErree.newLine();
+                        sqlPWriterErree.flush();
+                    }
+
+
+
+
+
+
+
+
 
 
 

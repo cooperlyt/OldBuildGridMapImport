@@ -1089,10 +1089,6 @@ public class HouseOwnerRecord {
 
         //预售许可证信息
         try {
-//            ResultSet rstRecortProject = statementRecord.executeQuery("select * from DGHouseRecord..Business as db where " +
-//                    "(nameid like '%WP50' or  nameid like '%WP51') " +
-//                    //"and db.b>='"+BEGIN_DATE+"' and RecordBizNO='20111213174' order by botime");
-//                    "and db.b>='"+BEGIN_DATE+"' order by botime");
               ResultSet rstRecortProject = statementRecord.executeQuery("select d.*,p.name as pname,p.no as pno from " +
                     "(select b.*,dd.name as ddname,dd.no as ddno from " +
                     "(select a.*,ds.name as dsname,ds.no as dsno,ds.DistrictID from " +
@@ -1107,7 +1103,6 @@ public class HouseOwnerRecord {
 
             rstRecortProject.last();
             int pjCount=rstRecortProject.getRow(),pi=1;
-
             System.out.println(pjCount);
             if (pjCount>0){
                 rstRecortProject.beforeFirst();
@@ -1253,6 +1248,65 @@ public class HouseOwnerRecord {
                                 "True"
                                  + ");"));
                         sqlPWriter.newLine();
+                     // BUILD ========
+
+                        ResultSet rstRecortBuild = statementRecordch.executeQuery("select c.*,hb.no as hbno,hb.* from " +
+                                "(select b.*,pcab.SumArea as bSumArea,pcab.sumCount as bSumCount,pcab.HomeArea as bHomeArea,pcab.HomeCount as bHomeCount,pcab.unhomeArea as bunhomeArea,pcab.unhomeCount as bunhomeCount,pcab.netPointArea as bnetPointArea,pcab.netPointCount as bnetPointCount,pcab.Build,pcab.projectCard from " +
+                                "(select a.*,hp.no as hpno from " +
+                                "(select db.*,hpc.id as hpcid " +
+                                "from DGHouseRecord..Business as db left join " +
+                                "DGHouseInfo..ProjectCard as hpc on db.id=hpc.bizid " +
+                                "where (nameid like '%WP50' or  nameid like '%WP51') and hpc.id is not null) as a " +
+                                "left join DGHouseInfo..Project as hp on a.projectid=hp.id) as b " +
+                                "left join DGHouseInfo..PorjectCardAndBuild as pcab on b.hpcid=pcab.projectCard) c " +
+                                "left join DGHouseInfo..Build as hb on c.build=hb.id " +
+                                "where RecordBizNo='"+rstRecortProject.getString("RecordBizNO")+"' order by botime");
+
+                        rstRecortBuild.last();
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+                        if (rstRecortBuild.getRow()>0){
+                            rstRecortBuild.beforeFirst();
+                            while (rstRecortBuild.next()){
+                                sqlPWriter.write("INSERT BUILD (ID, MAP_NUMBER, BLOCK_NO, BUILD_NO, BUILD_CODE,NAME, " +
+                                        "DOOR_NO, UNINT_COUNT, FLOOR_COUNT, UP_FLOOR_COUNT, DOWN_FLOOR_COUNT, HOUSE_COUNT, AREA, " +
+                                        "BUILD_TYPE, STRUCTURE, HOME_COUNT, HOME_AREA, UNHOME_COUNT, UNHOME_AREA, SHOP_COUNT, " +
+                                        "SHOP_AREA, PROJECT, COMPLETE_DATE, BUILD_DEVELOPER_NUMBER, MAP_TIME) VALUE ");
+
+                                sqlPWriter.write("(" + Q.v(Q.p(rstRecortBuild.getString("RecordBizNO")+"-"+rstRecortBuild.getRow()),Q.pm(rstRecortBuild.getString("MapNO")),
+                                        Q.pm(rstRecortBuild.getString("BlockNO")),Q.pm(rstRecortBuild.getString("BuildNO")),
+                                        Q.pm("N"+rstRecortBuild.getString("hbno")),Q.pm(rstRecortBuild.getString("BuildName")),
+                                        Q.p(rstRecortBuild.getString("DoorNO")),Q.p(rstRecortBuild.getString("UnintCount")),
+                                        rstRecortBuild.getString("FloorCount") != null ? Q.pm(rstRecortBuild.getString("FloorCount")) : "0",
+                                        rstRecortBuild.getString("FloorCount") != null ? Q.pm(rstRecortBuild.getString("FloorCount")) : "0",
+                                        "0",Q.p(rstRecortBuild.getString("bSumCount")),Q.p(rstRecortBuild.getBigDecimal("bSumArea")),
+                                        Q.p(rstRecortBuild.getString("BuildType")),rstRecortBuild.getString("Structure") != null ? Q.p(rstRecortBuild.getString("Structure")) : "827",
+                                        Q.p(rstRecortBuild.getString("bHomeCount")),Q.p(rstRecortBuild.getBigDecimal("bHomeArea")),
+                                        Q.p(rstRecortBuild.getString("bunhomeCount")),Q.p(rstRecortBuild.getBigDecimal("bunhomeArea")),
+                                        Q.p(rstRecortBuild.getString("netPointCount")),Q.p(rstRecortBuild.getBigDecimal("bnetPointArea")),
+                                        Q.pm(rstRecortProject.getString("RecordBizNO")),
+                                        rstRecortBuild.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstRecortBuild.getTimestamp("FirmlyDate"))) : "NULL",
+                                        Q.p(rstRecortBuild.getString("DoorNO")),Q.p(Q.nowFormatTime())
+                                         + ");"));
+                                sqlPWriter.newLine();
+                            }
+                        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
                     }else{

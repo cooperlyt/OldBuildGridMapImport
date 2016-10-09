@@ -17,8 +17,8 @@ import java.util.Set;
  */
 public class HouseInfo {
 
+    //private static final String OUT_FILE_PATH = "/root/Documents/houseInfo.sql";
     private static final String OUT_FILE_PATH = "/houseInfo.sql";
-
     private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseInfo";
 
     private static final String HOUSE_DB_URL = "jdbc:mysql://127.0.0.1:3306/HOUSE_INFO";
@@ -130,7 +130,7 @@ public class HouseInfo {
             sqlWriter.newLine();
             sqlWriter.write("INSERT ATTACH_CORPORATION(ID, RECORD_DATE, TYPE, ENABLE, DATE_TO, ADDRESS, PHONE, OWNER_NAME, OWNER_CARD, FAX, MEMO, POST_CODE, LICENSE_NUMBER, TAX_LICENSE, COMPANY_CODE, MANAGER, OWNER_TEL) values ");
             while (srt.next()){
-                sqlWriter.write("("+"N"+Q.v(Q.p(srt.getString("NO")), Q.p(Q.nowFormatTime()),Q.p("DEVELOPER"),"FALSE",Q.p(Q.nowFormatTime()),
+                sqlWriter.write("("+Q.v(Q.p("N"+srt.getString("NO")), Q.p(Q.nowFormatTime()),Q.p("DEVELOPER"),"True",Q.p(Q.nowFormatTime()),
                         Q.p(srt.getString("Address")),Q.p(srt.getString("PhoneNumber")), Q.p(srt.getString("OwnerName")),Q.p(srt.getString("OwnerCard")),
                         Q.p(srt.getString("Fax")),Q.p(srt.getString("Memo")),Q.p(srt.getString("PostCode")),Q.p(srt.getString("LicenseNO")),Q.p(srt.getString("TaxLicenseNO")),
                         Q.p(srt.getString("CompanyCode")),Q.p(srt.getString("Manager")),Q.p(srt.getString("PhoneNumber"))));

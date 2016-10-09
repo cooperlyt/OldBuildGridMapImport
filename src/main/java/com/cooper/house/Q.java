@@ -1,6 +1,5 @@
 package com.cooper.house;
 
-import javafx.scene.input.DataFormat;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -163,9 +162,9 @@ public class Q {
         if (jdname.equals("受理")){
             return "'APPLY_EMP'";
         }else if (jdname.equals("复审")){
-            return "'CHECK_EMP'";
+            return "'FIRST_CHECK'";
         }else if (jdname.equals("审批")){
-            return "'Last_CHECK_EMP'";
+            return "'CHECK_EMP'";
         }else if (jdname.equals("归档")){
             return "'RECORD_EMP'";
         }else {

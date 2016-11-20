@@ -19,20 +19,28 @@ import java.util.Set;
 public class HouseOwnerRecord {
 
     private static final String BEGIN_DATE = "2016-09-30";
+//
+//    private static final String OUT_PATH_FILE = "/root/Documents/houseOwnerRecord.sql";
+//
+//    private static final String OUT_PATH_PROJECTFILE = "/root/Documents/houseProjectRecord.sql";
+//
+//    private static final String OUT_PATH_PROJECTFILE_ERRER = "/root/Documents/houseProjectRecord_errer.sql";
+//
+ //   private static final String OUT_PATH_HAVEHOUSESTATENOTBIZ_FILE = "/root/Documents/haveHouseStateNotBiz.sql";
 
-    private static final String OUT_PATH_FILE = "/root/Documents/houseOwnerRecord.sql";
+    private static final String OUT_PATH_FILE = "/houseOwnerRecord.sql";
 
-    private static final String OUT_PATH_PROJECTFILE = "/root/Documents/houseProjectRecord.sql";
+    private static final String OUT_PATH_PROJECTFILE = "/houseProjectRecord.sql";
 
-    private static final String OUT_PATH_PROJECTFILE_ERRER = "/root/Documents/houseProjectRecord_errer.sql";
+    private static final String OUT_PATH_PROJECTFILE_ERRER = "/houseProjectRecord_errer.sql";
 
-    private static final String OUT_PATH_HAVEHOUSESTATENOTBIZ_FILE = "/root/Documents/haveHouseStateNotBiz.sql";
+    private static final String OUT_PATH_HAVEHOUSESTATENOTBIZ_FILE = "/haveHouseStateNotBiz.sql";
 
-    private static final String DB_RECORD_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseRecord";
+    private static final String DB_RECORD_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/DGHouseRecord";
 
-    private static final String DB_HOUSE_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/DGHouseInfo";
+    private static final String DB_HOUSE_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/DGHouseInfo";
 
-    private static final String DB_SHARK_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/shark";
+    private static final String DB_SHARK_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/shark";
 
 
     private static Connection recordConnection;
@@ -137,6 +145,7 @@ public class HouseOwnerRecord {
             sqlPWriterErree = new BufferedWriter(Pfwe);
             sqlPWriter = new BufferedWriter(pfw);
             sqlPWriter.write("USE HOUSE_OWNER_RECORD;");
+            sqlWriter.write("set global max_allowed_packet=1024*1024*2048;");
             sqlPWriter.newLine();
             sqlPWriter.flush();
         } catch (IOException e) {
@@ -229,10 +238,13 @@ public class HouseOwnerRecord {
                 }
             }
             //房屋状态为在建工程抵押，查封，不可售，异议，灭籍,声明作废,房屋已注销(灭籍) 导入预警 抵押(做完初始登记直接做的抵押)
-            ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
-                    " where houseState=890 or houseState=99 or houseState=127 or houseState=116 or houseState=115 or houseState=117 or houseState=119");
-            sqlWriter.newLine();
-            sqlWriter.write("INSERT LOCKED_HOUSE(HOUSE_CODE, DESCRIPTION, TYPE, EMP_CODE, EMP_NAME, LOCKED_TIME, ID, BUILD_CODE) values ");
+//            ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
+//                    " where houseState=890 or houseState=99 or houseState=127 or houseState=116 or houseState=115 or houseState=117 or houseState=119 or houseState=4111");
+              ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
+                      " where houseState=4111");
+
+              sqlWriter.newLine();
+              sqlWriter.write("INSERT LOCKED_HOUSE(HOUSE_CODE, DESCRIPTION, TYPE, EMP_CODE, EMP_NAME, LOCKED_TIME, ID, BUILD_CODE) values ");
             while (setd.next()){
                 if (!LOCKED_HOUSE_NO.contains(setd.getString("no"))){
                     LOCKED_HOUSE_NO.add(setd.getString("no"));
@@ -249,7 +261,7 @@ public class HouseOwnerRecord {
 
             }
 
-          sqlWriter.flush();
+         sqlWriter.flush();
           System.out.println("LOCKED_HOUSE is complate");
         } catch (Exception e) {
             System.out.println("LOCKED_HOUSE is errer");
@@ -275,9 +287,9 @@ public class HouseOwnerRecord {
                     " left join project as hp on a.ProjectID=hp.id) as c"+
                     " left join Developer as p on c.DeveloperID=p.id) as d"+
                     " left join Section as hs on d.sectionid=hs.id) as e"+
-                    " left join District as hd on e.DistrictID = hd.id");
-//                    " where (e.no='12119')");
-
+            //        " left join District as hd on e.DistrictID = hd.id");
+                    " left join District as hd on e.DistrictID = hd.id" +
+                    " where (e.no='137034')");
 
             rstHouse.last();
             System.out.print("rstHouseCount-Start-:" + rstHouse.getRow());
@@ -299,15 +311,16 @@ public class HouseOwnerRecord {
 
                     rstRecortBa.last();
                     int baCount = rstRecortBa.getRow();
-                    //System.out.println("baCount--"+baCount);
+                    System.out.println("baCount--"+baCount);
                     isFirst = true;
                     rstRecortBa.beforeFirst();
                     String stratBizid,lastBizid = null;
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
                     //按房号循环，
-                    if (baCount>0) while (rstRecortBa.next()) {
+                    if (baCount>0)
+                        while (rstRecortBa.next()) {
 
-                        System.out.println("RecordBizNO" + rstRecortBa.getString("RecordBizNO"));
+                       // System.out.println("RecordBizNO" + rstRecortBa.getString("RecordBizNO"));
 
 
                         if (!EXCEPTION_biz_NO.contains(rstRecortBa.getString("RecordBizNO"))) {
@@ -369,7 +382,7 @@ public class HouseOwnerRecord {
                             }
 
 
-                            System.out.println("备案人---" + barIDorNO);
+                            //System.out.println("备案人---" + barIDorNO);
                             ResultSet barResultSet = SlectInfo.bar(statementHousech, barIDorNO);
                             if (barResultSet != null) {
 
@@ -384,9 +397,11 @@ public class HouseOwnerRecord {
                                 sqlWriter.newLine();
 
                             } else {
+
                                 haveHouseStateNotBizWriter.write("此业务没有查到备案人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO"));
                                 haveHouseStateNotBizWriter.newLine();
                                 haveHouseStateNotBizWriter.flush();
+                                continue;
                             }
 
                             //==========beforeHouse afterHouse=============================
@@ -519,10 +534,7 @@ public class HouseOwnerRecord {
                                             String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
                                             int j=0;
                                             for (String str : skgyqr.split(";")) {
-//                                                System.out.println(str.split(",")[0]);
-//                                                System.out.println(str.split(",")[2]);
-//                                                System.out.println(str.split(",")[3]);
-//                                                System.out.println(str.split(",")[4]);
+
                                                 gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
                                                 if (gyrResultSet!=null){
                                                     sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
@@ -541,23 +553,25 @@ public class HouseOwnerRecord {
                                                             Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
                                                     sqlWriter.newLine();
                                                 }else{
-                                                    haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                                    haveHouseStateNotBizWriter.newLine();
-                                                    haveHouseStateNotBizWriter.flush();
-                                                    System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                   // haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                   // haveHouseStateNotBizWriter.newLine();
+                                                  //  haveHouseStateNotBizWriter.flush();
+                                                  //  System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                                 }
                                                 j++;
                                             }
                                         } else {
-                                            haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                            haveHouseStateNotBizWriter.newLine();
-                                            haveHouseStateNotBizWriter.flush();
-                                            System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                           // haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                           // haveHouseStateNotBizWriter.newLine();
+                                          //  haveHouseStateNotBizWriter.flush();
+                                          //  System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                         }
                                     }
                                 }
+
+
                             } else {
                                 stratBizid = lastBizid;
                                 lastBizid = rstRecortBa.getString("RecordBizNO");
@@ -657,10 +671,7 @@ public class HouseOwnerRecord {
                                             String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
                                             int j=0;
                                             for (String str : skgyqr.split(";")) {
-//                                                System.out.println(str.split(",")[0]);
-//                                                System.out.println(str.split(",")[2]);
-//                                                System.out.println(str.split(",")[3]);
-//                                                System.out.println(str.split(",")[4]);
+
                                                 gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
                                                 if (gyrResultSet!=null){
                                                     sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
@@ -679,19 +690,19 @@ public class HouseOwnerRecord {
                                                             Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
                                                     sqlWriter.newLine();
                                                 }else{
-                                                    haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                                    haveHouseStateNotBizWriter.newLine();
-                                                    haveHouseStateNotBizWriter.flush();
-                                                    System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                    //haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                                   // haveHouseStateNotBizWriter.newLine();
+                                                   // haveHouseStateNotBizWriter.flush();
+                                                   // System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                                 }
                                                 j++;
                                             }
                                         } else {
-                                            haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                            haveHouseStateNotBizWriter.newLine();
-                                            haveHouseStateNotBizWriter.flush();
-                                            System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                           // haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                          //  haveHouseStateNotBizWriter.newLine();
+                                          //  haveHouseStateNotBizWriter.flush();
+                                          //  System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                         }
                                     }
@@ -710,9 +721,12 @@ public class HouseOwnerRecord {
                             sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")), Q.p(rstRecortBa.getString("RecordBizNO"))
                                     , Q.p("CONTRACTS_RECORD"), Q.p(IS_REMOVE) + ");"));
                             sqlWriter.newLine();
-
+                            System.out.println("bbbb--"+rstRecortBa.getRow());
+                            System.out.println("aaa--"+rstRecortBa.isLast());
+                            System.out.println(HOUSE_STATUS);
                             //==== HOUSE_RECORD
                             if (rstRecortBa.isLast() && HOUSE_STATUS) {
+                                System.out.println("aaaaaaaaa");
 
                                 sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS) VALUES ");
 
@@ -745,14 +759,15 @@ public class HouseOwnerRecord {
 
                                     sqlWriter.newLine();
 
+
                                     //===TASK_OPER
 
-                                    sqlPWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
-                                    sqlPWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                    sqlWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
+                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
                                             Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(res),Q.pm(empResultSet.getString("resourceid")),
-                                            Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"NEXT"
+                                            Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"'NEXT'"
                                                     + ");"));
-                                    sqlPWriter.newLine();
+                                    sqlWriter.newLine();
 
 
                                     if (empResultSet.getString("jdname").equals("受理")){
@@ -829,9 +844,10 @@ public class HouseOwnerRecord {
                                 sqlWriter.newLine();
 
                          }else{
-                             haveHouseStateNotBizWriter.write("此业务没有查到'已备案'房屋产权人信息房屋编号--"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO"));
+                             haveHouseStateNotBizWriter.write("此业务没有查到'已备案'房屋产权人信息房屋编号--"+rstRecortBa.getString("NO")+"业务编号--"+rstRecortBa.getString("RecordBizNO")+"Nameid--"+rstRecortBa.getString("Nameid"));
                              haveHouseStateNotBizWriter.newLine();
                              haveHouseStateNotBizWriter.flush();
+                             continue;
                          }
 
                             sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
@@ -971,10 +987,7 @@ public class HouseOwnerRecord {
                                         String skgyqr = gyrResultSet.getString("VariableValueVCHAR");
                                         int j=0;
                                         for (String str : skgyqr.split(";")) {
-//                                                System.out.println(str.split(",")[0]);
-//                                                System.out.println(str.split(",")[2]);
-//                                                System.out.println(str.split(",")[3]);
-//                                                System.out.println(str.split(",")[4]);
+
                                             gyrResultSet = SlectInfo.bar(statementHousech,str.split(",")[0]);
                                             if (gyrResultSet!=null){
                                                 sqlWriter.write("INSERT BUSINESS_POOL (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, PERC, " +
@@ -993,19 +1006,19 @@ public class HouseOwnerRecord {
                                                         Q.pm(rstRecortBa.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
                                                 sqlWriter.newLine();
                                             }else{
-                                                haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                                haveHouseStateNotBizWriter.newLine();
-                                                haveHouseStateNotBizWriter.flush();
-                                                System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                               // haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                               // haveHouseStateNotBizWriter.newLine();
+                                               /// haveHouseStateNotBizWriter.flush();
+                                                //System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                             }
                                             j++;
                                         }
                                     } else {
-                                        haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
-                                        haveHouseStateNotBizWriter.newLine();
-                                        haveHouseStateNotBizWriter.flush();
-                                        System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                      //  haveHouseStateNotBizWriter.write("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
+                                       // haveHouseStateNotBizWriter.newLine();
+                                      //  haveHouseStateNotBizWriter.flush();
+                                       // System.out.println("此业务有共有情况没有共有权人信息房屋编号--" + rstRecortBa.getString("NO") + "业务编号--" + rstRecortBa.getString("RecordBizNO")+"DEFINE_ID--"+rstRecortBa.getString("NAMEID"));
 
                                     }
                                 }
@@ -1034,12 +1047,12 @@ public class HouseOwnerRecord {
 
                                     //===TASK_OPER
 
-                                    sqlPWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
-                                    sqlPWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                    sqlWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
+                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortBa.getString("RecordBizNO")+"-"+empResultSet.getRow()),
                                             Q.pm(rstRecortBa.getString("RecordBizNO")),Q.pm(res),Q.pm(empResultSet.getString("resourceid")),
-                                            Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"NEXT"
+                                            Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"'NEXT'"
                                                     + ");"));
-                                    sqlPWriter.newLine();
+                                    sqlWriter.newLine();
 
                                     if (empResultSet.getString("jdname").equals("受理")){
                                         sqlWriter.write("UPDATE OWNER_BUSINESS set CREATE_TIME='"+res+"',APPLY_TIME='"+res+"' WHERE ID='"+rstRecortBa.getString("RecordBizNO")+"';");
@@ -1108,8 +1121,11 @@ public class HouseOwnerRecord {
             e.printStackTrace();
             return;
         }
+   //  预售许可证信息
 
-        //预售许可证信息
+
+//预售许可证信息
+/**
         try {
               ResultSet rstRecortProject = statementRecord.executeQuery("select d.*,p.name as pname,p.no as pno from " +
                     "(select b.*,dd.name as ddname,dd.no as ddno from " +
@@ -1121,7 +1137,7 @@ public class HouseOwnerRecord {
                     "left join DGHouseInfo..Developer as p on d.developerid=p.id " +
                     "where (d.nameid like '%WP50' or d.nameid like '%WP51') " +
                     "and d.b>='"+BEGIN_DATE+"' order by botime");
-                    //"and d.RecordBizNO='20130329219'");
+                   // "and d.RecordBizNO='2013111461'");
 
             rstRecortProject.last();
             int pjCount=rstRecortProject.getRow(),pi=1;
@@ -1184,7 +1200,7 @@ public class HouseOwnerRecord {
                             sqlPWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
                             sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")+"-"+empResultSet.getRow()),
                                     Q.pm(rstRecortProject.getString("RecordBizNO")),Q.pm(res),Q.pm(empResultSet.getString("resourceid")),
-                                    Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"NEXT"
+                                    Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"'NEXT'"
                                             + ");"));
                             sqlPWriter.newLine();
 
@@ -1250,6 +1266,16 @@ public class HouseOwnerRecord {
                                 + ");"));
                         sqlPWriter.newLine();
 
+                        // MAKE_CARD=====
+                        sqlPWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
+                                Q.pm(rstRecortProjectbiz.getString("hpcno")),"'PROJECT_RSHIP'",
+                                Q.p(rstRecortProject.getString("RecordBizNO")),
+                                "True"
+                                        + ");"));
+                        sqlPWriter.newLine();
+
+
                        //PROJECT_CARD=====
 
                         empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
@@ -1273,14 +1299,7 @@ public class HouseOwnerRecord {
 
 
 
-                    // MAKE_CARD=====
-                        sqlPWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
-                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
-                                Q.pm(rstRecortProjectbiz.getString("hpcno")),"'PROJECT_RSHIP'",
-                                Q.p(rstRecortProject.getString("RecordBizNO")),
-                                "True"
-                                 + ");"));
-                        sqlPWriter.newLine();
+
                      // BUILD ========
 
                         ResultSet rstRecortBuild = statementRecordch.executeQuery("select c.*,hb.no as hbno,hb.* from " +
@@ -1323,29 +1342,11 @@ public class HouseOwnerRecord {
                                 sqlPWriter.newLine();
                             }
                         }
-
-
-
-
-
-
-
-
-
-
-
                     }else{
                         sqlPWriterErree.write("此业务没有查到预售许可证信息--Projectid-" + rstRecortProject.getString("Projectid") + "-业务编号--" + rstRecortProject.getString("RecordBizNO"));
                         sqlPWriterErree.newLine();
                         sqlPWriterErree.flush();
                     }
-
-
-
-
-
-
-
 
 
 
@@ -1357,16 +1358,14 @@ public class HouseOwnerRecord {
                     if (feilesl>0){
                         fileResulset.beforeFirst();
                         while (fileResulset.next()){
-                            sqlWriter.write("INSERT BUSINESS_FILE(ID, BUSINESS_ID, NAME, IMPORTANT_CODE, NO_FILE, IMPORTANT, PRIORITY) VALUES ");
-                            sqlWriter.write("(" + Q.v(Q.p("N"+rstRecortProject.getString("RecordBizNO")+"-"+fileResulset.getRow()),
+                            sqlPWriter.write("INSERT BUSINESS_FILE(ID, BUSINESS_ID, NAME, IMPORTANT_CODE, NO_FILE, IMPORTANT, PRIORITY) VALUES ");
+                            sqlPWriter.write("(" + Q.v(Q.p("N"+rstRecortProject.getString("RecordBizNO")+"-"+fileResulset.getRow()),
                                     Q.pm(rstRecortProject.getString("RecordBizNO")),Q.pm(fileResulset.getString("DocType")),
                                     "'未知'","True","False",Q.pm(String.valueOf(fileResulset.getRow()))+ ");"));
-                            sqlWriter.newLine();
+                            sqlPWriter.newLine();
                         }
 
                     }
-
-
                     sqlPWriter.flush();
                     pi++;
                     System.out.println(pi+"-"+pjCount);
@@ -1381,7 +1380,7 @@ public class HouseOwnerRecord {
             e.printStackTrace();
             return;
         }
-
+**/
 
     }
 }

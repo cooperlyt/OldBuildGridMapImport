@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ public class DGHouseOwnerRecord {
 
     private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
+    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/fang_chan_dg";
 
     private static Connection recordConnection;
 
@@ -40,6 +42,9 @@ public class DGHouseOwnerRecord {
     private static Connection sharkConnection;
 
     private static Connection ownerRecordConnection;
+
+    private static Connection fangchanConnection;
+
 
     private static BufferedWriter sqlWriter;
 
@@ -62,9 +67,13 @@ public class DGHouseOwnerRecord {
 
     private static Statement statementOwnerRecord;
 
+    private static Statement statementFangchan;
+
     private static ResultSet recordResultSet;
 
     private static ResultSet houseResultSet;
+
+    private static ResultSet fangChanResultSet;
 
     private static Set<String> LOCKED_HOUSE_NO = new HashSet<>();
 
@@ -72,30 +81,53 @@ public class DGHouseOwnerRecord {
 
     private static Set<String> SELECT_DEFINE_ID = new HashSet<>();
 
+    private static Set<String> REPEAT_NAMEID = new HashSet<>();
+
+    private static Set<String> HOUSE_ERROR = new HashSet<>();
+
+    private static Set<String> DEAL_DEFINE_ID= new HashSet<>();
+
+
+
     private static String DEFINE_ID;
     private static String DEFINE_NAME;
+    private static String NAME_ID;
     private static String bizid;//业务编号
 
     private static String selectbizid;//bei
 
-    public static void main(String agr[]){
+    private static boolean haveRepeat;
 
+    private static String stratHouseId;
+
+    private static String afterHouseId;
+
+    private static boolean isFirst;
+
+    private static boolean addStateisFirst;
+    private static ResultSet rstHouse;
+
+    public static void main(String agr[]) throws SQLException {
+
+
+        //有问题房屋编号，不导入
+        HOUSE_ERROR.add("118058");
+        HOUSE_ERROR.add("118057");
+        HOUSE_ERROR.add("128518");
+        HOUSE_ERROR.add("144016");
         //有selectbiz业务ID
-        SELECT_DEFINE_ID.add("WP10");//房屋所有权抵押变更登记
-        SELECT_DEFINE_ID.add("WP11");//房屋所有权抵押转移登记
-        SELECT_DEFINE_ID.add("WP12");//房屋所有权抵押注销登记
-        SELECT_DEFINE_ID.add("WP14");//最高额抵押权确定登记
-        SELECT_DEFINE_ID.add("WP15");//最高额抵押权设定变更登记
-        SELECT_DEFINE_ID.add("WP16");//最高额抵押权设定转移登记
-        SELECT_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
-        SELECT_DEFINE_ID.add("WP84");//在建工程房屋抵押权注销登记
-        SELECT_DEFINE_ID.add("WP2");//预购商品房抵押权预告变更登记
-        SELECT_DEFINE_ID.add("WP3");//预购商品房抵押权预告转移登记
-        SELECT_DEFINE_ID.add("WP4");//预购商品房抵押权预告注销登记
-        SELECT_DEFINE_ID.add("WP6");//房屋抵押权预告变更登记
-        SELECT_DEFINE_ID.add("WP7");//房屋抵押权预告转移登记
-        SELECT_DEFINE_ID.add("WP8");//房屋抵押权预告注销登记
+
+
+
+
         //不导入的业务编号
+        NO_EXCEPTION_DEFINE_ID.add("WP30");//新建房屋
+        NO_EXCEPTION_DEFINE_ID.add("WP31");//无籍房屋
+
+
+        NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
+        NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
+
         NO_EXCEPTION_DEFINE_ID.add("WP52");//名称变更登记
         NO_EXCEPTION_DEFINE_ID.add("WP53");//自翻扩改
         NO_EXCEPTION_DEFINE_ID.add("WP54");//分照
@@ -140,6 +172,38 @@ public class DGHouseOwnerRecord {
         NO_EXCEPTION_DEFINE_ID.add("WP81");//工程查封登记
         NO_EXCEPTION_DEFINE_ID.add("WP82");//工程查封解除登记
         NO_EXCEPTION_DEFINE_ID.add("WP88");//房屋续封登记
+        NO_EXCEPTION_DEFINE_ID.add("WP11");//房屋所有权抵押转移登记
+        NO_EXCEPTION_DEFINE_ID.add("WP12");//房屋所有权抵押注销登记
+        NO_EXCEPTION_DEFINE_ID.add("WP10");//房屋所有权抵押变更登记
+        NO_EXCEPTION_DEFINE_ID.add("WP14");//最高额抵押权确定登记
+        NO_EXCEPTION_DEFINE_ID.add("WP15");//最高额抵押权设定变更登记
+        NO_EXCEPTION_DEFINE_ID.add("WP16");//最高额抵押权设定转移登记
+        NO_EXCEPTION_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
+        NO_EXCEPTION_DEFINE_ID.add("WP84");//在建工程房屋抵押权注销登记
+        NO_EXCEPTION_DEFINE_ID.add("WP2");//预购商品房抵押权预告变更登记
+        NO_EXCEPTION_DEFINE_ID.add("WP3");//预购商品房抵押权预告转移登记
+        NO_EXCEPTION_DEFINE_ID.add("WP4");//预购商品房抵押权预告注销登记
+        NO_EXCEPTION_DEFINE_ID.add("WP6");//房屋抵押权预告变更登记
+        NO_EXCEPTION_DEFINE_ID.add("WP7");//房屋抵押权预告转移登记
+        NO_EXCEPTION_DEFINE_ID.add("WP8");//房屋抵押权预告注销登记
+        //交易备案 业务DEFINE_ID
+        DEAL_DEFINE_ID.add("WP41");//商品房交易
+        DEAL_DEFINE_ID.add("WP56");//二手房交易
+        DEAL_DEFINE_ID.add("WP57");//企业改制
+        DEAL_DEFINE_ID.add("WP58");//赠与
+        DEAL_DEFINE_ID.add("WP59");//继承(直系/非直系)
+        DEAL_DEFINE_ID.add("WP60");//判决(调解、裁定、仲裁、协议离婚)
+        DEAL_DEFINE_ID.add("WP61");//房屋拍卖
+        DEAL_DEFINE_ID.add("WP62");//投资入股
+        DEAL_DEFINE_ID.add("WP63");//兼并合并
+        DEAL_DEFINE_ID.add("WP64");//使用权交易
+        DEAL_DEFINE_ID.add("WP65");//抵债业务
+        DEAL_DEFINE_ID.add("WP66");//政府奖励
+        DEAL_DEFINE_ID.add("WP67");//房改房屋
+        DEAL_DEFINE_ID.add("WP68");//分照交易
+        DEAL_DEFINE_ID.add("WP72");//回迁房屋
+        //初始登记
+
 
         recordFile = new File(OUT_PATH_FILE);
         if (recordFile.exists()){
@@ -160,6 +224,9 @@ public class DGHouseOwnerRecord {
             houseOwnerError =new BufferedWriter(houseOwnerErrorFileWriter);
 
             sqlWriter.write("USE HOUSE_OWNER_RECORD;");
+
+            sqlWriter.newLine();
+            sqlWriter.write("ALTER TABLE HOUSE_OWNER_RECORD.OWNER_BUSINESS ADD NAMEID VARBINARY (25) NULL;");
             sqlWriter.newLine();
             sqlWriter.flush();
         } catch (IOException e) {
@@ -215,9 +282,20 @@ public class DGHouseOwnerRecord {
             return;
         }
 
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            fangchanConnection = DriverManager.getConnection(DB_FANG_CHAN_URL, "sa", "dgsoft");
+            statementFangchan = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            System.out.println("fangchanConnection successful");
+        } catch (Exception e) {
+            System.out.println("fangchanConnection is errer");
+            e.printStackTrace();
+            return;
+        }
+
 
         try {
-            ResultSet rstHouse = statementHouse.executeQuery("select hd.no as hdno,hd.name as hdname,e.* from " +
+             rstHouse = statementHouse.executeQuery("select hd.no as hdno,hd.name as hdname,e.* from " +
                     " (select hs.no as hsno,hs.name as hsname,hs.DistrictID,d.* from" +
                     " (select p.no as pno,p.name as pname,c.* from" +
                     " (select hp.no as hpno,hp.name as hpnmae,hp.DeveloperID,hp.SectionID,a.* from"+
@@ -229,7 +307,7 @@ public class DGHouseOwnerRecord {
                     " left join Section as hs on d.sectionid=hs.id) as e"+
 //                    " left join District as hd on e.DistrictID = hd.id");
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='B174N1-6-04')");
+                    " where (e.no='B94N1-5-02')"); // 单笔116146 多69759 初始 B94N1-5-02
             rstHouse.last();
             System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
             int sumCount = rstHouse.getRow();
@@ -237,98 +315,411 @@ public class DGHouseOwnerRecord {
             sqlWriter.newLine();
             int i=0;
             while (rstHouse.next()){
-                ResultSet rstRecortRecord = statementRecord.executeQuery("select * from" +
-                        " (select hh.* from DGHouseRecord..HouseHistroy hh where hh.id in " +
-                        " (select max(h1.id) as hhid from DGHouseRecord..HouseHistroy as h1 where inbizcode is not null and business is not null and h1.no='" +rstHouse.getString("No")+"'" +
-                        " group by inbizcode) " +
-                        " ) as a " +
-                        " left join DGHouseRecord..Business as hb on a.inbizcode=hb.nameid " +
-                        " where hb.workid not like '%WP50' and  hb.workid not like '%WP51' and  hb.workid not like '%WP85' and " +
-                        " hb.workid not like '%WP42' and hb.workid not like '%WP43' " +
-                        " and hb.workid not like '%WP52' and hb.workid not like '%WP53' and hb.workid not like '%WP54'" +
-                        " and hb.workid not like '%WP55' and hb.workid not like '%WP76' and hb.workid not like '%WP77'" +
-                        " and hb.workid not like '%WP78' and hb.workid not like '%WP79' and hb.workid not like '%WP80'" +
-                        " and hb.workid not like '%WP44' and hb.workid not like '%WP45' and hb.workid not like '%WP46'" +
-                        " and hb.workid not like '%WP47' and hb.workid not like '%WP48' and hb.workid not like '%WP49'" +
-                        " and hb.workid not like '%WP32' and hb.workid not like '%WP33' and hb.workid not like '%WP35'" +
-                        " and hb.workid not like '%WP36' and hb.workid not like '%WP37' and hb.workid not like '%WP38'" +
-                        " and hb.workid not like '%WP34' and hb.workid not like '%WP39' and hb.workid not like '%WP69'" +
-                        " and hb.workid not like '%WP70' and hb.workid not like '%WP22' and hb.workid not like '%WP23'" +
-                        " and hb.workid not like '%WP24' and hb.workid not like '%WP25' and hb.workid not like '%WP26'" +
-                        " and hb.workid not like '%WP27' and hb.workid not like '%WP28' and hb.workid not like '%WP29'" +
-                        " and hb.workid not like '%WP29' and hb.workid not like '%WP18' and hb.workid not like '%WP19'" +
-                        " and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP21'" +
-                        " and hb.workid not like '%WP73' and hb.workid not like '%WP74' and hb.workid not like '%WP81'" +
-                        " and hb.workid not like '%WP82' and hb.workid not like '%WP88' and " +
-                        " hb.b>='"+BEGIN_DATE+"'"+
-                        " order by a.no,hb.Botime");
+                ResultSet rstRecortRecord = statementRecord.executeQuery("select hb.id as dbid,* from DGHouseRecord..Business as hb left join " +
+                        "HouseHistroy as hh on hb.id=hh.Business where " +
+                        "hb.workid not like '%WP50' and  hb.workid not like '%WP51' and  hb.workid not like '%WP85' " +
+                        "and hb.workid not like '%WP42' and hb.workid not like '%WP43' " +
+                        "and hb.workid not like '%WP52' and hb.workid not like '%WP53' and hb.workid not like '%WP54' " +
+                        "and hb.workid not like '%WP55' and hb.workid not like '%WP76' and hb.workid not like '%WP77' " +
+                        "and hb.workid not like '%WP78' and hb.workid not like '%WP79' and hb.workid not like '%WP80' " +
+                        "and hb.workid not like '%WP44' and hb.workid not like '%WP45' and hb.workid not like '%WP46' " +
+                        "and hb.workid not like '%WP47' and hb.workid not like '%WP48' and hb.workid not like '%WP49' " +
+                        "and hb.workid not like '%WP32' and hb.workid not like '%WP33' and hb.workid not like '%WP35' " +
+                        "and hb.workid not like '%WP36' and hb.workid not like '%WP37' and hb.workid not like '%WP38' " +
+                        "and hb.workid not like '%WP34' and hb.workid not like '%WP39' and hb.workid not like '%WP69' " +
+                        "and hb.workid not like '%WP70' and hb.workid not like '%WP22' and hb.workid not like '%WP23' " +
+                        "and hb.workid not like '%WP24' and hb.workid not like '%WP25' and hb.workid not like '%WP26' " +
+                        "and hb.workid not like '%WP27' and hb.workid not like '%WP28' and hb.workid not like '%WP29' " +
+                        "and hb.workid not like '%WP29' and hb.workid not like '%WP18' and hb.workid not like '%WP19' " +
+                        "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP21' " +
+                        "and hb.workid not like '%WP73' and hb.workid not like '%WP74' and hb.workid not like '%WP81' " +
 
+                        "and hb.workid not like '%WP11' and hb.workid not like '%WP12' and hb.workid not like '%WP10' " +
+                        "and hb.workid not like '%WP14' and hb.workid not like '%WP15' and hb.workid not like '%WP16' " +
+                        "and hb.workid not like '%WP17' and hb.workid not like '%WP84' and hb.workid not like '%WP3' " +
+                        "and hb.workid not like '%WP4' and hb.workid not like '%WP6' and hb.workid not like '%WP7' " +
+                        "and hb.workid not like '%WP8' and hb.workid not like '%WP2' and hb.workid not like '%WP82'" +
+                        "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP30' " +
+                        "and hb.workid not like '%WP31' "+
+                        "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' "+
+                        "and hh.id is not null " +
+                        "and hh.no='" +rstHouse.getString("no")+"'"+
+                        "order by hh.no,hb.botime");
 
                 rstRecortRecord.last();
                 int recordCount = rstRecortRecord.getRow();
-                if (recordCount > 0){//有需要导入的业务
+                System.out.println(recordCount);
+                if (recordCount > 0) {//有需要导入的业务
+                    isFirst = true;
+                    addStateisFirst = true;
+                    String lastState=null;
                     rstRecortRecord.beforeFirst();
-                    while (rstRecortRecord.next()){
-                        String[] temp;
-                        if (rstRecortRecord.getString("workid").contains("A")) {
-                            temp = rstRecortRecord.getString("workid").split("_");
 
-                        } else {
-                            temp = rstRecortRecord.getString("workid").split("#");
-                        }
-                        DEFINE_ID = temp[temp.length - 1];//业务标识WP40
+                    while (rstRecortRecord.next()) {
+                        if (!REPEAT_NAMEID.contains(rstRecortRecord.getString("Nameid"))) {//重复的业务判断
+                            REPEAT_NAMEID.add(rstRecortRecord.getString("Nameid"));
+                            haveRepeat = false;
 
-                        ResultSet resultSetbizNmae = statementShark.executeQuery("select memo from Shark..DGBiz where ID='"+rstRecortRecord.getString("BizID")+"'");
-                        resultSetbizNmae.next();
-                        if (resultSetbizNmae.getString("memo")!=null){
-                            DEFINE_NAME = resultSetbizNmae.getString("memo");
-                        }else{
-                            DEFINE_NAME = "未知";
+                        }else {
+                            haveRepeat = true;
                         }
 
+                            if (!haveRepeat){
 
-                        selectbizid = null;
+                                if (!HOUSE_ERROR.contains(rstHouse.getString("no"))) {
 
-                        if (SELECT_DEFINE_ID.contains(DEFINE_ID)){//判断是否导入selectbiz
-                            System.out.println(DEFINE_ID);
-                            System.out.println("1111-"+rstRecortRecord.getString("SelectBiz"));
+                                    String[] temp;
+                                    if (rstRecortRecord.getString("workid").contains("A")) {
+                                        temp = rstRecortRecord.getString("workid").split("_");
+                                    } else {
+                                        temp = rstRecortRecord.getString("workid").split("#");
+                                    }
+                                    DEFINE_ID = temp[temp.length - 1];//业务标识WP40
 
-                            if ((rstRecortRecord.wasNull())){
-                                System.out.println(2222);
-
-                            }else {
-                                System.out.println(4444);
-                            }
-                            if (!(rstRecortRecord.wasNull())
-                                    && !rstRecortRecord.getString("SelectBiz").equals("")){
-                                selectbizid = rstRecortRecord.getString("SelectBiz");
-                                System.out.println("SelectBiz--" + rstRecortRecord.getString("SelectBiz"));
-
-                                ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortRecord.getString("SelectBiz") + "'");
-                                rstRecortbiz.next();
-                                System.out.println("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortRecord.getString("SelectBiz") + "'");
-                                if (!(rstRecortbiz.wasNull()) && !rstRecortbiz.getString("RecordBizNO").equals("")) {
-                                    selectbizid = rstRecortbiz.getString("RecordBizNO");
-                                } else {
+                                    ResultSet resultSetbizNmae = statementShark.executeQuery("select memo from Shark..DGBiz where ID='" + rstRecortRecord.getString("BizID") + "'");
+                                    resultSetbizNmae.next();
+                                    if (resultSetbizNmae.getString("memo") != null) {
+                                        DEFINE_NAME = resultSetbizNmae.getString("memo");
+                                    } else {
+                                        DEFINE_NAME = "未知";
+                                    }
                                     selectbizid = null;
+                                    if (SELECT_DEFINE_ID.contains(DEFINE_ID)) {//判断是否导入selectbiz
+                                        if (rstRecortRecord.getString("SelectBiz") != null) {
+                                            selectbizid = rstRecortRecord.getString("SelectBiz");
+                                            System.out.println("SelectBiz--" + rstRecortRecord.getString("SelectBiz"));
+                                            ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortRecord.getString("SelectBiz") + "'");
+                                            if (rstRecortbiz.next() && !rstRecortbiz.getString("RecordBizNO").equals("")) {
+                                                selectbizid = rstRecortbiz.getString("RecordBizNO");
+                                            } else {
+                                                selectbizid = null;
+                                            }
+                                        }
+                                    }
+                                    sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
+                                            " CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE,SEARCH_KEY,DISPLAY,NAMEID) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortRecord.getString("MEMO"))
+                                            , "'COMPLETE'", Q.p(DEFINE_NAME), Q.pm(DEFINE_ID), "0", Q.p(selectbizid), Q.p(rstRecortRecord.getTimestamp("BOTime"))
+                                            , Q.p(rstRecortRecord.getTimestamp("BOTime")), "Null", Q.p(rstRecortRecord.getTimestamp("BOTime")), Q.p(rstRecortRecord.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'", "''", "''",Q.p(rstRecortRecord.getString("Nameid"))) + ");");
+                                    sqlWriter.newLine();
+
+                                    if (selectbizid != null) {
+                                        sqlWriter.write("UPDATE OWNER_BUSINESS SET STATUS='COMPLETE_CANCEL' WHERE ID='" + selectbizid + "';");
+                                        sqlWriter.newLine();
+                                    }
+
+
+                                    //查找新库按房屋编号查取HouseRecord，取得startHouseid
+                                    ResultSet resultSetOwnerRecord = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
+
+                                    if (resultSetOwnerRecord.next() && isFirst) {
+
+                                        stratHouseId = resultSetOwnerRecord.getString("HOUSE");
+                                        afterHouseId = rstRecortRecord.getString("RecordBizNO");
+                                        isFirst = false;
+                                        System.out.println("aaaa");
+                                    } else {
+                                        if (isFirst) {
+                                            stratHouseId = rstRecortRecord.getString("RecordBizNO") + "-s";
+                                            afterHouseId = rstRecortRecord.getString("RecordBizNO");
+                                            isFirst = true;
+                                            System.out.println("bbbb");
+                                        } else {
+                                            stratHouseId = afterHouseId;
+                                            afterHouseId = rstRecortRecord.getString("RecordBizNO");
+                                            isFirst = false;
+                                            System.out.println("ccccc");
+                                        }
+                                    }
+                                    System.out.println("stratHouseId-" + stratHouseId);
+                                    System.out.println("afterHouseId-" + afterHouseId);
+                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
+
+
+                                    if (isFirst) {
+                                        sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                                "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                                "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                                "MAP_TIME,HOUSE_CODE, " +
+                                                "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                                "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                                "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                                " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                                "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                                "UNIT_NUMBER) VALUES");
+                                        sqlWriter.write("(" + Q.v(Q.p(stratHouseId), Q.pm(rstRecortRecord.getString("HouseOrder"))
+                                                , Q.pm(rstRecortRecord.getString("UnitName")), Q.pm(rstRecortRecord.getString("InFloorName"))
+                                                , Q.pm(rstRecortRecord.getBigDecimal("HouseArea")), Q.pm(rstRecortRecord.getBigDecimal("UseArea"))
+                                                , Q.pm(rstRecortRecord.getBigDecimal("CommParam")), Q.pm(rstRecortRecord.getBigDecimal("ShineArea"))
+                                                , Q.pm(rstRecortRecord.getBigDecimal("LoftArea")), Q.pm(rstRecortRecord.getBigDecimal("CommArea"))
+                                                , Q.changeHouseType(rstRecortRecord.getInt("HouseType")), rstRecortRecord.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                                , rstRecortRecord.getString("Structure") != null ? Q.changeStructure(rstRecortRecord.getInt("Structure")) : "'未知'"
+                                                , Q.pm(rstRecortRecord.getString("HouseStation")), Q.pm(rstRecortRecord.getString("mappingDate") != null ? (!rstRecortRecord.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortRecord.getString("mappingDate") : rstRecortRecord.getString("ChangeDate")) : rstRecortRecord.getString("ChangeDate"))
+                                                , Q.pm(rstRecortRecord.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                                , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstHouse.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                                , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                                , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                                , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                                , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                                , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                                , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                        sqlWriter.newLine();
+
+                                        if (rstRecortRecord.isLast() == false) {//是否是最后一手
+
+                                            sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                                    "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                                    "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                                    "MAP_TIME,HOUSE_CODE, " +
+                                                    "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                                    "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                                    "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                                    " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                                    "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                                    "UNIT_NUMBER) VALUES");
+
+                                            sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm(rstRecortRecord.getString("HouseOrder"))
+                                                    , Q.pm(rstRecortRecord.getString("UnitName")), Q.pm(rstRecortRecord.getString("InFloorName"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("HouseArea")), Q.pm(rstRecortRecord.getBigDecimal("UseArea"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("CommParam")), Q.pm(rstRecortRecord.getBigDecimal("ShineArea"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("LoftArea")), Q.pm(rstRecortRecord.getBigDecimal("CommArea"))
+                                                    , Q.changeHouseType(rstRecortRecord.getInt("HouseType")), rstRecortRecord.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                                    , rstRecortRecord.getString("Structure") != null ? Q.changeStructure(rstRecortRecord.getInt("Structure")) : "'未知'"
+                                                    , Q.pm(rstRecortRecord.getString("HouseStation")), Q.pm(rstRecortRecord.getString("mappingDate") != null ? (!rstRecortRecord.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortRecord.getString("mappingDate") : rstRecortRecord.getString("ChangeDate")) : rstRecortRecord.getString("ChangeDate"))
+                                                    , Q.pm(rstRecortRecord.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                                    , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstHouse.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                                    , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                                    , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                                    , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                                    , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                                    , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                            sqlWriter.newLine();
+                                        }else{//是最后一手
+                                            System.out.println("单个最后"+rstRecortRecord.getString("RecordBizNO"));
+                                            sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                                    "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                                    "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                                    "MAP_TIME,HOUSE_CODE, " +
+                                                    "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                                    "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                                    "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                                    " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                                    "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                                    "UNIT_NUMBER) VALUES");
+
+                                            sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm(rstHouse.getString("HouseOrder"))
+                                                    , Q.pm(rstHouse.getString("UnitName")), Q.pm(rstHouse.getString("InFloorName"))
+                                                    , Q.pm(rstHouse.getBigDecimal("HouseArea")), Q.pm(rstHouse.getBigDecimal("UseArea"))
+                                                    , Q.pm(rstHouse.getBigDecimal("CommParam")), Q.pm(rstHouse.getBigDecimal("ShineArea"))
+                                                    , Q.pm(rstHouse.getBigDecimal("LoftArea")), Q.pm(rstHouse.getBigDecimal("CommArea"))
+                                                    , Q.changeHouseType(rstHouse.getInt("HouseType")), rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                                    , rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
+                                                    , Q.pm(rstHouse.getString("HouseStation")), Q.pm(rstRecortRecord.getString("mappingDate") != null ? (!rstRecortRecord.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortRecord.getString("mappingDate") : rstRecortRecord.getString("ChangeDate")) : rstRecortRecord.getString("ChangeDate"))
+                                                    , Q.pm(rstRecortRecord.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                                    , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstHouse.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                                    , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                                    , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                                    , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                                    , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                                    , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                            sqlWriter.newLine();
+
+                                        }
+
+
+                                    } else {
+                                        if (rstRecortRecord.isLast() == false) {//是否是最后一手
+                                            sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                                    "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                                    "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                                    "MAP_TIME,HOUSE_CODE, " +
+                                                    "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                                    "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                                    "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                                    " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                                    "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                                    "UNIT_NUMBER) VALUES");
+
+                                            sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm(rstRecortRecord.getString("HouseOrder"))
+                                                    , Q.pm(rstRecortRecord.getString("UnitName")), Q.pm(rstRecortRecord.getString("InFloorName"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("HouseArea")), Q.pm(rstRecortRecord.getBigDecimal("UseArea"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("CommParam")), Q.pm(rstRecortRecord.getBigDecimal("ShineArea"))
+                                                    , Q.pm(rstRecortRecord.getBigDecimal("LoftArea")), Q.pm(rstRecortRecord.getBigDecimal("CommArea"))
+                                                    , Q.changeHouseType(rstRecortRecord.getInt("HouseType")), rstRecortRecord.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                                    , rstRecortRecord.getString("Structure") != null ? Q.changeStructure(rstRecortRecord.getInt("Structure")) : "'未知'"
+                                                    , Q.pm(rstRecortRecord.getString("HouseStation")), Q.pm(rstRecortRecord.getString("mappingDate") != null ? (!rstRecortRecord.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortRecord.getString("mappingDate") : rstRecortRecord.getString("ChangeDate")) : rstRecortRecord.getString("ChangeDate"))
+                                                    , Q.pm(rstRecortRecord.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                                    , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstHouse.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                                    , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                                    , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                                    , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                                    , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                                    , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                            sqlWriter.newLine();
+                                        }else{
+                                            System.out.println("多笔业务最后---"+rstRecortRecord.getString("RecordBizNO"));
+                                            sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                                    "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                                    "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                                    "MAP_TIME,HOUSE_CODE, " +
+                                                    "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                                    "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                                    "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                                    " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                                    "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                                    "UNIT_NUMBER) VALUES");
+
+                                            sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm(rstHouse.getString("HouseOrder"))
+                                                    , Q.pm(rstHouse.getString("UnitName")), Q.pm(rstHouse.getString("InFloorName"))
+                                                    , Q.pm(rstHouse.getBigDecimal("HouseArea")), Q.pm(rstHouse.getBigDecimal("UseArea"))
+                                                    , Q.pm(rstHouse.getBigDecimal("CommParam")), Q.pm(rstHouse.getBigDecimal("ShineArea"))
+                                                    , Q.pm(rstHouse.getBigDecimal("LoftArea")), Q.pm(rstHouse.getBigDecimal("CommArea"))
+                                                    , Q.changeHouseType(rstHouse.getInt("HouseType")), rstHouse.getString("UseType") != null ? Q.changeUseType(rstHouse.getInt("UseType")) : "'未知'"
+                                                    , rstHouse.getString("Structure") != null ? Q.changeStructure(rstHouse.getInt("Structure")) : "'未知'"
+                                                    , Q.pm(rstHouse.getString("HouseStation")), Q.pm(rstRecortRecord.getString("mappingDate") != null ? (!rstRecortRecord.getString("mappingDate").equals("1899-12-30 00:00:00.0") ? rstRecortRecord.getString("mappingDate") : rstRecortRecord.getString("ChangeDate")) : rstRecortRecord.getString("ChangeDate"))
+                                                    , Q.pm(rstRecortRecord.getString("No")), "False", Q.pm("N" + rstHouse.getString("bno")), Q.pm(rstHouse.getString("MapNo")), Q.pm(rstHouse.getString("BlockNo"))
+                                                    , Q.pm(rstHouse.getString("BuildNo")), Q.pm(rstHouse.getString("DoorNo")), rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1"
+                                                    , rstHouse.getString("FloorCount") != null ? Q.pm(rstHouse.getString("FloorCount")) : "1", "0"
+                                                    , Q.p(rstHouse.getString("BuildType")), Q.pm("N" + rstHouse.getString("hpno")), Q.pm(rstHouse.getString("hpnmae"))
+                                                    , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
+                                                    , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
+                                                    , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                            sqlWriter.newLine();
+
+                                        }
+                                    }
+                                    //--- BUSINESS_HOUSE
+                                    sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
+                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(rstRecortRecord.getString("NO"))
+                                            , Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.p(stratHouseId), Q.p(afterHouseId), "True", "''", "''" + ");"));
+                                    sqlWriter.newLine();
+
+                                    // 房屋状态 ===ADD_HOUSE_STATUS 交易备案 初始登记
+
+
+                                    if (DEAL_DEFINE_ID.contains(DEFINE_ID) || DEFINE_ID.contains("WP40")){
+                                        sqlWriter.write("INSERT ADD_HOUSE_STATUS (ID, BUSINESS, STATUS, IS_REMOVE) VALUES  ");
+                                        if(!DEFINE_ID.contains("WP40")){
+                                            sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")), Q.p(rstRecortRecord.getString("RecordBizNO"))
+                                                    , Q.p("OWNERED"), Q.p(false) + ");"));
+
+                                        }else {
+                                            sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")), Q.p(rstRecortRecord.getString("RecordBizNO"))
+                                                    , Q.p("INIT_REG"), Q.p(false) + ");"));
+                                            lastState = "INIT_REG";
+                                        }
+
+                                        sqlWriter.newLine();
+                                    }
+
+                                    if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
+                                        lastState="OWNERED";
+
+                                    }
+                                    if (lastState== null && DEFINE_ID.contains("WP40")){
+                                        lastState = "INIT_REG";
+                                    }
+
+                                    // ===HOUSE_RECORD 房屋主状态表
+                                    if (rstRecortRecord.isLast() == true){//判断是不是最后一手
+                                        ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
+                                        if (resultSetLast.next()){//删除第一次导入的房屋状态
+                                            if (lastState.equals("OWNERED")) {
+                                                sqlWriter.write("DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "';");
+                                                sqlWriter.newLine();
+                                                sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
+                                                        , Q.p(lastState),"''","''" + ");"));
+                                                sqlWriter.newLine();
+                                            }
+                                        }else{
+                                            sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
+                                                    , Q.p(lastState),"''","''" + ");"));
+                                            sqlWriter.newLine();
+
+                                        }
+                                        System.out.println("afterHouseId+lastState--"+afterHouseId+":"+lastState);
+
+                                    }
+
+
+
+
+
+                                    //产权人，共有人，预告人，初始登记人，
+                                    if (rstRecortRecord.getString("Nameid").contains("WP")){//判断是否老库读取
+                                        //初始登记导入开发商 //导入产权证 初始登记人 判断nameid 带不带wp 不带
+                                        if (DEFINE_ID.equals("WP40")){
+                                            houseResultSet = statementHousech.executeQuery("select hc.* from DGHouseRecord..Business as hb left join" +
+                                                    " DGHouseInfo..HouseCard as hc on hb.id=hc.bizid where hb.id='"+rstRecortRecord.getString("dbid")+"'");
+                                            if (houseResultSet.next()){
+                                                sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        Q.pm(houseResultSet.getString("no")),"'OWNER_RSHIP'",
+                                                        Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "True"+ ");"));
+                                                sqlWriter.newLine();
+
+                                            }else{
+                                                sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "''","'OWNER_RSHIP'",
+                                                        Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "True"+ ");"));
+                                                sqlWriter.newLine();
+
+                                            }
+                                            sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO," +
+                                                    " PHONE," +
+                                                    " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(rstHouse.getString("pname"))
+                                                    , Q.pm("COMPANY_CODE"),Q.pm("未知") , Q.pm("未知")
+                                                    , Q.p("INIT"), "'1'"
+                                                    , Q.p(rstRecortRecord.getString("RecordBizNO")),"'flase'" + ");"));
+                                            sqlWriter.newLine();
+
+---//开发商代理人
+
+
+                                        }else if (DEFINE_ID.equals("WP75")){//集资建房初始登记 产权人
+
+                                        }else if (DEFINE_ID.equals("WP1")){//预告人
+
+
+                                        }else{
+                                            if (rstRecortRecord.isLast() == false) {
+
+
+                                            } else {//取空间库的产权人
+
+
+                                            }
+                                        }
+                                    }else {
+                                        if (DEFINE_ID.equals("WP40")){
+
+                                        }
+
+                                    }
+
+
+
+
+
+
+
+
+                                    isFirst = false;
+                                    addStateisFirst= false;
                                 }
-                            }
+
                         }
-                        sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
-                                " CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
-                        sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")), "0", "'BIZ_IMPORT'", Q.p(rstRecortRecord.getString("MEMO"))
-                                , "'COMPLETE'",DEFINE_NAME, Q.pm(DEFINE_ID), "0", Q.p(selectbizid), Q.p(rstRecortRecord.getTimestamp("BOTime"))
-                                , Q.p(rstRecortRecord.getTimestamp("BOTime")), "Null", Q.p(rstRecortRecord.getTimestamp("BOTime")), Q.p(rstRecortRecord.getTimestamp("BOTime")), "False", "'NORMAL_BIZ'") + ");");
-                        sqlWriter.newLine();
-
-
-
-
-
-
-
                     }
-
                 }
                 i++;
                 System.out.println(i+"/"+String.valueOf(sumCount));
@@ -336,7 +727,7 @@ public class DGHouseOwnerRecord {
             }
             System.out.println("record is complate");
         } catch (Exception e) {
-            System.out.println("record is errer");
+            System.out.println("record is errer"+rstHouse.getString("No"));
             e.printStackTrace();
             return;
         }

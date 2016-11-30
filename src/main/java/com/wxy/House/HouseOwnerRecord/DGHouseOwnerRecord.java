@@ -63,6 +63,8 @@ public class DGHouseOwnerRecord {
 
     private static Statement statementHousech;
 
+    private static Statement statementHousech2;
+
     private static Statement statementShark;
 
     private static Statement statementOwnerRecord;
@@ -87,7 +89,7 @@ public class DGHouseOwnerRecord {
 
     private static Set<String> DEAL_DEFINE_ID= new HashSet<>();
 
-
+    private static Set<String> POOL_OWNER_ID = new HashSet<>();
 
     private static String DEFINE_ID;
     private static String DEFINE_NAME;
@@ -123,7 +125,7 @@ public class DGHouseOwnerRecord {
         //不导入的业务编号
         NO_EXCEPTION_DEFINE_ID.add("WP30");//新建房屋
         NO_EXCEPTION_DEFINE_ID.add("WP31");//无籍房屋
-
+        NO_EXCEPTION_DEFINE_ID.add("WP75");//集资建房初始登记
 
         NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
         NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
@@ -264,6 +266,7 @@ public class DGHouseOwnerRecord {
             houseConnection = DriverManager.getConnection(DB_HOUSE_URL, "sa", "dgsoft");
             statementHouse = houseConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementHousech = houseConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            statementHousech2 = houseConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             System.out.println("houseConnection successful");
         } catch (Exception e) {
             System.out.println("houseConnection is errer");
@@ -307,7 +310,8 @@ public class DGHouseOwnerRecord {
                     " left join Section as hs on d.sectionid=hs.id) as e"+
 //                    " left join District as hd on e.DistrictID = hd.id");
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='B94N1-5-02')"); // 单笔116146 多69759 初始 B94N1-5-02
+                    " where (e.no='B9N4-7-01')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
+
             rstHouse.last();
             System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
             int sumCount = rstHouse.getRow();
@@ -340,7 +344,7 @@ public class DGHouseOwnerRecord {
                         "and hb.workid not like '%WP4' and hb.workid not like '%WP6' and hb.workid not like '%WP7' " +
                         "and hb.workid not like '%WP8' and hb.workid not like '%WP2' and hb.workid not like '%WP82'" +
                         "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP30' " +
-                        "and hb.workid not like '%WP31' "+
+                        "and hb.workid not like '%WP31' and hb.workid not like '%WP75' "+
                         "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' "+
                         "and hh.id is not null " +
                         "and hh.no='" +rstHouse.getString("no")+"'"+
@@ -493,7 +497,7 @@ public class DGHouseOwnerRecord {
                                                     , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                                     , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
                                                     , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
-                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null",rstRecortRecord.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortRecord.getInt("PoolMemo")):"Null", "Null", "Null", "Null", "''", "''" + ");"));
                                             sqlWriter.newLine();
                                         }else{//是最后一手
                                             System.out.println("单个最后"+rstRecortRecord.getString("RecordBizNO"));
@@ -523,7 +527,7 @@ public class DGHouseOwnerRecord {
                                                     , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                                     , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
                                                     , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
-                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null",rstHouse.getString("PoolMemo")!=null?Q.changePoolMemo(rstHouse.getInt("PoolMemo")):"Null", "Null", "Null", "Null", "''", "''" + ");"));
                                             sqlWriter.newLine();
 
                                         }
@@ -557,7 +561,7 @@ public class DGHouseOwnerRecord {
                                                     , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                                     , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
                                                     , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
-                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null",rstRecortRecord.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortRecord.getInt("PoolMemo")):"Null", "Null", "Null", "Null", "''", "''" + ");"));
                                             sqlWriter.newLine();
                                         }else{
                                             System.out.println("多笔业务最后---"+rstRecortRecord.getString("RecordBizNO"));
@@ -587,7 +591,7 @@ public class DGHouseOwnerRecord {
                                                     , rstHouse.getTimestamp("FirmlyDate") != null ? Q.p(simpleDateFormat.format(rstHouse.getTimestamp("FirmlyDate"))) : "NULL"
                                                     , Q.pm("N" + rstHouse.getString("pno")), Q.pm(rstHouse.getString("pname")), Q.pm("N" + rstHouse.getString("hsno"))
                                                     , Q.pm(rstHouse.getString("hsname")), Q.pm("N" + rstHouse.getString("hdno")), Q.pm(rstHouse.getString("hdname"))
-                                                    , Q.pm(rstHouse.getString("BuildName")), "Null", "Null", "Null", "Null", "Null", "''", "''" + ");"));
+                                                    , Q.pm(rstHouse.getString("BuildName")), "Null",rstHouse.getString("PoolMemo")!=null?Q.changePoolMemo(rstHouse.getInt("PoolMemo")):"Null", "Null", "Null", "Null", "''", "''" + ");"));
                                             sqlWriter.newLine();
 
                                         }
@@ -625,25 +629,28 @@ public class DGHouseOwnerRecord {
                                     }
 
                                     // ===HOUSE_RECORD 房屋主状态表
-                                    if (rstRecortRecord.isLast() == true){//判断是不是最后一手
-                                        ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
-                                        if (resultSetLast.next()){//删除第一次导入的房屋状态
-                                            if (lastState.equals("OWNERED")) {
-                                                sqlWriter.write("DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "';");
-                                                sqlWriter.newLine();
+                                    if (rstRecortRecord.isLast() == true) {//判断是不是最后一手
+                                        System.out.println("aaaa-" + lastState);
+                                        if (lastState != null) {
+                                            ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
+                                            if (resultSetLast.next()) {//删除第一次导入的房屋状态
+                                                if (lastState.equals("OWNERED")) {
+                                                    sqlWriter.write("DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "';");
+                                                    sqlWriter.newLine();
+                                                    sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
+                                                            , Q.p(lastState), "''", "''" + ");"));
+                                                    sqlWriter.newLine();
+                                                }
+                                            } else {
                                                 sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
                                                 sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
-                                                        , Q.p(lastState),"''","''" + ");"));
+                                                        , Q.p(lastState), "''", "''" + ");"));
                                                 sqlWriter.newLine();
-                                            }
-                                        }else{
-                                            sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
-                                            sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
-                                                    , Q.p(lastState),"''","''" + ");"));
-                                            sqlWriter.newLine();
 
+                                            }
+                                            System.out.println("afterHouseId+lastState--" + afterHouseId + ":" + lastState);
                                         }
-                                        System.out.println("afterHouseId+lastState--"+afterHouseId+":"+lastState);
 
                                     }
 
@@ -652,11 +659,12 @@ public class DGHouseOwnerRecord {
 
 
                                     //产权人，共有人，预告人，初始登记人，
+                                    boolean isFind = false;
                                     if (rstRecortRecord.getString("Nameid").contains("WP")){//判断是否老库读取
                                         //初始登记导入开发商 //导入产权证 初始登记人 判断nameid 带不带wp 不带
                                         if (DEFINE_ID.equals("WP40")){
                                             houseResultSet = statementHousech.executeQuery("select hc.* from DGHouseRecord..Business as hb left join" +
-                                                    " DGHouseInfo..HouseCard as hc on hb.id=hc.bizid where hb.id='"+rstRecortRecord.getString("dbid")+"'");
+                                                    " DGHouseInfo..HouseCard as hc on hb.id=hc.bizid and hc.id is not null where hb.id='"+rstRecortRecord.getString("dbid")+"'");
                                             if (houseResultSet.next()){
                                                 sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
                                                 sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")),
@@ -664,6 +672,8 @@ public class DGHouseOwnerRecord {
                                                         Q.p(rstRecortRecord.getString("RecordBizNO")),
                                                         "True"+ ");"));
                                                 sqlWriter.newLine();
+
+
 
                                             }else{
                                                 sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
@@ -674,46 +684,403 @@ public class DGHouseOwnerRecord {
                                                 sqlWriter.newLine();
 
                                             }
+                                            //初始登记代理人
+                                            String dlrid = SlectInfo.svs(statementRecordch, "sellers_agent", rstRecortRecord.getString("RecordBizNO"));
+                                            String dlrbizid=null;
+                                            if (dlrid!=null){
+                                                ResultSet dlrResultSet = SlectInfo.bar(statementHousech2, dlrid);
+                                                if (dlrResultSet!=null){
+
+                                                    sqlWriter.write("INSERT PROXY_PERSON (ID, TYPE, NAME, ID_TYPE, ID_NO, PHONE) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm("ENTRUSTED")
+                                                            , Q.pm(dlrResultSet.getString("Name")), Q.pCardType(dlrResultSet.getInt("IDType"))
+                                                            , Q.pm(dlrResultSet.getString("IDNO")), Q.pm(dlrResultSet.getString("Phone")) + ");"));
+                                                    sqlWriter.newLine();
+                                                    dlrbizid = rstRecortRecord.getString("RecordBizNO");
+                                                }
+                                            }
+                                            //将开发商添加城产权人
                                             sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO," +
                                                     " PHONE," +
                                                     " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
                                             sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(rstHouse.getString("pname"))
                                                     , Q.pm("COMPANY_CODE"),Q.pm("未知") , Q.pm("未知")
                                                     , Q.p("INIT"), "'1'"
-                                                    , Q.p(rstRecortRecord.getString("RecordBizNO")),"'flase'" + ");"));
+                                                    , Q.p(rstRecortRecord.getString("RecordBizNO")),"false",Q.p(dlrbizid) + ");"));
                                             sqlWriter.newLine();
 
----//开发商代理人
+                                            //修改afterhouse产权人
+                                            sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                            sqlWriter.newLine();
 
+                                            //房屋与产权人关联
+                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                            sqlWriter.newLine();
+                                        }else if (DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5")){//预告人
+                                            String ygrID = null;
+                                            if (rstRecortRecord.getString("Mainowner")!=null && !rstRecortRecord.getString("Mainowner").equals("")){
+                                                ygrID = rstRecortRecord.getString("Mainowner");
+                                            }else{
+                                                ygrID = SlectInfo.svs(statementRecordch, "dept_people", rstRecortRecord.getString("RecordBizNO"));
+                                            }
 
-                                        }else if (DEFINE_ID.equals("WP75")){//集资建房初始登记 产权人
-
-                                        }else if (DEFINE_ID.equals("WP1")){//预告人
-
-
-                                        }else{
-                                            if (rstRecortRecord.isLast() == false) {
-
-
-                                            } else {//取空间库的产权人
+                                            if (ygrID!=null){
+                                                ResultSet ygrResultSet = SlectInfo.bar(statementHousech2,ygrID);
+                                                if (ygrResultSet!=null){
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                            " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(ygrResultSet.getString("Name"))
+                                                            , Q.pCardType(ygrResultSet.getInt("IDType")),Q.pm(ygrResultSet.getString("IDNO")),Q.pm(ygrResultSet.getString("Phone"))
+                                                            , Q.p(ygrResultSet.getString("Address"))
+                                                            , Q.p("PREPARE"), "'1'"
+                                                            , "Null","false","NULL" + ");"));
+                                                    sqlWriter.newLine();
+                                                    isFind = true;
+                                                }
+                                            }
+                                            if (!isFind){//什么都没有查询到，添一个空记录
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                        " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
+                                                        , "'OTHER'","'未知'","'未知'"
+                                                        , Q.p("PREPARE"), "'1'"
+                                                        , "Null","false","NULL" + ");"));
+                                                sqlWriter.newLine();
 
 
                                             }
-                                        }
-                                    }else {
-                                        if (DEFINE_ID.equals("WP40")){
 
+
+                                            sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                            sqlWriter.newLine();
+                                            //房屋与产权人关联
+                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                            sqlWriter.newLine();
+                                            // 共有权人
+                                            String skgyqr = null;
+                                            skgyqr = SlectInfo.svs(statementRecordch, "owners_no", rstRecortRecord.getString("RecordBizNO"));
+                                            if (skgyqr!=null){
+                                                int j=0;
+                                                for (String str : skgyqr.split(";")) {
+                                                    ResultSet gyrResultSet = SlectInfo.bar(statementHousech2,str.split(",")[0]);
+                                                    if (gyrResultSet!=null){
+                                                        sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                                "PHONE,  ADDRESS, TYPE, PRI," +
+                                                                " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                                Q.pm(gyrResultSet.getString("Name")), Q.pCardType(gyrResultSet.getInt("IDType")),
+                                                                Q.pm(gyrResultSet.getString("IDNO")),
+                                                                str.split(",")[3] != null ? (!str.split(",")[3].equals("0") ? str.split(",")[3] : "NULL") : "Null",
+                                                                Q.p(str.split(",")[2]),
+                                                                Q.pm(gyrResultSet.getString("phone")), Q.pm(gyrResultSet.getString("Address")),
+                                                                Q.pm("OWNER"),Q.p(String.valueOf(j+2)),"Null","false","Null" + ");"));
+                                                        sqlWriter.newLine();
+                                                        sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                                Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                        sqlWriter.newLine();
+                                                        j++;
+                                                    }
+                                                }
+                                            }
+
+                                        }else{
+                                            if (rstRecortRecord.isLast() == false) {
+                                                if (rstRecortRecord.getString("mainowner")!=null &&
+                                                        !rstRecortRecord.getString("mainowner").equals("")){
+                                                    ResultSet cqrResult = SlectInfo.bar(statementHousech2,rstRecortRecord.getString("mainowner"));
+                                                    if (cqrResult!=null){
+                                                        sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                                " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(cqrResult.getString("Name"))
+                                                                , Q.pCardType(cqrResult.getInt("IDType")),Q.pm(cqrResult.getString("IDNO")),Q.pm(cqrResult.getString("Phone"))
+                                                                , Q.p(cqrResult.getString("Address"))
+                                                                , Q.p("OWNER"), "'1'"
+                                                                , "Null","false","NULL" + ");"));
+                                                        sqlWriter.newLine();
+                                                        isFind = true;
+                                                    }
+                                                }
+                                                if (!isFind){//查找没有的，添加一个空的
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                            " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
+                                                            , "'OTHER'","'未知'","'未知'"
+                                                            , Q.p("OWNER"), "'1'"
+                                                            , "Null","false","NULL" + ");"));
+                                                    sqlWriter.newLine();
+
+                                                }
+
+                                                sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                                sqlWriter.newLine();
+
+                                                //房屋与产权人关联
+                                                sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                        Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                                sqlWriter.newLine();
+
+                                                //共有权人
+                                                ResultSet gyqrResultSet=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                        "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='"+rstRecortRecord.getString("dbid")+"'");
+                                                gyqrResultSet.last();
+                                                if (gyqrResultSet.getRow()>0){
+                                                    gyqrResultSet.beforeFirst();
+                                                    int j=0;
+                                                    while (gyqrResultSet.next()){
+                                                        if (!POOL_OWNER_ID.contains(gyqrResultSet.getString("id"))) {
+                                                            POOL_OWNER_ID.add(gyqrResultSet.getString("id"));
+
+
+                                                            sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                                    "PHONE,  ADDRESS, TYPE, PRI," +
+                                                                    " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                                    Q.pm(gyqrResultSet.getString("Name")), Q.pCardType(gyqrResultSet.getInt("IDType")),
+                                                                    Q.pm(gyqrResultSet.getString("IDNO")),
+                                                                    gyqrResultSet.getString("Relation") != null ? (!gyqrResultSet.getString("Relation").equals("0") ? gyqrResultSet.getString("Relation") : "NULL") : "Null",
+                                                                    Q.p(gyqrResultSet.getBigDecimal("PoolArea")),
+                                                                    Q.pm(gyqrResultSet.getString("phone")), Q.pm(gyqrResultSet.getString("Address")),
+                                                                    Q.pm("OWNER"), Q.p(String.valueOf(j + 2)), "Null", "false", "Null" + ");"));
+                                                            sqlWriter.newLine();
+                                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                                    Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                            sqlWriter.newLine();
+                                                            j++;
+                                                        }
+                                                    }
+                                                }
+
+                                            } else {//取空间库的产权人
+                                                if (rstHouse.getString("mainowner")!=null &&
+                                                        !rstHouse.getString("mainowner").equals("")){
+                                                    ResultSet cqrResult = SlectInfo.bar(statementHousech2,rstHouse.getString("mainowner"));
+                                                    if (cqrResult!=null){
+                                                        sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                                " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(cqrResult.getString("Name"))
+                                                                , Q.pCardType(cqrResult.getInt("IDType")),Q.pm(cqrResult.getString("IDNO")),Q.pm(cqrResult.getString("Phone"))
+                                                                , Q.p(cqrResult.getString("Address"))
+                                                                , Q.p("OWNER"), "'1'"
+                                                                , "Null","false","NULL" + ");"));
+                                                        sqlWriter.newLine();
+                                                        isFind = true;
+                                                    }
+                                                }
+                                                if (!isFind){//查找没有的，添加一个空的
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                            " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
+                                                            , "'OTHER'","'未知'","'未知'"
+                                                            , Q.p("OWNER"), "'1'"
+                                                            , "Null","false","NULL" + ");"));
+                                                    sqlWriter.newLine();
+
+                                                }
+
+                                                sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                                sqlWriter.newLine();
+
+                                                //房屋与产权人关联
+                                                sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                        Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                                sqlWriter.newLine();
+
+                                                //共有权人
+                                                ResultSet gyqrResultSet=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                        "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='"+rstRecortRecord.getString("dbid")+"'");
+                                                gyqrResultSet.last();
+                                                if (gyqrResultSet.getRow()>0){
+                                                    gyqrResultSet.beforeFirst();
+                                                    int j=0;
+                                                    while (gyqrResultSet.next()){
+                                                        if (!POOL_OWNER_ID.contains(gyqrResultSet.getString("id"))) {
+                                                            POOL_OWNER_ID.add(gyqrResultSet.getString("id"));
+
+
+                                                            sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                                    "PHONE,  ADDRESS, TYPE, PRI," +
+                                                                    " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                                    Q.pm(gyqrResultSet.getString("Name")), Q.pCardType(gyqrResultSet.getInt("IDType")),
+                                                                    Q.pm(gyqrResultSet.getString("IDNO")),
+                                                                    gyqrResultSet.getString("Relation") != null ? (!gyqrResultSet.getString("Relation").equals("0") ? gyqrResultSet.getString("Relation") : "NULL") : "Null",
+                                                                    Q.p(gyqrResultSet.getBigDecimal("PoolArea")),
+                                                                    Q.pm(gyqrResultSet.getString("phone")), Q.pm(gyqrResultSet.getString("Address")),
+                                                                    Q.pm("OWNER"), Q.p(String.valueOf(j + 2)), "Null", "false", "Null" + ");"));
+                                                            sqlWriter.newLine();
+                                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                                    Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                            sqlWriter.newLine();
+                                                            j++;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }else {//老库导入的数据
+                                        String personType=null;
+                                        if (DEFINE_ID.equals("WP40")){
+                                            personType = "INIT";
+                                            ResultSet fcResultSet=statementFangchan.executeQuery("select y.yw_cqr,sz.sz_zhenghao from fang_chan_dg..c_yewu as y,fang_chan_dg..c_shanzheng as sz " +
+                                                    "where y.keycode=sz.keycode and y.yw_mc_biaoshi ='16' and sz_zhenghao is not null and sz_zhenghao <>'' and y.keycode='"+rstRecortRecord.getString("Nameid")+"'");
+
+                                            if (fcResultSet.next()) {
+                                                sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        Q.pm(fcResultSet.getString("sz_zhenghao")), "'OWNER_RSHIP'",
+                                                        Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "True" + ");"));
+                                                sqlWriter.newLine();
+                                            }else {
+                                                sqlWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "''", "'OWNER_RSHIP'",
+                                                        Q.p(rstRecortRecord.getString("RecordBizNO")),
+                                                        "True" + ");"));
+                                                sqlWriter.newLine();
+                                            }
+                                            //将开发商添加城产权人
+                                            sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO," +
+                                                    " PHONE," +
+                                                    " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(rstHouse.getString("pname"))
+                                                    , Q.pm("COMPANY_CODE"),Q.pm("未知") , Q.pm("未知")
+                                                    , Q.p("INIT"), "'1'"
+                                                    , Q.p(rstRecortRecord.getString("RecordBizNO")),"false","Null" + ");"));
+                                            sqlWriter.newLine();
+
+                                            //修改afterhouse产权人
+                                            sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                            sqlWriter.newLine();
+
+                                            //房屋与产权人关联
+                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                            sqlWriter.newLine();
+
+
+
+                                        }else if(DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5") ){
+                                            personType = "PREPARE";
+                                            ResultSet fcResultSet=statementFangchan.executeQuery("select y.yw_cqr from fang_chan_dg..c_yewu as y " +
+                                                    "where y.yw_cqr is not null and y.yw_cqr<>'' and (y.yw_mc_biaoshi ='336' or y.yw_mc_biaoshi ='340') and y.keycode='"+rstRecortRecord.getString("Nameid")+"'");
+
+                                            if (fcResultSet.next()){
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                        " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(fcResultSet.getString("yw_cqr"))
+                                                        , "'OTHER'","'未知'","'未知'"
+                                                        ,"'未知'"
+                                                        , Q.p("PREPARE"), "'1'"
+                                                        , "Null","false","NULL" + ");"));
+                                                sqlWriter.newLine();
+
+                                            }else{
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                        " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
+                                                        , "'OTHER'","'未知'","'未知'"
+                                                        ,"'未知'"
+                                                        , Q.p("PREPARE"), "'1'"
+                                                        , "Null","false","NULL" + ");"));
+                                                sqlWriter.newLine();
+
+                                            }
+
+                                            sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                            sqlWriter.newLine();
+                                            //房屋与产权人关联
+                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                            sqlWriter.newLine();
+                                            // 共有权人
+                                            ResultSet fcgyResultSet=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
+                                                    "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
+                                            int j=0;
+                                            if (fcgyResultSet.next()){
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                        "PHONE,  ADDRESS, TYPE, PRI," +
+                                                        " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                        Q.pm(fcgyResultSet.getString("gy_ren")), "'MASTER_ID'",
+                                                        Q.pm(fcgyResultSet.getString("gy_card")),
+                                                        "Null","Null","'未知'","Null",
+                                                        Q.pm("OWNER"),Q.p(String.valueOf(j+2)),"Null","false","Null" + ");"));
+                                                sqlWriter.newLine();
+                                                sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                        Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                sqlWriter.newLine();
+                                                j++;
+
+                                            }
+                                        }else{
+                                            personType="OWNER";
+                                            ResultSet fcResultSet=statementFangchan.executeQuery("select y.yw_cqr,y.yw_cqr_card,y.yw_cqr_dianhua from fang_chan_dg..c_yewu as y " +
+                                                    "where y.yw_cqr is not null and y.yw_cqr<>'' and y.keycode='"+rstRecortRecord.getString("Nameid")+"'");
+                                            if(fcResultSet.next()){
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                        " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(fcResultSet.getString("yw_cqr"))
+                                                        , "'OTHER'",Q.pm(fcResultSet.getString("yw_cqr_card")),Q.pm(fcResultSet.getString("yw_cqr_dianhua"))
+                                                        ,"'未知'"
+                                                        , Q.p("PREPARE"), "'1'"
+                                                        , "Null","false","NULL" + ");"));
+                                                sqlWriter.newLine();
+                                            }else {
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                        " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
+                                                        , "'OTHER'","'未知'","'未知'"
+                                                        ,"'未知'"
+                                                        , Q.p("PREPARE"), "'1'"
+                                                        , "Null","false","NULL" + ");"));
+                                                sqlWriter.newLine();
+                                            }
+
+                                            sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                            sqlWriter.newLine();
+                                            //房屋与产权人关联
+                                            sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
+                                            sqlWriter.newLine();
+
+                                            // 共有权人
+                                            ResultSet fcgyResultSet=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
+                                                    "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
+                                            int j=0;
+                                            if (fcgyResultSet.next()){
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                        "PHONE,  ADDRESS, TYPE, PRI," +
+                                                        " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                        Q.pm(fcgyResultSet.getString("gy_ren")), "'MASTER_ID'",
+                                                        Q.pm(fcgyResultSet.getString("gy_card")),
+                                                        "Null","Null","'未知'","Null",
+                                                        Q.pm("OWNER"),Q.p(String.valueOf(j+2)),"Null","false","Null" + ");"));
+                                                sqlWriter.newLine();
+                                                sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                        Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                sqlWriter.newLine();
+                                                j++;
+
+                                            }
                                         }
 
                                     }
-
-
-
-
-
-
-
-
                                     isFirst = false;
                                     addStateisFirst= false;
                                 }
@@ -727,7 +1094,7 @@ public class DGHouseOwnerRecord {
             }
             System.out.println("record is complate");
         } catch (Exception e) {
-            System.out.println("record is errer"+rstHouse.getString("No"));
+            System.out.println("record is errer-----"+rstHouse.getString("No"));
             e.printStackTrace();
             return;
         }

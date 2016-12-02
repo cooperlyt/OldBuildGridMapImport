@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -90,6 +91,8 @@ public class DGHouseOwnerRecord {
     private static Set<String> DEAL_DEFINE_ID= new HashSet<>();
 
     private static Set<String> POOL_OWNER_ID = new HashSet<>();
+
+    private static Set<String> MORTGAEGE_DEFINE_ID = new HashSet<>();
 
     private static String DEFINE_ID;
     private static String DEFINE_NAME;
@@ -204,7 +207,12 @@ public class DGHouseOwnerRecord {
         DEAL_DEFINE_ID.add("WP67");//房改房屋
         DEAL_DEFINE_ID.add("WP68");//分照交易
         DEAL_DEFINE_ID.add("WP72");//回迁房屋
-        //初始登记
+        //抵押登记
+        MORTGAEGE_DEFINE_ID.add("WP1");//预购商品房预告登记
+        MORTGAEGE_DEFINE_ID.add("WP5");//房屋抵押权预告登记
+        MORTGAEGE_DEFINE_ID.add("WP9");//房屋所有权抵押登记
+        MORTGAEGE_DEFINE_ID.add("WP13");//最高额抵押登记
+        MORTGAEGE_DEFINE_ID.add("WP83");//在建工程抵押登记
 
 
         recordFile = new File(OUT_PATH_FILE);
@@ -228,7 +236,7 @@ public class DGHouseOwnerRecord {
             sqlWriter.write("USE HOUSE_OWNER_RECORD;");
 
             sqlWriter.newLine();
-            sqlWriter.write("ALTER TABLE HOUSE_OWNER_RECORD.OWNER_BUSINESS ADD NAMEID VARBINARY (25) NULL;");
+            //sqlWriter.write("ALTER TABLE HOUSE_OWNER_RECORD.OWNER_BUSINESS ADD NAMEID VARBINARY (25) NULL;");
             sqlWriter.newLine();
             sqlWriter.flush();
         } catch (IOException e) {
@@ -310,7 +318,7 @@ public class DGHouseOwnerRecord {
                     " left join Section as hs on d.sectionid=hs.id) as e"+
 //                    " left join District as hd on e.DistrictID = hd.id");
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='B9N4-7-01')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
+                    " where (e.no='B205N1-4-02')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
 
             rstHouse.last();
             System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
@@ -346,6 +354,7 @@ public class DGHouseOwnerRecord {
                         "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP30' " +
                         "and hb.workid not like '%WP31' and hb.workid not like '%WP75' "+
                         "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' "+
+//                        "and hh.id is not null and hb.workid like '%WP13'" +
                         "and hh.id is not null " +
                         "and hh.no='" +rstHouse.getString("no")+"'"+
                         "order by hh.no,hb.botime");
@@ -630,7 +639,7 @@ public class DGHouseOwnerRecord {
 
                                     // ===HOUSE_RECORD 房屋主状态表
                                     if (rstRecortRecord.isLast() == true) {//判断是不是最后一手
-                                        System.out.println("aaaa-" + lastState);
+                                        System.out.println("lastState-" + lastState);
                                         if (lastState != null) {
                                             ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
                                             if (resultSetLast.next()) {//删除第一次导入的房屋状态
@@ -1081,6 +1090,125 @@ public class DGHouseOwnerRecord {
                                         }
 
                                     }
+
+                                    //抵押登记 抵押信息，金融机构  在建工程抵押PROJECT_MORTGAGE
+                                    String financialNo=null;
+                                    boolean finisFind=false;
+                                    if (MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)){
+                                        if (rstRecortRecord.getString("Nameid").contains("WP")) {
+
+                                            financialNo = SlectInfo.svs(statementRecordch, "mortgage_obligee", rstRecortRecord.getString("RecordBizNO"));
+                                            if (financialNo != null) {
+                                                ResultSet fResultSet = SlectInfo.Financia(statementHousech2, financialNo);
+                                                if (fResultSet != null) {
+                                                    sqlWriter.write("INSERT FINANCIAL (ID, NAME, CODE, PHONE, FINANCIAL_TYPE, ID_TYPE, " +
+                                                            "BANK, CREATE_TIME, CARD, PROXY_PERSON) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(fResultSet.getString("Name")),
+                                                            Q.p(fResultSet.getString("No")), Q.p(fResultSet.getString("Phone")), "'FINANCE_CORP'", "Null", "Null",
+                                                            Q.p(rstRecortRecord.getTimestamp("BOTime")), "Null", "Null"
+                                                                    + ");"));
+                                                    sqlWriter.newLine();
+                                                    finisFind = true;
+                                                }
+                                            }
+                                            if (!finisFind) {
+                                                sqlWriter.write("INSERT FINANCIAL (ID, NAME, CODE, PHONE, FINANCIAL_TYPE, ID_TYPE, " +
+                                                        "BANK, CREATE_TIME, CARD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), "'未知'",
+                                                        "Null", "Null", "'FINANCE_CORP'", "Null", "Null",
+                                                        Q.p(rstRecortRecord.getTimestamp("BOTime")), "Null", "Null"
+                                                                + ");"));
+                                                sqlWriter.newLine();
+                                            }
+
+                                            if (DEFINE_ID.equals("WP83")) {
+                                                sqlWriter.write("INSERT PROJECT_MORTGAGE (ID,DEVELOPER_NAME,DEVELOPER_CODE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                        Q.pm(rstHouse.getString("pname")), Q.pm(rstHouse.getString("pno")) + ");"));
+                                                sqlWriter.newLine();
+                                            }
+
+                                            //债权数额
+                                            Double zqse = SlectInfo.svd(statementShark, "highest_mount_money", rstRecortRecord.getString("RecordBizNO"));
+                                            if (zqse == null) {
+                                                zqse = 0.0;
+                                            }
+                                            //担保范围
+                                            String dbfw = SlectInfo.svs(statementShark, "warrant_scope", rstRecortRecord.getString("RecordBizNO"));
+                                            //权利种类
+                                            String qlzl = String.valueOf(SlectInfo.svl(statementShark, "interest_type", rstRecortRecord.getString("RecordBizNO")));
+
+                                            if (!qlzl.equals("121") && !qlzl.equals("122")) {
+                                                qlzl = "power.type.other";
+                                            }
+                                            //抵押时间始
+                                            Timestamp dysjs = SlectInfo.svt(statementShark, "mortgage_due_time_s", rstRecortRecord.getString("RecordBizNO"));
+                                            //抵押时间止
+                                            Timestamp dysjz = SlectInfo.svt(statementShark, "mortgage_due_time_e", rstRecortRecord.getString("RecordBizNO"));
+                                            //抵押面积 mortgage_area
+                                            Double dymj = SlectInfo.svd(statementShark, "mortgage_area", rstRecortRecord.getString("RecordBizNO"));
+                                            if (dymj == null) {
+                                                dymj = 0.0;
+                                            }
+                                            sqlWriter.write("INSERT MORTGAEGE_REGISTE (HIGHEST_MOUNT_MONEY, WARRANT_SCOPE, INTEREST_TYPE, " +
+                                                    "MORTGAGE_DUE_TIME_S, MORTGAGE_TIME, MORTGAGE_AREA, " +
+                                                    "TIME_AREA_TYPE, ID, BUSINESS_ID, OLD_FIN, FIN, ORG_NAME) VALUE ");
+                                            sqlWriter.write("(" + Q.v(Q.pm(new BigDecimal(zqse)), Q.pm(dbfw), Q.pm(qlzl),
+                                                    Q.pm(dysjs), Q.pm(dysjz), Q.pm(new BigDecimal(dymj)),
+                                                    "'DATE_TIME'", rstRecortRecord.getString("RecordBizNO"), rstRecortRecord.getString("RecordBizNO"),
+                                                    "Null", rstRecortRecord.getString("RecordBizNO"), "'东港市房地产管理处'"
+                                                            + ");"));
+                                            sqlWriter.newLine();
+                                            //债务人
+                                            if (DEFINE_ID.contains("WP13")||DEFINE_ID.contains("WP9")) {
+                                                String zwrId = SlectInfo.svs(statementShark, "mortgage_work", rstRecortRecord.getString("RecordBizNO"));
+                                                if (zwrId != null) {
+                                                    ResultSet zwrResltSet = SlectInfo.bar(statementHousech2, zwrId);
+                                                    if (zwrResltSet != null) {
+                                                            sqlWriter.write("INSERT BUSINESS_PERSION (ID, ID_NO, ID_TYPE, NAME, TYPE, BUSINESS_ID, PHONE) VALUE ");
+                                                            sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(zwrResltSet.getString("IDNO"))
+                                                                    , Q.pCardType(zwrResltSet.getInt("IDType")), Q.pm(zwrResltSet.getString("Name")), "'MORTGAGE_OBLIGOR'"
+                                                                    , Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(zwrResltSet.getString("Phone"))
+                                                                    + ");"));
+                                                            sqlWriter.newLine();
+
+                                                    }
+                                                }
+                                            }
+
+
+
+                                        }else {
+
+
+                                        }
+
+
+
+                                    }
+
+
+
+
+
+
+
+
+
+                                    //相关业务人
+
+
+
+                                    //HOUSE_REG_INFO 产别 产权来源
+
+
+                                    //SALE_INFO 购房款
+
+                                    //业务要件
+
+
+
+
                                     isFirst = false;
                                     addStateisFirst= false;
                                 }
@@ -1098,8 +1226,6 @@ public class DGHouseOwnerRecord {
             e.printStackTrace();
             return;
         }
-
-
     }
 
 

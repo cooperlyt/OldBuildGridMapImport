@@ -90,6 +90,34 @@ public class SlectInfo {
         return null;
     }
 
+    public static ResultSet Financia(Statement sD,String IDorNo) throws SQLException{
+
+        if (IDorNo!=null && !IDorNo.equals("")) {
+            ResultSet hs = sD.executeQuery("select * from FinancialInfo where ID='" + IDorNo + "'");
+            //System.out.println("select * from OwnerInfo where ID='" + IDorNo + "'");
+            hs.last();
+            int rsCount = hs.getRow();
+            //System.out.println("rsCount--"+rsCount);
+            if (rsCount > 0) {
+                hs.first();
+                return hs;
+            } else {
+                hs = sD.executeQuery("select * from FinancialInfo where No='" + IDorNo + "'");
+                //System.out.println("select * from OwnerInfo where No='" + IDorNo + "'");
+                hs.last();
+                rsCount = hs.getRow();
+                // System.out.println("rsCount--"+rsCount);
+                if (rsCount > 0) {
+                    hs.first();
+                    return hs;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
     public static ResultSet gyr(Statement sD,String bizid) throws SQLException {
         if (bizid!=null && !bizid.equals("")) {
             ResultSet hs = sD.executeQuery("select hc.id as hcid,hc.bizid,hc.type as hcType,hc.no as hcno,hc.ownerid,hc.perc,hc.poolarea,hc.relation,"

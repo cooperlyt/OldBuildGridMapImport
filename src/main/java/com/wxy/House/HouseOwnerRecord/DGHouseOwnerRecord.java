@@ -318,7 +318,7 @@ public class DGHouseOwnerRecord {
                     " left join Section as hs on d.sectionid=hs.id) as e"+
 //                    " left join District as hd on e.DistrictID = hd.id");
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='B9N3-2-02')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
+                    " where (e.no='53951')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
 
             rstHouse.last();
             System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
@@ -1187,8 +1187,8 @@ public class DGHouseOwnerRecord {
                                                     ResultSet pgResultSet = SlectInfo.evaluateCorporation(statementHousech2, pgjgNo);
                                                     if (pgResultSet != null) {
                                                         sqlWriter.write("INSERT EVALUATE (EVALUATE_CORP_NAME, EVALUATE_CORP_N0, ASSESSMENT_PRICE, ID, BUSINESS_ID) VALUE ");
-                                                        sqlWriter.write("(" + Q.v(Q.pm(pgResultSet.getString("Name")), Q.pm(pgResultSet.getString("Name")),
-                                                                Q.p(pgResultSet.getString("No")), Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                        sqlWriter.write("(" + Q.v(Q.pm(pgResultSet.getString("Name")), Q.p(pgResultSet.getString("No"))
+                                                                , Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
                                                                 Q.pm(rstRecortRecord.getString("RecordBizNO"))
                                                                 + ");"));
                                                         sqlWriter.newLine();
@@ -1198,7 +1198,7 @@ public class DGHouseOwnerRecord {
                                                 if (!pgjgisFind) {
                                                     sqlWriter.write("INSERT EVALUATE (EVALUATE_CORP_NAME, EVALUATE_CORP_N0, ASSESSMENT_PRICE, ID, BUSINESS_ID) VALUE ");
                                                     sqlWriter.write("(" + Q.v(Q.pm("未知"), Q.pm("未知"),
-                                                            Q.p("未知"), Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                            Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
                                                             Q.pm(rstRecortRecord.getString("RecordBizNO"))
                                                                     + ");"));
                                                     sqlWriter.newLine();
@@ -1274,26 +1274,101 @@ public class DGHouseOwnerRecord {
 
                                         }
                                     }
-
-
-
-
-
-
-
-
-
                                     //相关业务人
+                                    if (rstRecortRecord.getString("Nameid").contains("WP")){
+                                        ResultSet empResultSet = statementShark.executeQuery("SELECT a.resourceid,a.LastStateTime,a.name as jdname,de.name as dename" +
+                                                " FROM shark..SHKActivities as a left join shark..DGEmployee as de " +
+                                                "on a.resourceid =de.no where ProcessId ='"+rstRecortRecord.getString("Nameid") +"' and (a.name='受理' or a.name='复审' or a.name='审批' or a.name='归档')");
+                                        empResultSet.last();
+                                        int sl = empResultSet.getRow();
+                                        String res;
+                                        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                        if (sl>0){
+                                            empResultSet.beforeFirst();;
+                                            while (empResultSet.next()){
+                                                long lt = new Long(empResultSet.getLong("LastStateTime"));
+                                                Date date = new Date(lt);
+                                                res = simpleDateFormat1.format(date);
+                                                sqlWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, EMP_NAME, BUSINESS_ID, OPER_TIME) VALUES ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                                        Q.changeBusinessEmpType(empResultSet.getString("jdname")),
+                                                        Q.pm(empResultSet.getString("resourceid")),
+                                                        Q.pm(empResultSet.getString("dename")),Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(res)
+                                                                + ");"));
+
+                                                sqlWriter.newLine();
+                                                //===TASK_OPER
+                                                sqlWriter.write("INSERT TASK_OPER (ID, BUSINESS, OPER_TIME, EMP_CODE, EMP_NAME, TASK_NAME, OPER_TYPE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("RecordBizNO")+"-"+empResultSet.getRow()),
+                                                        Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(res),Q.pm(empResultSet.getString("resourceid")),
+                                                        Q.pm(empResultSet.getString("dename")),Q.pm(empResultSet.getString("jdname")),"'NEXT'"
+                                                                + ");"));
+                                                sqlWriter.newLine();
 
 
+                                                if (empResultSet.getString("jdname").equals("受理")){
+                                                    sqlWriter.write("UPDATE OWNER_BUSINESS SET CREATE_TIME='"+res+"',APPLY_TIME='"+res+"' WHERE ID='"+rstRecortRecord.getString("RecordBizNO")+"';");
+                                                    sqlWriter.newLine();
+                                                }
+
+                                                if (empResultSet.getString("jdname").equals("复审")){
+                                                    sqlWriter.write("UPDATE OWNER_BUSINESS SET CHECK_TIME='"+res+"' WHERE ID='"+rstRecortRecord.getString("RecordBizNO")+"';");
+                                                    sqlWriter.newLine();
+                                                }
+                                                if (empResultSet.getString("jdname").equals("审批")){
+                                                    sqlWriter.write("UPDATE OWNER_BUSINESS SET REG_TIME='"+res+"' WHERE ID='"+rstRecortRecord.getString("RecordBizNO")+"';");
+                                                    sqlWriter.newLine();
+                                                }
+                                            }
+                                        }
+                                    }
 
                                     //HOUSE_REG_INFO 产别 产权来源
+                                    if (rstRecortRecord.isLast() == false){
+                                        sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(rstRecortRecord.getString("HousePorperty"))
+                                                ,Q.pm(rstRecortRecord.getString("HouseFrom"))+ ");"));
+                                        sqlWriter.newLine();
+                                        sqlWriter.write("UPDATE HOUSE SET REG_INFO = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                        sqlWriter.newLine();
+                                    }else {
+                                        sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(rstHouse.getString("HousePorperty"))
+                                                ,Q.pm(rstHouse.getString("HouseFrom"))+ ");"));
+                                        sqlWriter.newLine();
+                                        sqlWriter.write("UPDATE HOUSE SET REG_INFO = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+                                        sqlWriter.newLine();
 
-
+                                    }
                                     //SALE_INFO 购房款
+                                    if(rstRecortRecord.isLast() == false){
+                                        sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),rstRecortRecord.getString("PayType")!=null?Q.changePayType(rstRecortRecord.getInt("PayType")):"NULL"
+                                                ,Q.pm(rstRecortRecord.getBigDecimal("SumPrice")),Q.pm(afterHouseId)+ ");"));
+                                        sqlWriter.newLine();
 
+                                    }else {
+                                        sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),rstHouse.getString("PayType")!=null?Q.changePayType(rstHouse.getInt("PayType")):"NULL"
+                                                ,Q.pm(rstHouse.getBigDecimal("SumPrice")),Q.pm(afterHouseId)+ ");"));
+                                        sqlWriter.newLine();
+
+                                    }
                                     //业务要件
-
+                                    //BUSINESS_FILE
+                                    ResultSet fileResulset = statementShark.executeQuery("select * from DGBizDoc where BizID='"+rstRecortRecord.getString("nameid")+"'");
+                                    fileResulset.last();
+                                    int feilesl=fileResulset.getRow();
+                                    if (feilesl>0){
+                                        fileResulset.beforeFirst();
+                                        while (fileResulset.next()){
+                                            sqlWriter.write("INSERT BUSINESS_FILE(ID, BUSINESS_ID, NAME, IMPORTANT_CODE, NO_FILE, IMPORTANT, PRIORITY) VALUES ");
+                                            sqlWriter.write("(" + Q.v(Q.p("N"+rstRecortRecord.getString("RecordBizNO")+"-"+fileResulset.getRow()),
+                                                    Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(fileResulset.getString("DocType")),
+                                                    "'未知'","True","False",Q.pm(String.valueOf(fileResulset.getRow()))+ ");"));
+                                            sqlWriter.newLine();
+                                        }
+                                    }
 
 
 

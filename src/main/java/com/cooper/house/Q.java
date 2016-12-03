@@ -244,4 +244,15 @@ public class Q {
 
     }
 
+    public static String interest_type(String type){
+        if (type.equals("按揭贷款")){
+            return "'121'";
+        }else if (type.equals("抵押贷款")){
+            return "'122'";
+        }else{
+            return "'power.type.other'";
+        }
+    }
+
+
 }

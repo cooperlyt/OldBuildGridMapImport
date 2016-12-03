@@ -318,7 +318,7 @@ public class DGHouseOwnerRecord {
                     " left join Section as hs on d.sectionid=hs.id) as e"+
 //                    " left join District as hd on e.DistrictID = hd.id");
                     " left join District as hd on e.DistrictID = hd.id" +
-                    " where (e.no='B205N1-4-02')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
+                    " where (e.no='B9N3-2-02')"); // 单笔116146 多69759 初始 B94N1-5-02 预告登记97793 产权共有权人46343 房屋预抵B860N3-1-01
 
             rstHouse.last();
             System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
@@ -1175,16 +1175,104 @@ public class DGHouseOwnerRecord {
                                                     }
                                                 }
                                             }
+                                            //评估机构、评估价格
+                                            if (DEFINE_ID.contains("WP13")||DEFINE_ID.contains("WP9")||DEFINE_ID.contains("WP83")) {
+                                                String pgjgNo = SlectInfo.svs(statementRecordch, "assessment_agencies", rstRecortRecord.getString("RecordBizNO"));
+                                                Double pgjg = SlectInfo.svd(statementShark, "assessment_price", rstRecortRecord.getString("RecordBizNO"));
+                                                boolean pgjgisFind = false;
+                                                if (pgjg == null) {
+                                                    pgjg = 0.0;
+                                                }
+                                                if (pgjgNo != null) {
+                                                    ResultSet pgResultSet = SlectInfo.evaluateCorporation(statementHousech2, pgjgNo);
+                                                    if (pgResultSet != null) {
+                                                        sqlWriter.write("INSERT EVALUATE (EVALUATE_CORP_NAME, EVALUATE_CORP_N0, ASSESSMENT_PRICE, ID, BUSINESS_ID) VALUE ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(pgResultSet.getString("Name")), Q.pm(pgResultSet.getString("Name")),
+                                                                Q.p(pgResultSet.getString("No")), Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                                Q.pm(rstRecortRecord.getString("RecordBizNO"))
+                                                                + ");"));
+                                                        sqlWriter.newLine();
+                                                        pgjgisFind = true;
+                                                    }
+                                                }
+                                                if (!pgjgisFind) {
+                                                    sqlWriter.write("INSERT EVALUATE (EVALUATE_CORP_NAME, EVALUATE_CORP_N0, ASSESSMENT_PRICE, ID, BUSINESS_ID) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm("未知"), Q.pm("未知"),
+                                                            Q.p("未知"), Q.pm(new BigDecimal(pgjg)),Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                            Q.pm(rstRecortRecord.getString("RecordBizNO"))
+                                                                    + ");"));
+                                                    sqlWriter.newLine();
+                                                }
+                                            }
+
+
+                                        }else {//从老库读取
+                                            ResultSet fcdyResultSet=statementFangchan.executeQuery("select sl_taxiangquanren,sl_diya_dianhua,sl_date,sl_quanlizhonglei,sl_diyaqianxian1, " +
+                                                    "sl_diyaqianxian2,sl_danbaofanwei,sf_jiekuan,sl_jiekuanren,sl_dlr_dianhua,ch_dymj from " +
+                                                    "c_yewu as y,c_shouli as s,c_shoufei as sf,c_cehui as c where y.keycode=s.keycode and y.keycode=sf.keycode and y.keycode=c.keycode " +
+                                                    "and sl_taxiangquanren is not null and sl_taxiangquanren<>'' and y.yw_mc_biaoshi in ('336','340','32','323','328') " +
+                                                    "and y.keycode='"+rstRecortRecord.getString("Nameid")+"'");
+                                            if(fcdyResultSet.next()){
+                                                sqlWriter.write("INSERT FINANCIAL (ID, NAME, CODE, PHONE, FINANCIAL_TYPE, ID_TYPE, " +
+                                                        "BANK, CREATE_TIME, CARD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(fcdyResultSet.getString("sl_taxiangquanren")),
+                                                        "Null", Q.p(fcdyResultSet.getString("sl_diya_dianhua")), "'FINANCE_CORP'", "Null", "Null",
+                                                        Q.p(fcdyResultSet.getTimestamp("sl_date")), "Null", "Null"
+                                                                + ");"));
+                                                sqlWriter.newLine();
+
+
+                                                sqlWriter.write("INSERT MORTGAEGE_REGISTE (HIGHEST_MOUNT_MONEY, WARRANT_SCOPE, INTEREST_TYPE, " +
+                                                        "MORTGAGE_DUE_TIME_S, MORTGAGE_TIME, MORTGAGE_AREA, " +
+                                                        "TIME_AREA_TYPE, ID, BUSINESS_ID, OLD_FIN, FIN, ORG_NAME) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(fcdyResultSet.getBigDecimal("sf_jiekuan")), Q.pm(fcdyResultSet.getString("sl_danbaofanwei")), Q.interest_type(fcdyResultSet.getString("sl_quanlizhonglei")),
+                                                        Q.pm(fcdyResultSet.getTimestamp("sl_diyaqianxian1")), Q.pm(fcdyResultSet.getTimestamp("sl_diyaqianxian2")), Q.pm(fcdyResultSet.getBigDecimal("ch_dymj")),
+                                                        "'DATE_TIME'", rstRecortRecord.getString("RecordBizNO"), rstRecortRecord.getString("RecordBizNO"),
+                                                        "Null", rstRecortRecord.getString("RecordBizNO"), "'东港市房地产管理处'"
+                                                                + ");"));
+                                                sqlWriter.newLine();
 
 
 
-                                        }else {
+                                            }else{
 
+                                                sqlWriter.write("INSERT FINANCIAL (ID, NAME, CODE, PHONE, FINANCIAL_TYPE, ID_TYPE, " +
+                                                        "BANK, CREATE_TIME, CARD, PROXY_PERSON) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'",
+                                                        "Null","Null", "'FINANCE_CORP'", "Null", "Null",
+                                                        Q.p(rstRecortRecord.getTimestamp("BOTime")), "Null", "Null"
+                                                                + ");"));
+                                                sqlWriter.newLine();
+
+
+                                                sqlWriter.write("INSERT MORTGAEGE_REGISTE (HIGHEST_MOUNT_MONEY, WARRANT_SCOPE, INTEREST_TYPE, " +
+                                                        "MORTGAGE_DUE_TIME_S, MORTGAGE_TIME, MORTGAGE_AREA, " +
+                                                        "TIME_AREA_TYPE, ID, BUSINESS_ID, OLD_FIN, FIN, ORG_NAME) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(new BigDecimal(0)), "'未知'", "'未知'",
+                                                                "'2000-1-1'","'2000-1-1'","0",
+                                                        "'DATE_TIME'", rstRecortRecord.getString("RecordBizNO"), rstRecortRecord.getString("RecordBizNO"),
+                                                        "Null", rstRecortRecord.getString("RecordBizNO"), "'东港市房地产管理处'"
+                                                                + ");"));
+                                                sqlWriter.newLine();
+
+                                            }
+                                            if (DEFINE_ID.equals("WP83")) {
+                                                sqlWriter.write("INSERT PROJECT_MORTGAGE (ID,DEVELOPER_NAME,DEVELOPER_CODE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                        Q.pm(rstHouse.getString("pname")), Q.pm(rstHouse.getString("pno")) + ");"));
+                                                sqlWriter.newLine();
+                                            }
+                                            //债务人
+                                            if (fcdyResultSet.getString("sl_jiekuanren")!=null){
+                                                sqlWriter.write("INSERT BUSINESS_PERSION (ID, ID_NO, ID_TYPE, NAME, TYPE, BUSINESS_ID, PHONE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm("未知")
+                                                        , "'OTHER'", Q.pm(fcdyResultSet.getString("sl_jiekuanren")), "'MORTGAGE_OBLIGOR'"
+                                                        , Q.pm(rstRecortRecord.getString("RecordBizNO")), Q.pm(fcdyResultSet.getString("sl_dlr_dianhua"))
+                                                        + ");"));
+                                                sqlWriter.newLine();
+                                            }
 
                                         }
-
-
-
                                     }
 
 

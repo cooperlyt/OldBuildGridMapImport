@@ -117,20 +117,22 @@ public class Q {
 
     public static String changeHouseType(int HouseType){
 
-        if( HouseType==206 ){
-            return "'206'";
-        }else if( HouseType==781){
-            return "'781'";
-        }else if( HouseType==782){
-            return "'782'";
-        }else if( HouseType==783){
-            return "'783'";
-        }else if(HouseType==1946) {
-            return "'1946'";
-        } else if(HouseType==2773){
-            return "'2773'";
+        if( HouseType==205){
+            return "'SALE_HOUSE'";
+        }else if( HouseType==1946){
+            return "'BACK_HOUSE'";
+        }else if( HouseType==206){
+            return "'WELFARE_HOUSE'";
+        }else if( HouseType==2773 || HouseType==784){
+            return "'OTHER'";
+        }else if(HouseType==781) {
+            return "'GOV_SALE_HOUSE'";
+        } else if(HouseType==782){
+            return "'GOV_RENT'";
+        }else if(HouseType==783){
+            return "'GROUP_HOUSE'";
         }else
-            return "NULL";
+            return "SALE_HOUSE";
 
     }
 

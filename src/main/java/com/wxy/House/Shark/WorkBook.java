@@ -19,7 +19,7 @@ public class WorkBook {
 
     private static final String OUT_FILE_PATH = "/word.sql";
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.0.200:1433/Shark";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/Shark";
 
     private static Connection connection;
 

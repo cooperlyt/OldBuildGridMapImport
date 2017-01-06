@@ -132,7 +132,7 @@ public class Q {
         }else if(HouseType==783){
             return "'GROUP_HOUSE'";
         }else
-            return "SALE_HOUSE";
+            return "'SALE_HOUSE'";
 
     }
 
@@ -215,6 +215,23 @@ public class Q {
             return "'未知'";
         }else
             return "'"+String.valueOf(UseType)+"'";
+
+    }
+
+    public static String changeUseType(String UseType){
+
+        if( UseType.equals("") || UseType==null){
+            return "'未知'";
+        }else
+            return "'"+UseType+"'";
+
+    }
+    public static String changeDesignUseType(String DesignUseType){
+
+        if(DesignUseType.equals("") || DesignUseType==null){
+            return "'OTHER'";
+        }else
+            return "'"+DesignUseType+"'";
 
     }
 

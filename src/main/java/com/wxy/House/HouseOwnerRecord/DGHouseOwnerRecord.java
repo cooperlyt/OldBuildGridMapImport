@@ -113,30 +113,37 @@ public class DGHouseOwnerRecord {
     private static ResultSet rstHouse;
 
     public static void main(String agr[]) throws SQLException {
+        //有selectbiz业务ID
 
+        SELECT_DEFINE_ID.add("WP12");//房屋所有权抵押注销登记
+        SELECT_DEFINE_ID.add("WP10");//房屋所有权抵押变更登记
+
+        SELECT_DEFINE_ID.add("WP2");//预购商品房抵押权预告变更登记
+        SELECT_DEFINE_ID.add("WP4");//预购商品房抵押权预告注销登记
+
+        SELECT_DEFINE_ID.add("WP15");//最高额抵押权设定变更登记
+        SELECT_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
+
+        SELECT_DEFINE_ID.add("WP84");//在建工程房屋抵押权注销登记
+
+        SELECT_DEFINE_ID.add("WP6");//房屋抵押权预告变更登记
+        SELECT_DEFINE_ID.add("WP8");//房屋抵押权预告注销登记
+
+        SELECT_DEFINE_ID.add("WP22");//他项权更正登记
 
         //有问题房屋编号，不导入
-        HOUSE_ERROR.add("118058");
-        HOUSE_ERROR.add("118057");
-        HOUSE_ERROR.add("128518");
-        HOUSE_ERROR.add("144016");
-        //有selectbiz业务ID
+//        HOUSE_ERROR.add("118058");
+//        HOUSE_ERROR.add("118057");
+//        HOUSE_ERROR.add("128518");
+//        HOUSE_ERROR.add("144016");
+
 
 
 
 
         //不导入的业务编号
-        NO_EXCEPTION_DEFINE_ID.add("WP30");//新建房屋
-        NO_EXCEPTION_DEFINE_ID.add("WP31");//无籍房屋
+
         NO_EXCEPTION_DEFINE_ID.add("WP75");//集资建房初始登记
-
-        NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
-        NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
-
-        NO_EXCEPTION_DEFINE_ID.add("WP52");//名称变更登记
-        NO_EXCEPTION_DEFINE_ID.add("WP53");//自翻扩改
-        NO_EXCEPTION_DEFINE_ID.add("WP54");//分照
-        NO_EXCEPTION_DEFINE_ID.add("WP55");//合照
         NO_EXCEPTION_DEFINE_ID.add("WP76");//租赁登记
         NO_EXCEPTION_DEFINE_ID.add("WP77");//地役权登记
         NO_EXCEPTION_DEFINE_ID.add("WP78");//地役权变更登记
@@ -148,9 +155,7 @@ public class DGHouseOwnerRecord {
         NO_EXCEPTION_DEFINE_ID.add("WP47");//预购商品房预告更正登记
         NO_EXCEPTION_DEFINE_ID.add("WP48");//预购商品房预告异议登记
         NO_EXCEPTION_DEFINE_ID.add("WP49");//预购商品房预告异议注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP32");//所有权遗失补照
-        NO_EXCEPTION_DEFINE_ID.add("WP33");//换照
-        NO_EXCEPTION_DEFINE_ID.add("WP35");//所有权更正登记
+
         NO_EXCEPTION_DEFINE_ID.add("WP36");//所有权异议登记
         NO_EXCEPTION_DEFINE_ID.add("WP37");//所有权异议注销登记
         NO_EXCEPTION_DEFINE_ID.add("WP38");//注销登记(灭籍)
@@ -158,7 +163,9 @@ public class DGHouseOwnerRecord {
         NO_EXCEPTION_DEFINE_ID.add("WP39");//解除声明作废
         NO_EXCEPTION_DEFINE_ID.add("WP69");//房屋所有权转移预告登记
         NO_EXCEPTION_DEFINE_ID.add("WP70");//房屋所有权转移预告注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP22");//他项权更正登记
+
+        //NO_EXCEPTION_DEFINE_ID.add("WP22");//他项权更正登记
+
         NO_EXCEPTION_DEFINE_ID.add("WP23");//他项权异议登记
         NO_EXCEPTION_DEFINE_ID.add("WP24");//他项权异议注销登记
         NO_EXCEPTION_DEFINE_ID.add("WP25");//他项权遗失补照
@@ -178,19 +185,12 @@ public class DGHouseOwnerRecord {
         NO_EXCEPTION_DEFINE_ID.add("WP82");//工程查封解除登记
         NO_EXCEPTION_DEFINE_ID.add("WP88");//房屋续封登记
         NO_EXCEPTION_DEFINE_ID.add("WP11");//房屋所有权抵押转移登记
-        NO_EXCEPTION_DEFINE_ID.add("WP12");//房屋所有权抵押注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP10");//房屋所有权抵押变更登记
+
+
         NO_EXCEPTION_DEFINE_ID.add("WP14");//最高额抵押权确定登记
-        NO_EXCEPTION_DEFINE_ID.add("WP15");//最高额抵押权设定变更登记
         NO_EXCEPTION_DEFINE_ID.add("WP16");//最高额抵押权设定转移登记
-        NO_EXCEPTION_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP84");//在建工程房屋抵押权注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP2");//预购商品房抵押权预告变更登记
-        NO_EXCEPTION_DEFINE_ID.add("WP3");//预购商品房抵押权预告转移登记
-        NO_EXCEPTION_DEFINE_ID.add("WP4");//预购商品房抵押权预告注销登记
-        NO_EXCEPTION_DEFINE_ID.add("WP6");//房屋抵押权预告变更登记
         NO_EXCEPTION_DEFINE_ID.add("WP7");//房屋抵押权预告转移登记
-        NO_EXCEPTION_DEFINE_ID.add("WP8");//房屋抵押权预告注销登记
+
         //交易备案 业务DEFINE_ID
         DEAL_DEFINE_ID.add("WP41");//商品房交易
         DEAL_DEFINE_ID.add("WP56");//二手房交易
@@ -207,12 +207,35 @@ public class DGHouseOwnerRecord {
         DEAL_DEFINE_ID.add("WP67");//房改房屋
         DEAL_DEFINE_ID.add("WP68");//分照交易
         DEAL_DEFINE_ID.add("WP72");//回迁房屋
+        //变更登记导入已办产权
+        DEAL_DEFINE_ID.add("WP52");//名称变更登记
+        DEAL_DEFINE_ID.add("WP53");//自翻扩改
+        DEAL_DEFINE_ID.add("WP54");//分照
+        DEAL_DEFINE_ID.add("WP55");//合照
+       //初始登记入已办产权
+        DEAL_DEFINE_ID.add("WP30");//新建房屋
+        DEAL_DEFINE_ID.add("WP31");//无籍房屋
+
+        DEAL_DEFINE_ID.add("WP32");//所有权遗失补照
+        DEAL_DEFINE_ID.add("WP33");//换照
+        DEAL_DEFINE_ID.add("WP35");//所有权更正登记
+
         //抵押登记
         MORTGAEGE_DEFINE_ID.add("WP1");//预购商品房预告登记
         MORTGAEGE_DEFINE_ID.add("WP5");//房屋抵押权预告登记
         MORTGAEGE_DEFINE_ID.add("WP9");//房屋所有权抵押登记
         MORTGAEGE_DEFINE_ID.add("WP13");//最高额抵押登记
         MORTGAEGE_DEFINE_ID.add("WP83");//在建工程抵押登记
+        MORTGAEGE_DEFINE_ID.add("WP12");//房屋所有权抵押注销登记
+        MORTGAEGE_DEFINE_ID.add("WP10");//房屋所有权抵押变更登记
+        MORTGAEGE_DEFINE_ID.add("WP2");//预购商品房抵押权预告变更登记
+        MORTGAEGE_DEFINE_ID.add("WP4");//预购商品房抵押权预告注销登记
+        MORTGAEGE_DEFINE_ID.add("WP15");//最高额抵押权设定变更登记
+        MORTGAEGE_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
+        MORTGAEGE_DEFINE_ID.add("WP84");//在建工程房屋抵押权注销登记
+        MORTGAEGE_DEFINE_ID.add("WP6");//房屋抵押权预告变更登记
+        MORTGAEGE_DEFINE_ID.add("WP8");//房屋抵押权预告注销登记
+        MORTGAEGE_DEFINE_ID.add("WP22");//他项权更正登记
 
 
         recordFile = new File(OUT_PATH_FILE);
@@ -332,17 +355,21 @@ public class DGHouseOwnerRecord {
                     " left join DGHouseInfo..Developer as p on c.DeveloperID=p.id) as d" +
                     " left join DGHouseInfo..Section as hs on d.sectionid=hs.id) as e" +
                     " left join DGHouseInfo..District as hd on e.DistrictID = hd.id) as f" +
-                    " left join Shark..DGWordBook as sw on f.useType= sw.id where f.no='69759'");
+                    " left join Shark..DGWordBook as sw on f.useType= sw.id where f.no='B860N3-1-01'");
+                   // " left join Shark..DGWordBook as sw on f.useType= sw.id order by f.no desc");
+
+
 
 
 
             rstHouse.last();
-            System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
+            //System.out.println("rstHouseCount-Start-:" + rstHouse.getRow());
             int sumCount = rstHouse.getRow();
             rstHouse.beforeFirst();
             sqlWriter.newLine();
             int i=0;
             while (rstHouse.next()){
+                //System.out.println(rstHouse.getString("no"));
                 ResultSet rstRecortRecord = statementRecord.executeQuery("select a.*,sw.value as useTypevalue,sw.memo as designUseType from " +
                         "(select hb.id as dbid,hb.NameID,hb.WorkID,hb.BizID,hb.BOTime,hb.RegisterTime," +
                         "hb.FinalWorker,hb.EnrolWorker,hb.Memo as dbmemo,hb.FinalTime,hb.AddBizTime," +
@@ -350,28 +377,26 @@ public class DGHouseOwnerRecord {
                         "HouseHistroy as hh on hb.id=hh.Business where " +
                         "hb.workid not like '%WP50' and  hb.workid not like '%WP51' and  hb.workid not like '%WP85' " +
                         "and hb.workid not like '%WP42' and hb.workid not like '%WP43' " +
-                        "and hb.workid not like '%WP52' and hb.workid not like '%WP53' and hb.workid not like '%WP54' " +
-                        "and hb.workid not like '%WP55' and hb.workid not like '%WP76' and hb.workid not like '%WP77' " +
+                        "and hb.workid not like '%WP76' and hb.workid not like '%WP77' " +
                         "and hb.workid not like '%WP78' and hb.workid not like '%WP79' and hb.workid not like '%WP80' " +
                         "and hb.workid not like '%WP44' and hb.workid not like '%WP45' and hb.workid not like '%WP46' " +
                         "and hb.workid not like '%WP47' and hb.workid not like '%WP48' and hb.workid not like '%WP49' " +
-                        "and hb.workid not like '%WP32' and hb.workid not like '%WP33' and hb.workid not like '%WP35' " +
                         "and hb.workid not like '%WP36' and hb.workid not like '%WP37' and hb.workid not like '%WP38' " +
                         "and hb.workid not like '%WP34' and hb.workid not like '%WP39' and hb.workid not like '%WP69' " +
-                        "and hb.workid not like '%WP70' and hb.workid not like '%WP22' and hb.workid not like '%WP23' " +
+                        "and hb.workid not like '%WP70' and hb.workid not like '%WP23' " +
                         "and hb.workid not like '%WP24' and hb.workid not like '%WP25' and hb.workid not like '%WP26' " +
                         "and hb.workid not like '%WP27' and hb.workid not like '%WP28' and hb.workid not like '%WP29' " +
                         "and hb.workid not like '%WP29' and hb.workid not like '%WP18' and hb.workid not like '%WP19' " +
                         "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP21' " +
                         "and hb.workid not like '%WP73' and hb.workid not like '%WP74' and hb.workid not like '%WP81' " +
-                        "and hb.workid not like '%WP11' and hb.workid not like '%WP12' and hb.workid not like '%WP10' " +
-                        "and hb.workid not like '%WP14' and hb.workid not like '%WP15' and hb.workid not like '%WP16' " +
-                        "and hb.workid not like '%WP17' and hb.workid not like '%WP84' and hb.workid not like '%WP3' " +
-                        "and hb.workid not like '%WP4' and hb.workid not like '%WP6' and hb.workid not like '%WP7' " +
-                        "and hb.workid not like '%WP8' and hb.workid not like '%WP2' and hb.workid not like '%WP82'" +
-                        "and hb.workid not like '%WP20' and hb.workid not like '%WP21' and hb.workid not like '%WP30' " +
-                        "and hb.workid not like '%WP31' and hb.workid not like '%WP75' "+
-                        "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' "+
+                        "and hb.workid not like '%WP11' " +
+                        "and hb.workid not like '%WP14' and hb.workid not like '%WP16' " +
+                        "and hb.workid not like '%WP3' " +
+                        "and hb.workid not like '%WP7' " +
+                        "and hb.workid not like '%WP82'" +
+                        "and hb.workid not like '%WP20' and hb.workid not like '%WP21' " +
+                        "and hb.workid not like '%WP75' "+
+                        "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' and hb.WorkID is not null and hb.WorkID <>''"+
                         "and hh.no='" +rstHouse.getString("no")+"' "+
                         "and hh.id is not null ) as a " +
                         "left join Shark..DGWordBook as sw on a.useType= sw.id "+
@@ -418,10 +443,11 @@ public class DGHouseOwnerRecord {
                                         DEFINE_NAME = "未知";
                                     }
                                     selectbizid = null;
+
                                     if (SELECT_DEFINE_ID.contains(DEFINE_ID)) {//判断是否导入selectbiz
                                         if (rstRecortRecord.getString("SelectBiz") != null) {
                                             selectbizid = rstRecortRecord.getString("SelectBiz");
-                                            System.out.println("SelectBiz--" + rstRecortRecord.getString("SelectBiz"));
+                                           // System.out.println("SelectBiz--" + rstRecortRecord.getString("SelectBiz"));
                                             ResultSet rstRecortbiz = statementRecordch.executeQuery("select RecordBizNO from DGHouseRecord..Business where id='" + rstRecortRecord.getString("SelectBiz") + "'");
                                             if (rstRecortbiz.next() && !rstRecortbiz.getString("RecordBizNO").equals("")) {
                                                 selectbizid = rstRecortbiz.getString("RecordBizNO");
@@ -451,22 +477,22 @@ public class DGHouseOwnerRecord {
                                         stratHouseId = resultSetOwnerRecord.getString("HOUSE");
                                         afterHouseId = rstRecortRecord.getString("RecordBizNO");
                                         isFirst = false;
-                                        System.out.println("aaaa");
+                                        //System.out.println("aaaa");
                                     } else {
                                         if (isFirst) {
                                             stratHouseId = rstRecortRecord.getString("RecordBizNO") + "-s";
                                             afterHouseId = rstRecortRecord.getString("RecordBizNO");
                                             isFirst = true;
-                                            System.out.println("bbbb");
+                                            //System.out.println("bbbb");
                                         } else {
                                             stratHouseId = afterHouseId;
                                             afterHouseId = rstRecortRecord.getString("RecordBizNO");
                                             isFirst = false;
-                                            System.out.println("ccccc");
+                                            //System.out.println("ccccc");
                                         }
                                     }
-                                    System.out.println("stratHouseId-" + stratHouseId);
-                                    System.out.println("afterHouseId-" + afterHouseId);
+                                    //System.out.println("stratHouseId-" + stratHouseId);
+                                    //System.out.println("afterHouseId-" + afterHouseId);
                                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy");
 
 
@@ -530,7 +556,7 @@ public class DGHouseOwnerRecord {
                                                     , Q.pm(rstHouse.getString("BuildName")), "Null",rstRecortRecord.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortRecord.getInt("PoolMemo")):"Null", "Null", "Null", "Null", Q.changeUseType(rstRecortRecord.getString("useTypevalue")), "''" + ");"));
                                             sqlWriter.newLine();
                                         }else{//是最后一手
-                                            System.out.println("单个最后"+rstRecortRecord.getString("RecordBizNO"));
+                                            //System.out.println("单个最后"+rstRecortRecord.getString("RecordBizNO"));
                                             sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
                                                     "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
                                                     "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
@@ -594,7 +620,7 @@ public class DGHouseOwnerRecord {
                                                     , Q.pm(rstHouse.getString("BuildName")), "Null",rstRecortRecord.getString("PoolMemo")!=null?Q.changePoolMemo(rstRecortRecord.getInt("PoolMemo")):"Null", "Null", "Null", "Null", Q.changeUseType(rstRecortRecord.getString("useTypevalue")), "''" + ");"));
                                             sqlWriter.newLine();
                                         }else{
-                                            System.out.println("多笔业务最后---"+rstRecortRecord.getString("RecordBizNO"));
+                                            //System.out.println("多笔业务最后---"+rstRecortRecord.getString("RecordBizNO"));
                                             sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
                                                     "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
                                                     "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
@@ -660,7 +686,7 @@ public class DGHouseOwnerRecord {
 
                                     // ===HOUSE_RECORD 房屋主状态表
                                     if (rstRecortRecord.isLast() == true) {//判断是不是最后一手
-                                        System.out.println("lastState-" + lastState);
+                                        //System.out.println("lastState-" + lastState);
                                         if (lastState != null) {
                                             ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
                                             if (resultSetLast.next()) {//删除第一次导入的房屋状态
@@ -679,7 +705,7 @@ public class DGHouseOwnerRecord {
                                                 sqlWriter.newLine();
 
                                             }
-                                            System.out.println("afterHouseId+lastState--" + afterHouseId + ":" + lastState);
+                                            //System.out.println("afterHouseId+lastState--" + afterHouseId + ":" + lastState);
                                         }
 
                                     }
@@ -748,7 +774,9 @@ public class DGHouseOwnerRecord {
                                             sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
                                                     Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
                                             sqlWriter.newLine();
-                                        }else if (DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5")){//预告人
+                                        }else if (DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5")
+                                                || DEFINE_ID.equals("WP2") || DEFINE_ID.equals("WP6")
+                                                || DEFINE_ID.equals("WP4") || DEFINE_ID.equals("WP8")){//预告人
                                             String ygrID = null;
                                             if (rstRecortRecord.getString("Mainowner")!=null && !rstRecortRecord.getString("Mainowner").equals("")){
                                                 ygrID = rstRecortRecord.getString("Mainowner");
@@ -771,7 +799,7 @@ public class DGHouseOwnerRecord {
                                                 }
                                             }
                                             if (!isFind){//什么都没有查询到，添一个空记录
-                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE," +
                                                         " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
                                                 sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
                                                         , "'OTHER'","'未知'","'未知'"
@@ -794,7 +822,7 @@ public class DGHouseOwnerRecord {
                                             String skgyqr = null;
                                             skgyqr = SlectInfo.svs(statementRecordch, "owners_no", rstRecortRecord.getString("RecordBizNO"));
                                             if (skgyqr!=null){
-                                                int j=0;
+                                                int j=1;
                                                 for (String str : skgyqr.split(";")) {
                                                     ResultSet gyrResultSet = SlectInfo.bar(statementHousech2,str.split(",")[0]);
                                                     if (gyrResultSet!=null){
@@ -807,7 +835,7 @@ public class DGHouseOwnerRecord {
                                                                 str.split(",")[3] != null ? (!str.split(",")[3].equals("0") ? str.split(",")[3] : "NULL") : "Null",
                                                                 Q.p(str.split(",")[2]),
                                                                 Q.pm(gyrResultSet.getString("phone")), Q.pm(gyrResultSet.getString("Address")),
-                                                                Q.pm("OWNER"),Q.p(String.valueOf(j+2)),"Null","false","Null" + ");"));
+                                                                Q.pm("OWNER"),Q.p(String.valueOf(j+1)),"Null","false","Null" + ");"));
                                                         sqlWriter.newLine();
                                                         sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
                                                         sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
@@ -836,7 +864,7 @@ public class DGHouseOwnerRecord {
                                                     }
                                                 }
                                                 if (!isFind){//查找没有的，添加一个空的
-                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE," +
                                                             " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
                                                     sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
                                                             , "'OTHER'","'未知'","'未知'"
@@ -904,7 +932,7 @@ public class DGHouseOwnerRecord {
                                                     }
                                                 }
                                                 if (!isFind){//查找没有的，添加一个空的
-                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE" +
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE," +
                                                             " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
                                                     sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),"'未知'"
                                                             , "'OTHER'","'未知'","'未知'"
@@ -1000,7 +1028,9 @@ public class DGHouseOwnerRecord {
 
 
 
-                                        }else if(DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5") ){
+                                        }else if(DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP5")
+                                                || DEFINE_ID.equals("WP2") || DEFINE_ID.equals("WP6")
+                                                || DEFINE_ID.equals("WP4") || DEFINE_ID.equals("WP8") ){
                                             personType = "PREPARE";
                                             ResultSet fcResultSet=statementFangchan.executeQuery("select y.yw_cqr from fang_chan_dg..c_yewu as y " +
                                                     "where y.yw_cqr is not null and y.yw_cqr<>'' and (y.yw_mc_biaoshi ='336' or y.yw_mc_biaoshi ='340') and y.keycode='"+rstRecortRecord.getString("Nameid")+"'");
@@ -1037,7 +1067,7 @@ public class DGHouseOwnerRecord {
                                             // 共有权人
                                             ResultSet fcgyResultSet=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
                                                     "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
-                                            int j=0;
+                                            int j=1;
                                             if (fcgyResultSet.next()){
                                                 sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                         "PHONE,  ADDRESS, TYPE, PRI," +
@@ -1090,7 +1120,7 @@ public class DGHouseOwnerRecord {
                                             // 共有权人
                                             ResultSet fcgyResultSet=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
                                                     "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
-                                            int j=0;
+                                            int j=1;
                                             if (fcgyResultSet.next()){
                                                 sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                         "PHONE,  ADDRESS, TYPE, PRI," +
@@ -1142,12 +1172,7 @@ public class DGHouseOwnerRecord {
                                                 sqlWriter.newLine();
                                             }
 
-                                            if (DEFINE_ID.equals("WP83")) {
-                                                sqlWriter.write("INSERT PROJECT_MORTGAGE (ID,DEVELOPER_NAME,DEVELOPER_CODE) VALUE ");
-                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),
-                                                        Q.pm(rstHouse.getString("pname")), Q.pm(rstHouse.getString("pno")) + ");"));
-                                                sqlWriter.newLine();
-                                            }
+
 
                                             //债权数额
                                             Double zqse = SlectInfo.svd(statementShark, "highest_mount_money", rstRecortRecord.getString("RecordBizNO"));
@@ -1181,7 +1206,9 @@ public class DGHouseOwnerRecord {
                                                             + ");"));
                                             sqlWriter.newLine();
                                             //债务人
-                                            if (DEFINE_ID.contains("WP13")||DEFINE_ID.contains("WP9")) {
+                                            if (DEFINE_ID.contains("WP13")||DEFINE_ID.contains("WP9")
+                                                    || DEFINE_ID.contains("WP10")||DEFINE_ID.contains("WP15")
+                                                    | DEFINE_ID.contains("WP17")||DEFINE_ID.contains("WP12") ||DEFINE_ID.contains("WP22")) {
                                                 String zwrId = SlectInfo.svs(statementShark, "mortgage_work", rstRecortRecord.getString("RecordBizNO"));
                                                 if (zwrId != null) {
                                                     ResultSet zwrResltSet = SlectInfo.bar(statementHousech2, zwrId);
@@ -1196,8 +1223,16 @@ public class DGHouseOwnerRecord {
                                                     }
                                                 }
                                             }
+
+
+                                            if (DEFINE_ID.equals("WP83")||DEFINE_ID.equals("WP84")) {
+                                                sqlWriter.write("INSERT PROJECT_MORTGAGE (ID,DEVELOPER_NAME,DEVELOPER_CODE) VALUE ");
+                                                sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),
+                                                        Q.pm(rstHouse.getString("pname")), Q.pm(rstHouse.getString("pno")) + ");"));
+                                                sqlWriter.newLine();
+                                            }
                                             //评估机构、评估价格
-                                            if (DEFINE_ID.contains("WP13")||DEFINE_ID.contains("WP9")||DEFINE_ID.contains("WP83")) {
+                                            if (MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)) {
                                                 String pgjgNo = SlectInfo.svs(statementRecordch, "assessment_agencies", rstRecortRecord.getString("RecordBizNO"));
                                                 Double pgjg = SlectInfo.svd(statementShark, "assessment_price", rstRecortRecord.getString("RecordBizNO"));
                                                 boolean pgjgisFind = false;
@@ -1277,7 +1312,7 @@ public class DGHouseOwnerRecord {
                                                 sqlWriter.newLine();
 
                                             }
-                                            if (DEFINE_ID.equals("WP83")) {
+                                            if (DEFINE_ID.equals("WP83")||DEFINE_ID.equals("WP84")) {
                                                 sqlWriter.write("INSERT PROJECT_MORTGAGE (ID,DEVELOPER_NAME,DEVELOPER_CODE) VALUE ");
                                                 sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),
                                                         Q.pm(rstHouse.getString("pname")), Q.pm(rstHouse.getString("pno")) + ");"));
@@ -1345,36 +1380,40 @@ public class DGHouseOwnerRecord {
                                     }
 
                                     //HOUSE_REG_INFO 产别 产权来源
-                                    if (rstRecortRecord.isLast() == false){
+//                                    if (rstRecortRecord.isLast() == false){
+                                        String cb=rstRecortRecord.getString("HousePorperty");
+                                        if (DEFINE_ID.contains("WP40")){
+                                            cb = "819";
+                                        }
                                         sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(rstRecortRecord.getString("HousePorperty"))
+                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(cb)
                                                 ,Q.pm(rstRecortRecord.getString("HouseFrom"))+ ");"));
                                         sqlWriter.newLine();
                                         sqlWriter.write("UPDATE HOUSE SET REG_INFO = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
                                         sqlWriter.newLine();
-                                    }else {
-                                        sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(rstHouse.getString("HousePorperty"))
-                                                ,Q.pm(rstHouse.getString("HouseFrom"))+ ");"));
-                                        sqlWriter.newLine();
-                                        sqlWriter.write("UPDATE HOUSE SET REG_INFO = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
-                                        sqlWriter.newLine();
-
-                                    }
+//                                    }else {
+//                                        sqlWriter.write("INSERT HOUSE_REG_INFO (ID, HOUSE_PORPERTY, HOUSE_FROM) VALUES ");
+//                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),Q.pm(rstHouse.getString("HousePorperty"))
+//                                                ,Q.pm(rstHouse.getString("HouseFrom"))+ ");"));
+//                                        sqlWriter.newLine();
+//                                        sqlWriter.write("UPDATE HOUSE SET REG_INFO = '"+rstRecortRecord.getString("RecordBizNO")+"' WHERE ID='"+afterHouseId+"';");
+//                                        sqlWriter.newLine();
+//
+//                                    }
                                     //SALE_INFO 购房款
-                                    if(rstRecortRecord.isLast() == false){
+//                                    if(rstRecortRecord.isLast() == false){
                                         sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
                                         sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),rstRecortRecord.getString("PayType")!=null?Q.changePayType(rstRecortRecord.getInt("PayType")):"NULL"
                                                 ,Q.pm(rstRecortRecord.getBigDecimal("SumPrice")),Q.pm(afterHouseId)+ ");"));
                                         sqlWriter.newLine();
 
-                                    }else {
-                                        sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),rstHouse.getString("PayType")!=null?Q.changePayType(rstHouse.getInt("PayType")):"NULL"
-                                                ,Q.pm(rstHouse.getBigDecimal("SumPrice")),Q.pm(afterHouseId)+ ");"));
-                                        sqlWriter.newLine();
-
-                                    }
+//                                    }else {
+//                                        sqlWriter.write("INSERT SALE_INFO (ID, PAY_TYPE, SUM_PRICE, HOUSEID) VALUES ");
+//                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO")),rstHouse.getString("PayType")!=null?Q.changePayType(rstHouse.getInt("PayType")):"NULL"
+//                                                ,Q.pm(rstHouse.getBigDecimal("SumPrice")),Q.pm(afterHouseId)+ ");"));
+//                                        sqlWriter.newLine();
+//
+//                                    }
                                     //业务要件
                                     //BUSINESS_FILE
                                     ResultSet fileResulset = statementShark.executeQuery("select * from DGBizDoc where BizID='"+rstRecortRecord.getString("nameid")+"'");

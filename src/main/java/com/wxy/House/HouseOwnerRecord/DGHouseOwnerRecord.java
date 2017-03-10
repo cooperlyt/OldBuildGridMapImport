@@ -10,9 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by wxy on 2016-11-17.
@@ -22,9 +22,9 @@ public class DGHouseOwnerRecord {
 
     private static final String BEGIN_DATE = "2016-09-30";
 
-    private static final String OUT_PATH_FILE = "/houseOwnerRecord.sql";
+    private static final String OUT_PATH_FILE = "/root/Documents/houseOwnerRecord.sql";
 
-    private static final String OUT_PATH_HouseOwnerError_FILE = "/HouseOwnerError.sql";
+    private static final String OUT_PATH_HouseOwnerError_FILE = "/root/Documents/HouseOwnerError.sql";
 
     private static final String DB_RECORD_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/DGHouseRecord";
 
@@ -102,7 +102,8 @@ public class DGHouseOwnerRecord {
     private static String DEFINE_NAME;
     private static String NAME_ID;
     private static String bizid;//业务编号
-    private static String gybizid;
+    private static String gybizid,oldgybizid;
+
     private static String noticeGyBizid;
 
     private static String selectbizid;//bei
@@ -254,7 +255,7 @@ public class DGHouseOwnerRecord {
         MORTGAEGE_GY_ID.add("WP13");//最高额抵押登记
         MORTGAEGE_GY_ID.add("WP15");//最高额抵押权设定变更登记
         MORTGAEGE_GY_ID.add("WP17");//最高额抵押权设定注销登记
-
+        MORTGAEGE_GY_ID.add("WP22");//他项权更正登记
         //预告注销登记带入共有人
         NOTICE_GY_ID.add("WP46");
         NOTICE_GY_ID.add("WP70");
@@ -328,7 +329,7 @@ public class DGHouseOwnerRecord {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
+            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             System.out.println("ownerRecordConnection successful");
         } catch (Exception e) {
@@ -365,8 +366,9 @@ public class DGHouseOwnerRecord {
                     " left join DGHouseInfo..Developer as p on c.DeveloperID=p.id) as d" +
                     " left join DGHouseInfo..Section as hs on d.sectionid=hs.id) as e" +
                     " left join DGHouseInfo..District as hd on e.DistrictID = hd.id) as f" +
-                    " left join Shark..DGWordBook as sw on f.useType= sw.id where f.no='B400N1-4-02'");
-                   // " left join Shark..DGWordBook as sw on f.useType= sw.id order by f.no desc");//B860N3-1-01
+                   // " left join Shark..DGWordBook as sw on f.useType= sw.id where no='B45N4-3-02'");
+
+                    " left join Shark..DGWordBook as sw on f.useType= sw.id order by f.no desc");//B860N3-1-01
 
 
 
@@ -382,6 +384,7 @@ public class DGHouseOwnerRecord {
                 //System.out.println(rstHouse.getString("no"));
                 gybizid = null;
                 noticeGyBizid = null;
+                oldgybizid= null;
                 ResultSet rstRecortRecord = statementRecord.executeQuery("select a.*,sw.value as useTypevalue,sw.memo as designUseType from " +
                         "(select hb.id as dbid,hb.NameID,hb.WorkID,hb.BizID,hb.BOTime,hb.RegisterTime," +
                         "hb.FinalWorker,hb.EnrolWorker,hb.Memo as dbmemo,hb.FinalTime,hb.AddBizTime," +
@@ -859,6 +862,7 @@ public class DGHouseOwnerRecord {
                                                 ygrID = SlectInfo.svs(statementRecordch, "dept_people", rstRecortRecord.getString("RecordBizNO"));
                                             }
 
+
                                             if (ygrID!=null){
                                                 ResultSet ygrResultSet = SlectInfo.bar(statementHousech2,ygrID);
                                                 if (ygrResultSet!=null){
@@ -956,6 +960,53 @@ public class DGHouseOwnerRecord {
                                                 }
 
                                             }
+                                            if (rstRecortRecord.isLast() == true && gybizid !=null
+                                                    && (DEFINE_ID.equals("WP70") || DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP4")
+                                                    || DEFINE_ID.equals("WP8"))){
+                                                ResultSet gyqrResultSet2;
+                                                if (gybizid.length()>31) { //判断是否从老房产库带入共有权人
+
+                                                    gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                            "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='" + gybizid + "'");
+                                                }else{
+                                                    gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                            "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and ho.no='"+"DL" + gybizid +"0"+ "'");
+
+                                                }
+                                                System.out.println("11111--"+gybizid+"---"+DEFINE_ID);
+                                                gyqrResultSet2.last();
+                                                if (gyqrResultSet2.getRow()>0){
+                                                    gyqrResultSet2.beforeFirst();
+                                                    int j=1;
+                                                    while (gyqrResultSet2.next()){
+                                                        sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                                "PHONE,  ADDRESS, TYPE, PRI," +
+                                                                " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                                Q.pm(gyqrResultSet2.getString("Name")), Q.pCardType(gyqrResultSet2.getInt("IDType")),
+                                                                Q.pm(gyqrResultSet2.getString("IDNO")),
+                                                                gyqrResultSet2.getString("Relation") != null ? (!gyqrResultSet2.getString("Relation").equals("0") ? gyqrResultSet2.getString("Relation") : "NULL") : "Null",
+                                                                Q.p(gyqrResultSet2.getBigDecimal("PoolArea")),
+                                                                Q.pm(gyqrResultSet2.getString("phone")), Q.pm(gyqrResultSet2.getString("Address")),
+                                                                Q.pm("OWNER"), Q.p(String.valueOf(j + 1)), "Null", "false", "Null" + ");"));
+                                                        sqlWriter.newLine();
+                                                        sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                        sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                                Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                        sqlWriter.newLine();
+                                                        j++;
+
+                                                    }
+
+
+                                                }
+
+
+
+
+
+
+                                            }
 
                                         }else{
                                             if (rstRecortRecord.isLast() == false) {
@@ -995,7 +1046,6 @@ public class DGHouseOwnerRecord {
                                                         Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
                                                 sqlWriter.newLine();
 
-
                                                 //共有权人
 
                                                 ResultSet gyqrResultSet=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
@@ -1032,6 +1082,7 @@ public class DGHouseOwnerRecord {
                                                 }else{
 
                                                     if(!MORTGAEGE_GY_ID.contains(DEFINE_ID)){
+
                                                         gybizid =null;
                                                     }
 
@@ -1040,17 +1091,20 @@ public class DGHouseOwnerRecord {
 
 
                                                 if (MORTGAEGE_GY_ID.contains(DEFINE_ID) && gybizid!=null){
-                                                    ResultSet gyqrResultSet2=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
-                                                            "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='"+gybizid+"'");
+                                                    ResultSet gyqrResultSet2;
+                                                    if (gybizid.length()>31) { //判断是否从老房产库带入共有权人
 
+                                                        gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                                "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='" + gybizid + "'");
+                                                    }else{
+                                                        gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                                "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and ho.no='"+"DL" + gybizid +"0"+ "'");
+
+                                                    }
                                                     gyqrResultSet2.last();
-
-
-
                                                     if (gyqrResultSet2.getRow()>0){
                                                         gyqrResultSet2.beforeFirst();
                                                         int j=1;
-
                                                         while (gyqrResultSet2.next()){
                                                             sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                                     "PHONE,  ADDRESS, TYPE, PRI," +
@@ -1118,17 +1172,19 @@ public class DGHouseOwnerRecord {
                                                         Q.pm(rstRecortRecord.getString("RecordBizNO"))+");"));
                                                 sqlWriter.newLine();
 
-                                                System.out.println("gybizid-"+gybizid);
+
 
                                                 //共有权人
-                                                ResultSet gyqrResultSet=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
-                                                        "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='"+rstRecortRecord.getString("dbid")+"'");
-                                                gyqrResultSet.last();
-                                                if (gyqrResultSet.getRow()>0){
-                                                    gyqrResultSet.beforeFirst();
-                                                    gybizid = rstRecortRecord.getString("dbid");
-                                                    int j=1;
-                                                    while (gyqrResultSet.next()){
+                                              //  if (!MORTGAEGE_GY_ID.contains(DEFINE_ID)) {//最后一手不是抵押的 查找共有权人，抵押的通过上一手带过来
+                                                    ResultSet gyqrResultSet = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                            "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='" + rstRecortRecord.getString("dbid") + "'");
+                                                    gyqrResultSet.last();
+                                                    if (gyqrResultSet.getRow() > 0) {
+                                                        gyqrResultSet.beforeFirst();
+                                                        gybizid = rstRecortRecord.getString("dbid");
+
+                                                        int j = 1;
+                                                        while (gyqrResultSet.next()) {
                                                             sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                                     "PHONE,  ADDRESS, TYPE, PRI," +
                                                                     " CARD, OLD, PROXY_PERSON) VALUE ");
@@ -1146,15 +1202,23 @@ public class DGHouseOwnerRecord {
                                                             sqlWriter.newLine();
                                                             j++;
 
+                                                        }
                                                     }
-                                                }else{
-                                                    if(!MORTGAEGE_GY_ID.contains(DEFINE_ID)){
-                                                        gybizid =null;
-                                                    }
-                                                }
+                                              //  }
+
+
                                                 if (MORTGAEGE_GY_ID.contains(DEFINE_ID) && gybizid!=null){
-                                                    ResultSet gyqrResultSet2=statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
-                                                            "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='"+gybizid+"'");
+
+                                                    ResultSet gyqrResultSet2;
+                                                    if (gybizid.length()>31) {
+
+                                                        gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                                "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and hc.bizid='" + gybizid + "'");
+                                                    }else{
+                                                        gyqrResultSet2 = statementHousech2.executeQuery("select ho.*,hc.Relation,hc.PoolArea from DGHouseInfo..housecard as hc left join DGHouseInfo..ownerinfo as ho " +
+                                                                "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and ho.no='"+"DL" + gybizid +"0"+ "'");
+
+                                                    }
 
                                                     gyqrResultSet2.last();
 
@@ -1165,6 +1229,7 @@ public class DGHouseOwnerRecord {
                                                         int j=1;
 
                                                         while (gyqrResultSet2.next()){
+
                                                             sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                                     "PHONE,  ADDRESS, TYPE, PRI," +
                                                                     " CARD, OLD, PROXY_PERSON) VALUE ");
@@ -1277,6 +1342,7 @@ public class DGHouseOwnerRecord {
                                                     "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
                                             int j=1;
                                             if (fcgyResultSet.next()){
+
                                                 sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                         "PHONE,  ADDRESS, TYPE, PRI," +
                                                         " CARD, OLD, PROXY_PERSON) VALUE ");
@@ -1328,8 +1394,12 @@ public class DGHouseOwnerRecord {
                                             // 共有权人
                                             ResultSet fcgyResultSet=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
                                                     "and keycode='"+rstRecortRecord.getString("Nameid")+"'");
+
+
                                             int j=1;
                                             if (fcgyResultSet.next()){
+                                                oldgybizid = rstRecortRecord.getString("Nameid");
+                                                gybizid=rstRecortRecord.getString("Nameid");
                                                 sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
                                                         "PHONE,  ADDRESS, TYPE, PRI," +
                                                         " CARD, OLD, PROXY_PERSON) VALUE ");
@@ -1345,9 +1415,35 @@ public class DGHouseOwnerRecord {
                                                 sqlWriter.newLine();
                                                 j++;
 
+                                            }else{
+                                                if(!MORTGAEGE_GY_ID.contains(DEFINE_ID)){
+                                                    oldgybizid =null;
+                                                    gybizid=null;
+                                                }
+                                            }
+
+                                            if (MORTGAEGE_GY_ID.contains(DEFINE_ID) && oldgybizid!=null){
+                                                ResultSet fcgyResultSet1=statementFangchan.executeQuery("select * from fang_chan_dg..c_gongyou where gy_ren is not null and gy_ren<>'' " +
+                                                        "and keycode='"+oldgybizid+"'");
+                                                int K=1;
+                                                if (fcgyResultSet1.next()){
+                                                    sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO, RELATION, POOL_AREA, " +
+                                                            "PHONE,  ADDRESS, TYPE, PRI," +
+                                                            " CARD, OLD, PROXY_PERSON) VALUE ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)),
+                                                            Q.pm(fcgyResultSet1.getString("gy_ren")), "'MASTER_ID'",
+                                                            Q.pm(fcgyResultSet1.getString("gy_card")),
+                                                            "Null","Null","'未知'","Null",
+                                                            Q.pm("OWNER"),Q.p(String.valueOf(K+1)),"Null","false","Null" + ");"));
+                                                    sqlWriter.newLine();
+                                                    sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                                    sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),
+                                                            Q.pm(rstRecortRecord.getString("RecordBizNO") + "-" + String.valueOf(j)) + ");"));
+                                                    sqlWriter.newLine();
+                                                    K++;
+                                                }
                                             }
                                         }
-
                                     }
 
                                     //抵押登记 抵押信息，金融机构  在建工程抵押PROJECT_MORTGAGE
@@ -1669,7 +1765,9 @@ public class DGHouseOwnerRecord {
                 System.out.println(i+"/"+String.valueOf(sumCount));
                 sqlWriter.flush();
                 gybizid=null;
+                oldgybizid=null;
                 noticeGyBizid=null;
+
             }
             System.out.println("record is complate");
         } catch (Exception e) {

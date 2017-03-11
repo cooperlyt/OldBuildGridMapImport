@@ -1,6 +1,7 @@
 package com.wxy.House.HouseOwnerRecord;
 
 import com.cooper.house.Q;
+import com.scoopit.weedfs.client.net.Result;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,6 +43,8 @@ public class FcHouseOwnerRecord {
 
     private static Statement statementFangchanCH;
 
+    private static Statement statementFangchanCH1;
+
     private static Statement statementOwnerRecord;
 
     private static ResultSet fangChanResultSet;
@@ -52,9 +55,13 @@ public class FcHouseOwnerRecord {
 
     private static String DEFINE_ID;
 
-    private static String stratHouseId;
 
-    private static String afterHouseId;
+
+
+
+
+
+    private static boolean isFirst;
 
     private static Set<String> DEAL_DEFINE_ID= new HashSet<>();
 
@@ -139,6 +146,7 @@ public class FcHouseOwnerRecord {
             fangchanConnection = DriverManager.getConnection(DB_FANG_CHAN_URL, "sa", "dgsoft");
             statementFangchan = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementFangchanCH = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            statementFangchanCH1 = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             System.out.println("fangchanConnection successful");
         } catch (Exception e) {
             System.out.println("fangchanConnection is errer");
@@ -164,7 +172,7 @@ public class FcHouseOwnerRecord {
             fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card," +
                     "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao," +
                     "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan," +
-                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_beizhu,sl_beizhu,sl_date,fs_date " +
+                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth " +
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                     "and y.keycode=sz.keycode and  y.keycode=pg.keycode and (yw_mc_biaoshi='11' or yw_mc_biaoshi='21' or yw_mc_biaoshi='808' or yw_mc_biaoshi='250' " +
@@ -173,8 +181,8 @@ public class FcHouseOwnerRecord {
                     "or yw_mc_biaoshi='812' or yw_mc_biaoshi='34' or yw_mc_biaoshi='811' or yw_mc_biaoshi='33' or yw_mc_biaoshi='305' or yw_mc_biaoshi='306' " +
                     "or yw_mc_biaoshi='35' or yw_mc_biaoshi='61') " +
                     "and yw_mc_biaoshi <> '3' and yw_mc_biaoshi <> '2' and yw_jd_biaoshi <> '6' and yw_jd_biaoshi <> '8' and yw_jd_biaoshi <> '7' " +
-                    "and yw_jd_biaoshi <> '4'and yw_jd_biaoshi <> '10' and yw_jd_biaoshi <> '1' and y.keycode='201411280039' " +
-                    "order by y.keycode");
+                    "and yw_jd_biaoshi <> '4'and yw_jd_biaoshi <> '10' and yw_jd_biaoshi <> '1' and y.keycode='200702070003' " +
+                    "order by yw_houseid,y.keycode DESC");
 
 
             fangChanResultSet.last();
@@ -185,8 +193,9 @@ public class FcHouseOwnerRecord {
             if (recordCount>0){
                 fangChanResultSet.beforeFirst();
                 int i=0;
+                String oldhouseid = "";
+                String stratHouseId = "",afterHouseId="";
                 while (fangChanResultSet.next()){
-
                     //OWNER_BUSINESS
                     DEFINE_ID = Q.changeDefineID(fangChanResultSet.getInt("yw_mc_biaoshi"));
                     sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
@@ -207,6 +216,11 @@ public class FcHouseOwnerRecord {
                         cardType = "MORTGAGE";
                         number = fangChanResultSet.getString("sz_taxiangzheng");
                     }
+                    if (DEFINE_ID.equals("WP18") || DEFINE_ID.equals("WP19")){
+                        cardType = "PROJECT_MORTGAGE";
+                        number = fangChanResultSet.getString("sz_zjgczh");
+
+                    }
 
                     sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
                     sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")),Q.pm(cardType),
@@ -214,22 +228,41 @@ public class FcHouseOwnerRecord {
                             "NUll" + ");"));
                     sqlWriter.newLine();
 
-                    if (MORTGAEGE_DEFINE_ID.contains(DEFINE_ID) && !DEFINE_ID.equals("WP18") && !DEFINE_ID.equals("WP19")){
-                        sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"),Q.pm("OWNER_RSHIP"),
-                                Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")),Q.pm(fangChanResultSet.getString("keycode")),"NUll",
-                                "NUll" + ");"));
-                        sqlWriter.newLine();
-                    }
 
 
 
                     String houseid=fangChanResultSet.getString("yw_houseid");
-                    if (houseid!=null && !houseid.equals("")){
-                        ResultSet resultSetOwnerRecord = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + houseid + "'");
-
-
+                    System.out.println(fangChanResultSet.getString("yw_houseid"));
+                    if (oldhouseid.equals("") || !oldhouseid.equals(houseid)){
+                        stratHouseId = "";
+                            if (!houseid.equals("")) {
+                                ResultSet resultSetOwnerRecord = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + houseid + "'");
+                                if (resultSetOwnerRecord.next()) {
+                                    stratHouseId = resultSetOwnerRecord.getString("HOUSE");
+                                }
+                            }
                     }
+                    if(stratHouseId.equals("")){
+                        stratHouseId =fangChanResultSet.getString("keycode") + "-s";
+                    }
+
+                    System.out.println("stratHouseId-" + stratHouseId);
+                    //添加starthosue
+                    afterHouseId = fangChanResultSet.getString("keycode");
+                  //添加afterhosue
+                    //busnessshouse
+
+                    System.out.println("afterHouseId-" + afterHouseId);
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -240,6 +273,12 @@ public class FcHouseOwnerRecord {
                     i++;
                     System.out.println(i+"/"+String.valueOf(recordCount));
                     sqlWriter.flush();
+
+                    oldhouseid  = fangChanResultSet.getString("yw_houseid");
+                    if (oldhouseid==null || oldhouseid.trim().equals("")){
+                        oldhouseid = "";
+                    }
+                    stratHouseId = afterHouseId;
                 }
 
 

@@ -24,7 +24,11 @@ public class DGHouseOwnerRecord {
 
     private static final String OUT_PATH_FILE = "/root/Documents/houseOwnerRecord.sql";
 
+   // private static final String OUT_PATH_FILE = "/houseOwnerRecord.sql";
+
     private static final String OUT_PATH_HouseOwnerError_FILE = "/root/Documents/HouseOwnerError.sql";
+
+    //private static final String OUT_PATH_HouseOwnerError_FILE = "/HouseOwnerError.sql";
 
     private static final String DB_RECORD_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/DGHouseRecord";
 
@@ -330,6 +334,7 @@ public class DGHouseOwnerRecord {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
+            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             System.out.println("ownerRecordConnection successful");
         } catch (Exception e) {
@@ -366,7 +371,7 @@ public class DGHouseOwnerRecord {
                     " left join DGHouseInfo..Developer as p on c.DeveloperID=p.id) as d" +
                     " left join DGHouseInfo..Section as hs on d.sectionid=hs.id) as e" +
                     " left join DGHouseInfo..District as hd on e.DistrictID = hd.id) as f" +
-                   // " left join Shark..DGWordBook as sw on f.useType= sw.id where no='B45N4-3-02'");
+                    //" left join Shark..DGWordBook as sw on f.useType= sw.id where no='B860N3-1-01'");
 
                     " left join Shark..DGWordBook as sw on f.useType= sw.id order by f.no desc");//B860N3-1-01
 
@@ -415,6 +420,38 @@ public class DGHouseOwnerRecord {
                         "and hh.id is not null ) as a " +
                         "left join Shark..DGWordBook as sw on a.useType= sw.id "+
                         "order by a.no,a.botime");
+
+
+//                System.out.println("select a.*,sw.value as useTypevalue,sw.memo as designUseType from " +
+//                        "(select hb.id as dbid,hb.NameID,hb.WorkID,hb.BizID,hb.BOTime,hb.RegisterTime," +
+//                        "hb.FinalWorker,hb.EnrolWorker,hb.Memo as dbmemo,hb.FinalTime,hb.AddBizTime," +
+//                        "hb.SelectBiz,hb.RecordBizNO,hb.ProjectID,hb.b,hh.* from DGHouseRecord..Business as hb left join " +
+//                        "HouseHistroy as hh on hb.id=hh.Business where " +
+//                        "hb.workid not like '%WP50' and  hb.workid not like '%WP51' and  hb.workid not like '%WP85' " +
+//                        "and hb.workid not like '%WP42' and hb.workid not like '%WP43' " +
+//                        "and hb.workid not like '%WP76' and hb.workid not like '%WP77' " +
+//                        "and hb.workid not like '%WP78' and hb.workid not like '%WP79' and hb.workid not like '%WP80' " +
+//                        "and hb.workid not like '%WP48' and hb.workid not like '%WP49' " +
+//                        "and hb.workid not like '%WP36' and hb.workid not like '%WP37' and hb.workid not like '%WP38' " +
+//                        "and hb.workid not like '%WP34' and hb.workid not like '%WP39' " +
+//                        "and hb.workid not like '%WP23' " +
+//                        "and hb.workid not like '%WP24' and hb.workid not like '%WP25' and hb.workid not like '%WP26' " +
+//                        "and hb.workid not like '%WP27' and hb.workid not like '%WP28' and hb.workid not like '%WP29' " +
+//                        "and hb.workid not like '%WP29' and hb.workid not like '%WP18' and hb.workid not like '%WP19' " +
+//                        "and hb.workid not like '%WP20' " +
+//                        "and hb.workid not like '%WP73' and hb.workid not like '%WP74' and hb.workid not like '%WP81' " +
+//                        "and hb.workid not like '%WP11' " +
+//                        "and hb.workid not like '%WP14' and hb.workid not like '%WP16' " +
+//                        "and hb.workid not like '%WP3' " +
+//                        "and hb.workid not like '%WP7' " +
+//                        "and hb.workid not like '%WP82' " +
+//                        "and hb.workid not like '%WP20' " +
+//                        "and hb.workid not like '%WP75' "+
+//                        "and hb.workid not like '%WP88' and hb.b>'" +BEGIN_DATE+"' and hb.WorkID is not null and hb.WorkID <>''"+
+//                        "and hh.no='" +rstHouse.getString("no")+"' "+
+//                        "and hh.id is not null ) as a " +
+//                        "left join Shark..DGWordBook as sw on a.useType= sw.id "+
+//                        "order by a.no,a.botime");
 
 
 
@@ -734,8 +771,10 @@ public class DGHouseOwnerRecord {
                                     // ===HOUSE_RECORD 房屋主状态表
                                     if (rstRecortRecord.isLast() == true) {//判断是不是最后一手
                                         //System.out.println("lastState-" + lastState);
+                                        ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
+
                                         if (lastState != null) {
-                                            ResultSet resultSetLast = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "'");
+
                                             if (resultSetLast.next()) {//删除第一次导入的房屋状态
                                                 if (lastState.equals("OWNERED")) {
                                                     sqlWriter.write("DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE='" + rstRecortRecord.getString("no") + "';");
@@ -754,31 +793,28 @@ public class DGHouseOwnerRecord {
 
 
                                             }
-                                            //System.out.println("afterHouseId+lastState--" + afterHouseId + ":" + lastState);
-                                        }else if (lastState==null){
+
+                                        }else if (lastState==null && resultSetLast.next() == false){
                                             if (DEFINE_ID.equals("WP83") || DEFINE_ID.equals("WP84") || DEFINE_ID.equals("WP21")
                                                     || DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP2") || DEFINE_ID.equals("WP4")
                                                     || DEFINE_ID.equals("WP5") || DEFINE_ID.equals("WP6") || DEFINE_ID.equals("WP8")
                                                     || DEFINE_ID.equals("WP44") || DEFINE_ID.equals("WP45") || DEFINE_ID.equals("WP46")
                                                     || DEFINE_ID.equals("WP47") || DEFINE_ID.equals("WP69") || DEFINE_ID.equals("WP70")){
 
-
+                                                //System.out.println("111"+DEFINE_ID);
                                                 sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
                                                 sqlWriter.write("(" + Q.v(Q.p(rstRecortRecord.getString("No")), Q.p(afterHouseId)
                                                         ,"NULL", "''", "''" + ");"));
                                                 sqlWriter.newLine();
 
-                                        }
-
-
-
-                                        }
+                                                }
+                                       }
 
                                     }
 
 
 
-
+                                    //System.out.println("afterHouseId+lastState--" + afterHouseId + ":" + lastState);
 
 
                                     //产权人，共有人，预告人，初始登记人，
@@ -934,9 +970,9 @@ public class DGHouseOwnerRecord {
 
                                                 }
                                             }
-                                            if ((DEFINE_ID.equals("WP70") || DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP4") || DEFINE_ID.equals("WP8")) && noticeGyBizid!=null && !noticeGyBizid.equals("")){
+                                            if ((DEFINE_ID.equals("WP70") || DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP4") || DEFINE_ID.equals("WP8")) && rstRecortRecord.isLast() == false && noticeGyBizid!=null && !noticeGyBizid.equals("")){
                                                 int j=1;
-
+                                                //System.out.println("aaaaaaa");
                                                 for (String str : noticeGyBizid.split(";")){
                                                     ResultSet gyrResultSet = SlectInfo.bar(statementHousech2,str.split(",")[0]);
                                                     if (gyrResultSet!=null){
@@ -973,7 +1009,7 @@ public class DGHouseOwnerRecord {
                                                             "on hc.ownerid=ho.id where hc.type=77 and ho.id is not null and ho.no='"+"DL" + gybizid +"0"+ "'");
 
                                                 }
-                                                System.out.println("11111--"+gybizid+"---"+DEFINE_ID);
+                                                //System.out.println("11111--"+gybizid+"---"+DEFINE_ID);
                                                 gyqrResultSet2.last();
                                                 if (gyqrResultSet2.getRow()>0){
                                                     gyqrResultSet2.beforeFirst();
@@ -988,7 +1024,7 @@ public class DGHouseOwnerRecord {
                                                                 gyqrResultSet2.getString("Relation") != null ? (!gyqrResultSet2.getString("Relation").equals("0") ? gyqrResultSet2.getString("Relation") : "NULL") : "Null",
                                                                 Q.p(gyqrResultSet2.getBigDecimal("PoolArea")),
                                                                 Q.pm(gyqrResultSet2.getString("phone")), Q.pm(gyqrResultSet2.getString("Address")),
-                                                                Q.pm("OWNER"), Q.p(String.valueOf(j + 1)), "Null", "false", "Null" + ");"));
+                                                                Q.pm("PREPARE"), Q.p(String.valueOf(j + 1)), "Null", "false", "Null" + ");"));
                                                         sqlWriter.newLine();
                                                         sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
                                                         sqlWriter.write("(" + Q.v(Q.pm(afterHouseId),

@@ -43,6 +43,14 @@ public class Q {
         }
     }
 
+    public static String pm1(String s){
+        if (s == null || s.equals("")) {
+            return "'未知'";
+        }else{
+            return "'" + filterErrorChar(s) + "'";
+        }
+    }
+
     public static String pmId(String s){
         if (s == null) {
             return "''";
@@ -135,6 +143,12 @@ public class Q {
             return "'SALE_HOUSE'";
 
     }
+    public static String changeHouseTypeFc(int ywid){
+        if( ywid==61){
+            return "'BACK_HOUSE'";
+        }else
+            return "'SALE_HOUSE'";
+    }
 
     public static String changePayType(int HouseType){
         if( HouseType==177 ){
@@ -193,8 +207,13 @@ public class Q {
             return "'在老系统中房屋状态为：房屋状态为抵押'";
         }else if(HouseState==127) {
             return "'在老系统中房屋状态为：房屋状态为不可售'";
-        }else
+        }else if(HouseState==132) {
+            return "'在老系统中房屋状态为：房屋状态为预告商品房抵押'";
+        }else if(HouseState==133) {
+            return "'在老系统中房屋状态为：房屋状态为房屋转移预告抵押'";
+        }else {
             return "'未知'";
+        }
 
     }
 
@@ -220,7 +239,7 @@ public class Q {
 
     public static String changeUseType(String UseType){
 
-        if( UseType.equals("") || UseType==null){
+        if( UseType==null || UseType.equals("")){
             return "'未知'";
         }else
             return "'"+UseType+"'";
@@ -228,10 +247,26 @@ public class Q {
     }
     public static String changeDesignUseType(String DesignUseType){
 
-        if(DesignUseType.equals("") || DesignUseType==null){
+        if(DesignUseType==null || DesignUseType.equals("")){
             return "'OTHER'";
         }else
             return "'"+DesignUseType+"'";
+
+    }
+    public static String changeCardType(int Type) {
+        if (Type == 111) {
+            return "OWNER_RSHIP";
+        }else if(Type == 110){
+            return "MORTGAGE";
+        }else if (Type == 198) {
+            return "NOTICE_MORTGAGE";
+        }else if (Type == 214) {
+            return "PROJECT_MORTGAGE";
+        }else if (Type == 3849) {
+            return "OTHER_CARD";
+        }else{
+            return "OTHER_CARD";
+        }
 
     }
 
@@ -264,12 +299,110 @@ public class Q {
     }
 
     public static String interest_type(String type){
+        if (type ==null){
+            return "'power.type.other'";
+        }
         if (type.equals("按揭贷款")){
             return "'121'";
         }else if (type.equals("抵押贷款")){
             return "'122'";
         }else{
             return "'power.type.other'";
+        }
+    }
+
+    public static String changeDefineID(int id) {
+        String wpid=null;
+        //System.out.println("aaa-"+id);
+        switch (id){
+            case 11 : wpid="WP41";//商品房交易
+            case 21 : wpid="WP56";//二手房交易
+            case 808 : wpid="WP68";//分照交易
+            case 250 : wpid="WP64";//使用权交易
+            case 43 : wpid="WP243";//房屋调拨
+            case 41 : wpid="WP58";//赠与
+            case 42 : wpid="WP59";//继承
+            case 91 : wpid="WP60";//法院判决
+            case 101 : wpid="WP71";//房屋交换
+            case 302 : wpid="WP61";//房屋拍卖
+            case 303 : wpid="WP62";//投资入股
+            case 304 : wpid="WP63";//兼并合并
+            case 50 : wpid="WP65";//抵债业务
+            case 111 : wpid="WP66";//政府奖励
+            case 61 : wpid="WP72";//回迁房屋
+            case 80 : wpid="WP67";//
+
+            case 31 : wpid="WP9";//单位抵押
+            case 32 : wpid="WP9";//个人抵押
+            case 33 : wpid="WP9";//商品房按揭贷款
+            case 812 : wpid="WP10";//房屋所有权抵押变更登记
+            case 35 : wpid="WP13";//最高额抵押权设定登记
+            case 34 : wpid="WP18";//在建工程抵押权设定登记
+            case 811 : wpid="WP19";//在建工程抵押权设定变更登记
+            case 123 : wpid="WP21";//按揭与在建工程注销登记
+            case 171 : wpid="WP171";//抵押注销登记
+
+
+            case 51 : wpid="WP44";//预购商品房
+            case 55 : wpid="WP46";//预购商品房预告注销登记
+            case 52 : wpid="WP1";//预购商品房设定抵押
+            case 56 : wpid="WP4";//预购商品房设定抵押注销登记
+
+
+
+            case 161: wpid="WP52";//房屋变更
+            case 131: wpid="WP54";//分照
+            case 170: wpid="WP102";//改变用途
+            case 141: wpid="WP55";//合照
+            case 71: wpid="WP53";//	自翻扩改
+
+            case 300: wpid="WP30";//新建房屋
+            case 121: wpid="WP32";//遗失补照
+            case 301: wpid="WP38";//房屋灭籍
+            case 151: wpid="WP33";//换照
+            case 220: wpid="WP34";//声明作废
+            case 2002: wpid="WP35";//所有权更正登记
+            case 142: wpid="WP75";//集资建房
+            case 201: wpid="WP73";//查封
+            case 202: wpid="WP74";//查封解除
+
+
+        }
+        return wpid;
+
+    }
+    public static String changeStructureFc(String structure){
+        if (structure == null){
+            return "'827'";
+        }
+        if (structure.equals("混合")){
+            return "'824'";
+        }else if (structure.equals("钢、钢混")){
+            return "'822'";
+        }else if (structure.equals("钢")){
+            return "'88'";
+        }else if (structure.equals("砖木")){
+            return "'825'";
+        }else if (structure.equals("简易")){
+            return "'5000'";
+        }else if (structure.equals("钢结构")){
+            return "'5001'";
+        }else if (structure.equals("框架")){
+            return "'915'";
+        }else if (structure.equals("荫道")){
+            return "'5002'";
+        }else if (structure.equals("钢屋架")){
+            return "'5003'";
+        }else if (structure.equals("钢混、钢构")){
+            return "'5004'";
+        }else if (structure.equals("混合.砖木")){
+            return "'5005'";
+        }else if (structure.equals("钢混")){
+            return "'823'";
+        }else if (structure.equals("砖混")){
+            return "'5006'";
+        }else{
+            return "'827'";
         }
     }
 

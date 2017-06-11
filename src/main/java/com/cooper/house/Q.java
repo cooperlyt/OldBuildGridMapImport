@@ -146,7 +146,11 @@ public class Q {
     public static String changeHouseTypeFc(int ywid){
         if( ywid==61){
             return "'BACK_HOUSE'";
-        }else
+        }else if(ywid==142){
+            return "'GROUP_HOUSE'";
+        }else if(ywid==300){
+            return "'SELF_CREATE'";
+        }
             return "'SALE_HOUSE'";
     }
 
@@ -313,58 +317,58 @@ public class Q {
 
     public static String changeDefineID(int id) {
         String wpid=null;
-        //System.out.println("aaa-"+id);
+        System.out.println("aaa-"+id);
         switch (id){
-            case 11 : wpid="WP41";//商品房交易
-            case 21 : wpid="WP56";//二手房交易
-            case 808 : wpid="WP68";//分照交易
-            case 250 : wpid="WP64";//使用权交易
-            case 43 : wpid="WP243";//房屋调拨
-            case 41 : wpid="WP58";//赠与
-            case 42 : wpid="WP59";//继承
-            case 91 : wpid="WP60";//法院判决
-            case 101 : wpid="WP71";//房屋交换
-            case 302 : wpid="WP61";//房屋拍卖
-            case 303 : wpid="WP62";//投资入股
-            case 304 : wpid="WP63";//兼并合并
-            case 50 : wpid="WP65";//抵债业务
-            case 111 : wpid="WP66";//政府奖励
-            case 61 : wpid="WP72";//回迁房屋
-            case 80 : wpid="WP67";//
+            case 11 : wpid="WP41";break;//商品房交易
+            case 21 : wpid="WP56";break;//二手房交易
+            case 808 : wpid="WP68";break;//分照交易
+            case 250 : wpid="WP64";break;//使用权交易
+            case 43 : wpid="WP243";break;//房屋调拨
+            case 41 : wpid="WP58";break;//赠与
+            case 42 : wpid="WP59";break;//继承
+            case 91 : wpid="WP60";break;//法院判决
+            case 101 : wpid="WP71";break;//房屋交换
+            case 302 : wpid="WP61";break;//房屋拍卖
+            case 303 : wpid="WP62";break;//投资入股
+            case 304 : wpid="WP63";break;//兼并合并
+            case 50 : wpid="WP65";break;//抵债业务
+            case 111 : wpid="WP66";break;//政府奖励
+            case 61 : wpid="WP72";break;//回迁房屋
+            case 80 : wpid="WP67";break;//
 
-            case 31 : wpid="WP9";//单位抵押
-            case 32 : wpid="WP9";//个人抵押
-            case 33 : wpid="WP9";//商品房按揭贷款
-            case 812 : wpid="WP10";//房屋所有权抵押变更登记
-            case 35 : wpid="WP13";//最高额抵押权设定登记
-            case 34 : wpid="WP18";//在建工程抵押权设定登记
-            case 811 : wpid="WP19";//在建工程抵押权设定变更登记
-            case 123 : wpid="WP21";//按揭与在建工程注销登记
-            case 171 : wpid="WP171";//抵押注销登记
-
-
-            case 51 : wpid="WP44";//预购商品房
-            case 55 : wpid="WP46";//预购商品房预告注销登记
-            case 52 : wpid="WP1";//预购商品房设定抵押
-            case 56 : wpid="WP4";//预购商品房设定抵押注销登记
+            case 31 : wpid="WP9";break;//单位抵押
+            case 32 : wpid="WP9";break;//个人抵押
+            case 33 : wpid="WP9";break;//商品房按揭贷款
+            case 812 : wpid="WP10";break;//房屋所有权抵押变更登记
+            case 35 : wpid="WP13";break;//最高额抵押权设定登记
+            case 34 : wpid="WP18";break;//在建工程抵押权设定登记
+            case 811 : wpid="WP19";break;//在建工程抵押权设定变更登记
+            case 123 : wpid="WP21";break;//按揭与在建工程注销登记
+            case 171 : wpid="WP171";break;//抵押注销登记
 
 
+            case 51 : wpid="WP44";break;//预购商品房
+            case 55 : wpid="WP46";break;//预购商品房预告注销登记
+            case 52 : wpid="WP1";break;//预购商品房设定抵押
+            case 56 : wpid="WP4";break;//预购商品房设定抵押注销登记
 
-            case 161: wpid="WP52";//房屋变更
-            case 131: wpid="WP54";//分照
-            case 170: wpid="WP102";//改变用途
-            case 141: wpid="WP55";//合照
-            case 71: wpid="WP53";//	自翻扩改
 
-            case 300: wpid="WP30";//新建房屋
-            case 121: wpid="WP32";//遗失补照
-            case 301: wpid="WP38";//房屋灭籍
-            case 151: wpid="WP33";//换照
-            case 220: wpid="WP34";//声明作废
-            case 2002: wpid="WP35";//所有权更正登记
-            case 142: wpid="WP75";//集资建房
-            case 201: wpid="WP73";//查封
-            case 202: wpid="WP74";//查封解除
+
+            case 161: wpid="WP52";break;//房屋变更
+            case 131: wpid="WP54";break;//分照
+            case 170: wpid="WP102";break;//改变用途
+            case 141: wpid="WP55";break;//合照
+            case 71: wpid="WP53";break;//	自翻扩改
+
+            case 300: wpid="WP30";break;//新建房屋
+            case 121: wpid="WP32";break;//遗失补照
+            case 301: wpid="WP38";break;//房屋灭籍
+            case 151: wpid="WP33";break;//换照
+            case 220: wpid="WP34";break;//声明作废
+            case 2002: wpid="WP35";break;//所有权更正登记
+            case 142: wpid="WP75";break;//集资建房
+            case 201: wpid="WP73";break;//查封
+            case 202: wpid="WP74";break;//查封解除
 
 
         }
@@ -395,14 +399,30 @@ public class Q {
             return "'5003'";
         }else if (structure.equals("钢混、钢构")){
             return "'5004'";
-        }else if (structure.equals("混合.砖木")){
+        }else if (structure.equals("混合.砖木")||structure.equals("砖木.混合") || structure.equals("砖木、混合")){
             return "'5005'";
         }else if (structure.equals("钢混")){
             return "'823'";
         }else if (structure.equals("砖混")){
             return "'5006'";
+        }else if (structure.equals("钢混、钢架")) {
+            return "'5007'";
+        }else if (structure.equals("石木")) {
+            return "'5008'";
         }else{
             return "'827'";
+        }
+    }
+
+    public static String changePoolMemoFc(String poolmemo){
+        if(poolmemo.equals("共同共有")){
+            return "'TOGETHER_OWNER'";
+        }else if( poolmemo.equals("按份共有")){
+            return "'SHARE_OWNER'";
+        }else if( poolmemo.equals("单独所有")){
+            return "'SINGLE_OWNER'";
+        }else {
+            return "NULL";
         }
     }
 

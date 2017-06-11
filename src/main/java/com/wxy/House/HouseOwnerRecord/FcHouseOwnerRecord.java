@@ -99,8 +99,8 @@ public class FcHouseOwnerRecord {
         NO_EXCEPTION_DEFINE_ID.add("WP19");//在建工程抵押权设定变更登记
         NO_EXCEPTION_DEFINE_ID.add("WP20");//在建工程抵押权设定转移登记
 
-        NO_EXCEPTION_DEFINE_ID.add("WP73");//房屋查封登记
-        NO_EXCEPTION_DEFINE_ID.add("WP74");//房屋查封解除登记
+       // NO_EXCEPTION_DEFINE_ID.add("WP73");//房屋查封登记
+        //NO_EXCEPTION_DEFINE_ID.add("WP74");//房屋查封解除登记
         NO_EXCEPTION_DEFINE_ID.add("WP81");//工程查封登记
         NO_EXCEPTION_DEFINE_ID.add("WP82");//工程查封解除登记
         NO_EXCEPTION_DEFINE_ID.add("WP88");//房屋续封登记
@@ -232,7 +232,7 @@ public class FcHouseOwnerRecord {
             fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
                     "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
                     "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan, " +
-                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType " +
+                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                     "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
@@ -244,7 +244,7 @@ public class FcHouseOwnerRecord {
                     "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
-                    //"and (y.yw_houseid='101003' or y.yw_houseid='42844' or y.keycode='200706110010') " +
+                    "and (y.keycode='201511180056') " +
                     "order by yw_houseid,y.keycode DESC " );
 
 
@@ -267,6 +267,7 @@ public class FcHouseOwnerRecord {
 
                                 //OWNER_BUSINESS
                                 DEFINE_ID = Q.changeDefineID(fangChanResultSet.getInt("yw_mc_biaoshi"));
+
                                 sqlWriter.write("INSERT OWNER_BUSINESS (ID, VERSION, SOURCE, MEMO, STATUS, DEFINE_NAME, DEFINE_ID, DEFINE_VERSION, SELECT_BUSINESS," +
                                         " CREATE_TIME, APPLY_TIME, CHECK_TIME, REG_TIME, RECORD_TIME, RECORDED, TYPE) VALUES ");
                                 sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")), "0", "'BIZ_IMPORT'", Q.p(fangChanResultSet.getString("sl_beizhu"))
@@ -287,6 +288,15 @@ public class FcHouseOwnerRecord {
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
                                     }
+                                }
+                                if(DEAL_DEFINE_ID.contains("WP73")||DEAL_DEFINE_ID.contains("WP74")){//查封，查封解除
+
+                                        sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("OLD_OWNER_RSHIP"),
+                                                Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
+                                                "NUll" + ");"));
+                                        sqlWriter.newLine();
+
                                 }
 
                                 if (MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)) {
@@ -383,146 +393,168 @@ public class FcHouseOwnerRecord {
 
 
                                 // house
-                                String houseid = fangChanResultSet.getString("yw_houseid");
-                                if (houseid == null || houseid.trim().equals("")) {
-                                    houseid = "";
+                                String houseCode = fangChanResultSet.getString("yw_houseid");
+                                if (houseCode == null || houseCode.trim().equals("") || houseCode.equals("0")) {
+                                    houseCode = fangChanResultSet.getString("keycode");
                                 }
-                                if (oldhouseid.equals("") || !oldhouseid.equals(houseid)) {
-                                    stratHouseId = "";
-                                    if (!houseid.equals("")) {
-                                        ResultSet resultSetOwnerRecord = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE_RECORD WHERE HOUSE_CODE='" + houseid + "'");
-                                        if (resultSetOwnerRecord.next()) {
-                                            stratHouseId = resultSetOwnerRecord.getString("HOUSE");
+                                //startHouse
+                                sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                        "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                        "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
+                                        "MAP_TIME,HOUSE_CODE, " +
+                                        "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
+                                        "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                        "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
+                                        " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                        "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                        "UNIT_NUMBER) VALUES");
 
-                                        }
-                                    }
-                                }
-                                if (stratHouseId.equals("")) {//库里没有hosued需要自动生成一个
-                                    stratHouseId = fangChanResultSet.getString("keycode") + "-s";
-                                    System.out.println("stratHouseId-" + stratHouseId);
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
-                                            "UNIT_NUMBER) VALUES");
+                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")+"-1"), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
+                                        , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
+                                        , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
+                                        , "0", "0", "0", "0"
+                                        , Q.changeHouseTypeFc(fangChanResultSet.getInt("yw_mc_biaoshi")), Q.changeDesignUseType(fangChanResultSet.getString("useType"))
+                                        , Q.changeStructureFc(fangChanResultSet.getString("ch_jiegou"))
+                                        , Q.pm1(fangChanResultSet.getString("yw_zuoluo")), Q.pm(fangChanResultSet.getString("sl_date"))
+                                        , Q.pm(houseCode), "False", "'未知'", "'未知'", Q.pm1(fangChanResultSet.getString("ch_qiuhao"))
+                                        , Q.pm1(fangChanResultSet.getString("ch_zhuanghao")), "'未知'", Q.pm1(fangChanResultSet.getString("ch_zongceng"))
+                                        , Q.pm1(fangChanResultSet.getString("ch_zongceng")), "0", "Null", "'未知'", "'未知'"
+                                        , Q.pm1(fangChanResultSet.getString("ch_jianzhuNianFen"))
+                                        , "'未知'", Q.pm1(fangChanResultSet.getString("sl_kaifagongsi")), "'未知'"
+                                        , "'未知'", "'未知'", "'未知'", "'未知'", "Null", "Null", "Null", "Null", "Null", Q.pm1(fangChanResultSet.getString("ch_shejiyongtu")), "''" + ");"));
+                                sqlWriter.newLine();
+                                //afteferHouse
+                                sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
+                                        "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
+                                        "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
 
-                                    sqlWriter.write("(" + Q.v(Q.p(stratHouseId), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
-                                            , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
-                                            , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
-                                            , "0", "0", "0", "0"
-                                            , Q.changeHouseTypeFc(fangChanResultSet.getInt("yw_mc_biaoshi")), Q.changeDesignUseType(fangChanResultSet.getString("useType"))
-                                            , Q.changeStructureFc(fangChanResultSet.getString("ch_jiegou"))
-                                            , Q.pm1(fangChanResultSet.getString("yw_zuoluo")), Q.pm(fangChanResultSet.getString("sl_date"))
-                                            , Q.pm(fangChanResultSet.getString("keycode")), "False", "'未知'", "'未知'", Q.pm1(fangChanResultSet.getString("ch_qiuhao"))
-                                            , Q.pm1(fangChanResultSet.getString("ch_zhuanghao")), "'未知'", Q.pm1(fangChanResultSet.getString("ch_zongceng"))
-                                            , Q.pm1(fangChanResultSet.getString("ch_zongceng")), "0", "Null", "'未知'", "'未知'"
-                                            , Q.pm1(fangChanResultSet.getString("ch_jianzhuNianFen"))
-                                            , "'未知'", Q.pm1(fangChanResultSet.getString("sl_kaifagongsi")), "'未知'"
-                                            , "'未知'", "'未知'", "'未知'", "'未知'", "Null", "Null", "Null", "Null", "Null", Q.pm1(fangChanResultSet.getString("ch_shejiyongtu")), "''" + ");"));
-                                    sqlWriter.newLine();
-                                }
+                                        "MAP_TIME,HOUSE_CODE, " +
+                                        "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
 
-                                afterHouseId = fangChanResultSet.getString("keycode");
-                                ResultSet resultSetBusnessHouse = statementOwnerRecord.executeQuery("SELECT * FROM HOUSE WHERE  HOUSE_CODE='" + houseid + "' AND ID NOT LIKE '%-t%'");
-                                if (resultSetBusnessHouse.next()) {//有HOUSEID
-                                    resultSetBusnessHouse.last();
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
-                                            "UNIT_NUMBER) VALUES");
-                                    sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm1(resultSetBusnessHouse.getString("HOUSE_ORDER"))
-                                            , Q.p(resultSetBusnessHouse.getString("HOUSE_UNIT_NAME")), Q.pm1(resultSetBusnessHouse.getString("IN_FLOOR_NAME"))
-                                            , Q.pm(resultSetBusnessHouse.getBigDecimal("HOUSE_AREA")), Q.pm(resultSetBusnessHouse.getBigDecimal("USE_AREA"))
-                                            , Q.pm(resultSetBusnessHouse.getBigDecimal("COMM_AREA")), Q.pm(resultSetBusnessHouse.getBigDecimal("SHINE_AREA"))
-                                            , Q.pm(resultSetBusnessHouse.getBigDecimal("LOFT_AREA")), Q.pm(resultSetBusnessHouse.getBigDecimal("COMM_PARAM"))
-                                            , Q.changeHouseTypeFc(fangChanResultSet.getInt("yw_mc_biaoshi")), Q.changeDesignUseType(resultSetBusnessHouse.getString("USE_TYPE"))
-                                            , Q.changeStructureFc(fangChanResultSet.getString("ch_jiegou")), Q.pm1(fangChanResultSet.getString("yw_zuoluo"))
-                                            , Q.pm(resultSetBusnessHouse.getTimestamp("MAP_TIME")), Q.pm(houseid)
-                                            , "False", Q.pm(resultSetBusnessHouse.getString("BUILD_CODE")), Q.pm(resultSetBusnessHouse.getString("MAP_NUMBER"))
-                                            , Q.pm(resultSetBusnessHouse.getString("BLOCK_NO")), Q.pm1(resultSetBusnessHouse.getString("BUILD_NO"))
-                                            , Q.pm(resultSetBusnessHouse.getString("DOOR_NO")), Q.pm1(fangChanResultSet.getString("ch_zongceng"))
-                                            , Q.pm1(fangChanResultSet.getString("ch_zongceng")), "0", "Null"
-                                            , Q.pm1(resultSetBusnessHouse.getString("PROJECT_CODE")), Q.pm1(resultSetBusnessHouse.getString("PROJECT_NAME"))
-                                            , Q.p(resultSetBusnessHouse.getString("COMPLETE_DATE")), Q.pm1(resultSetBusnessHouse.getString("DEVELOPER_CODE"))
-                                            , Q.pm1(resultSetBusnessHouse.getString("DEVELOPER_NAME"))
-                                            , Q.pm1(resultSetBusnessHouse.getString("SECTION_CODE")), Q.pm1(resultSetBusnessHouse.getString("SECTION_NAME"))
-                                            , Q.pm1(resultSetBusnessHouse.getString("DISTRICT_CODE")), Q.pm1(resultSetBusnessHouse.getString("DISTRICT_NAME"))
-                                            , Q.pm1(resultSetBusnessHouse.getString("BUILD_NAME")), Q.pm1(resultSetBusnessHouse.getString("BUILD_DEVELOPER_NUMBER"))
-                                            , "Null", "Null"
-                                            , "Null", "Null", Q.pm1(fangChanResultSet.getString("ch_shejiyongtu")), "''" + ");"));
-                                    sqlWriter.newLine();
-                                } else {//无HOUSEID
-                                    sqlWriter.write("INSERT HOUSE (ID, HOUSE_ORDER, HOUSE_UNIT_NAME, IN_FLOOR_NAME, " +
-                                            "HOUSE_AREA, USE_AREA, COMM_AREA, SHINE_AREA, LOFT_AREA, COMM_PARAM, " +
-                                            "HOUSE_TYPE, USE_TYPE, STRUCTURE, ADDRESS, " +
-                                            "MAP_TIME,HOUSE_CODE, " +
-                                            "HAVE_DOWN_ROOM, BUILD_CODE, MAP_NUMBER, BLOCK_NO, BUILD_NO, " +
-                                            "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
-                                            "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
-                                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
-                                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
-                                            "UNIT_NUMBER) VALUES");
-                                    sqlWriter.write("(" + Q.v(Q.p(afterHouseId), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
-                                            , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
-                                            , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
-                                            , "0", "0", "0", "0"
-                                            , Q.changeHouseTypeFc(fangChanResultSet.getInt("yw_mc_biaoshi")), Q.changeDesignUseType(fangChanResultSet.getString("useType"))
-                                            , Q.changeStructureFc(fangChanResultSet.getString("ch_jiegou"))
-                                            , Q.pm1(fangChanResultSet.getString("yw_zuoluo")), Q.pm(fangChanResultSet.getString("sl_date"))
-                                            , Q.pm(fangChanResultSet.getString("keycode")), "False", "'未知'", "'未知'", Q.pm1(fangChanResultSet.getString("ch_qiuhao"))
-                                            , Q.pm1(fangChanResultSet.getString("ch_zhuanghao")), "'未知'", Q.pm1(fangChanResultSet.getString("ch_zongceng"))
-                                            , Q.pm1(fangChanResultSet.getString("ch_zongceng")), "0", "Null", "'未知'", "'未知'"
-                                            , Q.pm1(fangChanResultSet.getString("ch_jianzhuNianFen"))
-                                            , "'未知'", Q.pm1(fangChanResultSet.getString("sl_kaifagongsi")), "'未知'"
-                                            , "'未知'", "'未知'", "'未知'", "'未知'", "Null", "Null", "Null", "Null", "Null", Q.pm1(fangChanResultSet.getString("ch_shejiyongtu")), "''" + ");"));
-                                    sqlWriter.newLine();
-                                }
+                                        "DOOR_NO, UP_FLOOR_COUNT, FLOOR_COUNT, DOWN_FLOOR_COUNT, BUILD_TYPE, " +
+                                        "PROJECT_CODE, PROJECT_NAME, COMPLETE_DATE, DEVELOPER_CODE, DEVELOPER_NAME," +
 
-                                //--- BUSINESS_HOUSE
-                                String no;
-                                if (houseid != null && !houseid.equals("")) {
-                                    no = houseid;
-                                } else {
-                                    no = fangChanResultSet.getString("keycode");
-                                }
-                                sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
-                                sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")), Q.pm(no)
-                                        , Q.pm(fangChanResultSet.getString("keycode")), Q.p(stratHouseId), Q.p(afterHouseId), "True", "''", "''" + ");"));
+                                        "SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
+                                        "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
+                                        "UNIT_NUMBER) VALUES");
+                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
+                                        , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
+                                        , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
+                                        , "0", "0", "0", "0"
+                                        , Q.changeHouseTypeFc(fangChanResultSet.getInt("yw_mc_biaoshi")), Q.changeDesignUseType(fangChanResultSet.getString("useType"))
+                                        , Q.changeStructureFc(fangChanResultSet.getString("ch_jiegou"))
+                                        , Q.pm1(fangChanResultSet.getString("yw_zuoluo")), Q.pm(fangChanResultSet.getString("sl_date"))
+                                        , Q.pm(houseCode), "False", "'未知'", "'未知'", Q.pm1(fangChanResultSet.getString("ch_qiuhao"))
+
+                                        , Q.pm1(fangChanResultSet.getString("ch_zhuanghao")), "'未知'", Q.pm1(fangChanResultSet.getString("ch_zongceng"))
+                                        , Q.pm1(fangChanResultSet.getString("ch_zongceng")), "0", "Null", "'未知'", "'未知'"
+                                        , Q.pm1(fangChanResultSet.getString("ch_jianzhuNianFen"))
+                                        , "'未知'", Q.pm1(fangChanResultSet.getString("sl_kaifagongsi")), "'未知'"
+                                        , "'未知'", "'未知'", "'未知'", "'未知'", "Null", Q.changePoolMemoFc(fangChanResultSet.getString("sz_gongyouqingkuang")), "Null", "Null", "Null", Q.pm1(fangChanResultSet.getString("ch_shejiyongtu")), "''" + ");"));
                                 sqlWriter.newLine();
 
-                                // 房屋状态 ===ADD_HOUSE_STATUS 交易备案
-                                String lastState = null;
-                                if (DEAL_DEFINE_ID.contains(DEFINE_ID)) {
-                                    sqlWriter.write("INSERT ADD_HOUSE_STATUS (ID, BUSINESS, STATUS, IS_REMOVE) VALUES  ");
 
-                                    sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode"))
-                                            , Q.p("OWNERED"), Q.p(false) + ");"));
+                                //--- BUSINESS_HOUSE
 
-                                    sqlWriter.newLine();
-                                    lastState = "OWNERED";
+
+
+                                KeyGeneratorHelper key = new KeyGeneratorHelper();
+                                key.addWord(fangChanResultSet.getString("yw_cqr")); //产权人
+                                key.addWord(fangChanResultSet.getString("yw_cqr_card"));//产权人身份证号
+
+                                ResultSet resultSetFangchanGy= statementFangchanCH.executeQuery("SELECT * FROM c_gongyou WHERE keycode='" + fangChanResultSet.getString("keycode") + "'");
+                                resultSetFangchanGy.last();
+                                int gysl=resultSetFangchanGy.getRow();
+                                if (gysl>0){
+                                    resultSetFangchanGy.beforeFirst();
+                                    while(resultSetFangchanGy.next()){
+                                        key.addWord((resultSetFangchanGy.getString("gy_ren").trim())); //共有权人
+                                        key.addWord(resultSetFangchanGy.getString("gy_card").trim()); //身份证号
+                                    }
+
                                 }
+                                if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
+                                    if (fangChanResultSet.getString("sl_ycqr")!=null && !fangChanResultSet.getString("sl_ycqr").equals("")){
+                                        key.addWord((fangChanResultSet.getString("sl_ycqr").trim())); //原产权人
+                                    }
+                                    if (fangChanResultSet.getString("sl_ycqr_card")!=null && !fangChanResultSet.getString("sl_ycqr_card").equals("")){
+                                        key.addWord((fangChanResultSet.getString("sl_ycqr_card").trim())); //原产权人身份证号
+                                    }
+
+                                }
+
+                                key.addWord(houseCode);//房屋编号 业务编号
+                                key.addWord(number);//权证号
+                                key.addWord(fangChanResultSet.getString("yw_zuoluo"));//房屋坐落
+
+                                System.out.println(key.getKey());
+                                DescriptionDisplay businessDisplay = new DescriptionDisplay();
+                                businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "房屋编号");
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,houseCode);
+                                String cqr = fangChanResultSet.getString("yw_cqr"),gyqr="";
+                                if(DEAL_DEFINE_ID.contains(DEFINE_ID)){ //产权业务
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "现在产权备案人");
+                                }else if(MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)){
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "抵押备案人");
+                                }else if (DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP44")){
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "预告备案人");
+                                }else{
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "产权案备案人");
+                                }
+                                    if (gysl>0){
+                                        resultSetFangchanGy.beforeFirst();
+                                        while (resultSetFangchanGy.next()){
+                                            gyqr =","+resultSetFangchanGy.getString("gy_ren").trim();
+
+                                        }
+                                        cqr = cqr+gyqr;
+                                    }
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH, cqr);
+
+
+
+
+
+
+                                businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("yw_zuoluo"));
+
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,"未知");
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"图");
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_qiuhao"));
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"丘");
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"幢");
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
+                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"房");
+
+                                if(MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)){//抵押业务
+
+
+                                    businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "抵押权人");
+                                    businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("sl_taxiangquanren"));
+
+                                }
+                                System.out.println(DescriptionDisplay.toStringValue(businessDisplay));
+
+
+                                sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")), Q.pm(houseCode)
+                                        , Q.pm(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode")+"-1"), "True", Q.pm(key.getKey()),Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
+                                sqlWriter.newLine();
+
+
+                                // 房屋状态 ===ADD_HOUSE_STATUS 交易备案
+
 
 
                                 i++;
                                 System.out.println(i + "/" + String.valueOf(recordCount));
                                 sqlWriter.flush();
 
-                                oldhouseid = fangChanResultSet.getString("yw_houseid");
-                                if (oldhouseid == null || oldhouseid.trim().equals("")) {
-                                    oldhouseid = "";
-                                }
-                                stratHouseId = afterHouseId;
+
                             }
                         }
 

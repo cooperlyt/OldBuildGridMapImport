@@ -51,6 +51,14 @@ public class Q {
         }
     }
 
+    public static String pmZc(String s){
+        if (s == null || s.equals("")) {
+            return "'0'";
+        }else{
+            return "'" + filterErrorChar(s) + "'";
+        }
+    }
+
     public static String pmId(String s){
         if (s == null) {
             return "''";
@@ -77,7 +85,7 @@ public class Q {
     }
 
     public static String pm(BigDecimal b){
-        if (b == null) {
+        if (b == null || b.equals("")) {
             return "0";
         }else{
             return b.stripTrailingZeros().toPlainString();
@@ -85,7 +93,7 @@ public class Q {
     }
 
     public static String p(BigDecimal b){
-        if (b == null){
+        if (b == null || b.equals("")){
             return "NULL";
         }else{
             return b.stripTrailingZeros().toPlainString();
@@ -317,7 +325,7 @@ public class Q {
 
     public static String changeDefineID(int id) {
         String wpid=null;
-        System.out.println("aaa-"+id);
+//        System.out.println("aaa-"+id);
         switch (id){
             case 11 : wpid="WP41";break;//商品房交易
             case 21 : wpid="WP56";break;//二手房交易
@@ -415,16 +423,63 @@ public class Q {
     }
 
     public static String changePoolMemoFc(String poolmemo){
-        if(poolmemo.equals("共同共有")){
+        if(poolmemo.trim().equals("共同共有")){
             return "'TOGETHER_OWNER'";
-        }else if( poolmemo.equals("按份共有")){
+        }else if( poolmemo.trim().equals("按份共有")){
             return "'SHARE_OWNER'";
-        }else if( poolmemo.equals("单独所有")){
+        }else if( poolmemo.trim().equals("单独所有")){
             return "'SINGLE_OWNER'";
         }else {
             return "NULL";
         }
     }
+
+    public static String fcCardType(String s){
+        if (s==null || s.equals("")){
+            return "'未知'";
+
+        }
+        if( s.equals("身份证") || s.equals("临时身份证") || s.equals("户口簿") ){
+            return "'MASTER_ID'";
+        }else if(s.equals("营业执照")){
+            return "'COMPANY_CODE'";
+        }else if(s.equals("军官证") || s.equals("士兵证") ){
+            return "'SOLDIER_CARD'";
+        }else if(s.equals("机构代码证") || s.equals("组织机构代码证")){
+            return "'CORP_CODE'";
+        }else if(s.equals("港澳居民通行证") ) {
+            return "'TW_ID'";
+        } else
+            return "'未知'";
+    }
+
+    public static String fcRelation(String s){
+        if (s==null || s.equals("")){
+            return "NULL";
+        }
+        if( s.equals(" 夫妻") || s.equals("夫妻") || s.equals("妻子")){
+            return "'215'";
+        }else if(s.equals("兄弟") || s.equals("弟弟")){
+            return "'216'";
+        }else if(s.equals("姐妹") || s.equals("姐姐")){
+            return "'217'";
+        }else if(s.equals("母女")){
+            return "'3850'";
+        }else if(s.equals("母子") ) {
+            return "'3851'";
+        } else if(s.equals("父子") ) {
+            return "'3852'";
+        } else if(s.equals("父女") ) {
+            return "'3853'";
+        } else if(s.equals("父亲") ) {
+            return "'3854'";
+        } else if(s.equals("母亲") ) {
+            return "'3855'";
+        } else
+            return "'3856'";
+    }
+
+
 
 
 }

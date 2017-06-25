@@ -77,7 +77,7 @@ public class Q {
 
     public static String pm(java.sql.Timestamp d){
         if (d == null){
-            return "'2000-1-1'";
+            return "'1801-1-1'";
         }else{
 
             return "'" + d.toString() + "'";
@@ -436,7 +436,7 @@ public class Q {
 
     public static String fcCardType(String s){
         if (s==null || s.equals("")){
-            return "'未知'";
+            return "'OTHER'";
 
         }
         if( s.equals("身份证") || s.equals("临时身份证") || s.equals("户口簿") ){
@@ -450,7 +450,7 @@ public class Q {
         }else if(s.equals("港澳居民通行证") ) {
             return "'TW_ID'";
         } else
-            return "'未知'";
+            return "'OTHER'";
     }
 
     public static String fcRelation(String s){

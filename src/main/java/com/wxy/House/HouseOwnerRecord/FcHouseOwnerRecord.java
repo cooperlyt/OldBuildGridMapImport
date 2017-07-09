@@ -24,9 +24,11 @@ public class FcHouseOwnerRecord {
 
     private static final String OUT_PATH_HouseOwnerError_FILE = "/FCHouseOwnerError.sql";
 
-    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
+    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
 
     private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+
+    //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
 
     private static Connection fangchanConnection;
 
@@ -159,7 +161,7 @@ public class FcHouseOwnerRecord {
         MORTGAEGE_DEFINE_ID.add("WP17");//最高额抵押权设定注销登记
         MORTGAEGE_DEFINE_ID.add("WP22");//他项权更正登记
         MORTGAEGE_DEFINE_ID.add("WP25");//他项权遗失补照
-        MORTGAEGE_DEFINE_ID.add("WP171");//抵押注销登记
+        MORTGAEGE_DEFINE_ID.add("OM2");//抵押注销登记
 
         MORTGAEGE_DEFINE_ID.add("WP18");//在建工程抵押登记
         MORTGAEGE_DEFINE_ID.add("WP21");//在建工程抵押权设定注销登记
@@ -219,6 +221,7 @@ public class FcHouseOwnerRecord {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
+            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
             ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
@@ -228,6 +231,8 @@ public class FcHouseOwnerRecord {
             e.printStackTrace();
             return;
         }
+
+
 
 
 
@@ -241,19 +246,34 @@ public class FcHouseOwnerRecord {
                     "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                     "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                     "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
-                    "and yw_jieduan not like '%审批%' and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                     "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                    "or y.keycode like '2016%' or y.keycode like '2015%') " +
+                    "or y.keycode like '2016%') " +
                     "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                     "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
-                    //"and (y.keycode='201611150019') " +
-                    "and (y.keycode='201512040061') " +
+                   // "and (y.keycode='201707040012') " +
+                   // "and (y.keycode='201601180034') " +
                     "order by yw_houseid,y.keycode " );
-
-
-
+//            System.out.println("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
+//                    "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
+//                    "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
+//                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
+//                    "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
+//                    "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
+//                    "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
+//                    "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
+//                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+//                    "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
+//                    "or y.keycode like '2016%') " +
+//                    "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
+//                    "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
+//                    "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+//                    "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+//                    // "and (y.keycode='201707040012') " +
+//                    "and (y.keycode='201601120011') " +
+//                    "order by yw_houseid,y.keycode " );
 
 
             fangChanResultSet.last();
@@ -293,7 +313,7 @@ public class FcHouseOwnerRecord {
                                     number = fangChanResultSet.getString("sz_zhenghao");
                                     if (!DEFINE_ID.equals("WP30") && !DEFINE_ID.equals("WP31") && !DEFINE_ID.equals("WP75")) {
                                         sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("OLD_OWNER_RSHIP"),
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("OLD_OWNER_RSHIP"),
                                                 Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
@@ -302,17 +322,17 @@ public class FcHouseOwnerRecord {
                                 if(DEAL_DEFINE_ID.contains("WP73")||DEAL_DEFINE_ID.contains("WP74")){//查封，查封解除
 
                                         sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("OWNER_RSHIP"),
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("OWNER_RSHIP"),
                                                 Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
 
                                 }
 
-                                if (DEFINE_ID.equals("WP38")){
+                                if (DEFINE_ID.equals("WP38")|| DEFINE_ID.equals("WP34")){
 
                                     sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("OWNER_RSHIP"),
+                                    sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("OWNER_RSHIP"),
                                             Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                             "NUll" + ");"));
                                     sqlWriter.newLine();
@@ -325,11 +345,11 @@ public class FcHouseOwnerRecord {
 
                                     //房屋所有权证号
                                     if (DEFINE_ID.equals("WP9") || DEFINE_ID.equals("WP10") || DEFINE_ID.equals("WP12") || DEFINE_ID.equals("WP13") || DEFINE_ID.equals("WP15")
-                                     || DEFINE_ID.equals("WP171") || DEFINE_ID.equals("WP17") || DEFINE_ID.equals("WP25")){
+                                     || DEFINE_ID.equals("OM2") || DEFINE_ID.equals("WP17") || DEFINE_ID.equals("WP25")){
                                         cardType = "MORTGAGE";
                                         number = fangChanResultSet.getString("sz_taxiangzheng");
                                         sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("OWNER_RSHIP"),
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("OWNER_RSHIP"),
                                                 Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
@@ -338,7 +358,7 @@ public class FcHouseOwnerRecord {
 
 
                                     // 他项权证号 注销登记
-                                    if(DEFINE_ID.equals("WP12") || DEFINE_ID.equals("WP171") ){
+                                    if(DEFINE_ID.equals("WP12") || DEFINE_ID.equals("OM2") ){
                                         cardType = "MORTGAGE";
                                         number = fangChanResultSet.getString("sl_str6");
 
@@ -347,7 +367,7 @@ public class FcHouseOwnerRecord {
                                     if(DEFINE_ID.equals("WP10")){
 
                                         sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-2", Q.pm("OLD_MORTGAGE"),
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-2"), Q.pm("OLD_MORTGAGE"),
                                                 Q.pm1(fangChanResultSet.getString("sl_str6")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
@@ -359,7 +379,7 @@ public class FcHouseOwnerRecord {
                                         number = fangChanResultSet.getString("sz_zjgczh");
                                         if(DEFINE_ID.equals("WP19")){
                                             sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                            sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-2", Q.pm("OLD_PROJECT_MORTGAGE"),
+                                            sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-2"), Q.pm("OLD_PROJECT_MORTGAGE"),
                                                     Q.pm1(fangChanResultSet.getString("sl_str6")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                     "NUll" + ");"));
                                             sqlWriter.newLine();
@@ -378,7 +398,7 @@ public class FcHouseOwnerRecord {
                                         number = fangChanResultSet.getString("sz_ygdjh");
 
                                         sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("NOTICE"),
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("NOTICE"),
                                                 Q.pm1(fangChanResultSet.getString("sl_ycq_zheng")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                                 "NUll" + ");"));
                                         sqlWriter.newLine();
@@ -399,7 +419,7 @@ public class FcHouseOwnerRecord {
 
                                 if (DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP44")) {
                                     sqlWriter.write("INSERT CARD (ID, TYPE, NUMBER, BUSINESS_ID,MEMO,CODE) VALUE ");
-                                    sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode"))+"-1", Q.pm("CONTRACT_NO"),
+                                    sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"-1"), Q.pm("CONTRACT_NO"),
                                             Q.pm1(fangChanResultSet.getString("sl_hth")), Q.pm(fangChanResultSet.getString("keycode")),"NULL",
                                             "NUll" + ");"));
                                     sqlWriter.newLine();
@@ -496,8 +516,12 @@ public class FcHouseOwnerRecord {
                                 if (gysl>0){
                                     resultSetFangchanGy.beforeFirst();
                                     while(resultSetFangchanGy.next()){
-                                        key.addWord((resultSetFangchanGy.getString("gy_ren").trim())); //共有权人
-                                        key.addWord(resultSetFangchanGy.getString("gy_card").trim()); //身份证号
+                                        if(resultSetFangchanGy.getString("gy_ren")!=null) {
+                                            key.addWord((resultSetFangchanGy.getString("gy_ren").trim())); //共有权人
+                                        }
+                                        if (resultSetFangchanGy.getString("gy_card")!=null) {
+                                            key.addWord(resultSetFangchanGy.getString("gy_card").trim()); //身份证号
+                                        }
                                     }
                                 }
                                 if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
@@ -514,7 +538,7 @@ public class FcHouseOwnerRecord {
 
                                 if (DEFINE_ID.equals("WP9") || DEFINE_ID.equals("WP10") || DEFINE_ID.equals("WP12")
                                         || DEFINE_ID.equals("WP13") || DEFINE_ID.equals("WP15")
-                                        || DEFINE_ID.equals("WP171") || DEFINE_ID.equals("WP17")
+                                        || DEFINE_ID.equals("OM2") || DEFINE_ID.equals("WP17")
                                         || DEFINE_ID.equals("WP25") || DEFINE_ID.equals("WP73")
                                         || DEFINE_ID.equals("WP74") || DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP4")){//抵押查封 把产权证号导入进去
                                     if (fangChanResultSet.getString("sl_ycq_zheng")!=null && !fangChanResultSet.getString("sl_ycq_zheng").equals("")){
@@ -616,7 +640,7 @@ public class FcHouseOwnerRecord {
                                 }
                                 if (DEFINE_ID.equals("WP9") || DEFINE_ID.equals("WP10") || DEFINE_ID.equals("WP12")
                                         || DEFINE_ID.equals("WP13") || DEFINE_ID.equals("WP15")
-                                        || DEFINE_ID.equals("WP171") || DEFINE_ID.equals("WP17")
+                                        || DEFINE_ID.equals("OM2") || DEFINE_ID.equals("WP17")
                                         || DEFINE_ID.equals("WP25") || DEFINE_ID.equals("WP73")
                                         || DEFINE_ID.equals("WP74") ){//抵押查封 把产权证号导入进去
                                     if (fangChanResultSet.getString("sl_ycq_zheng")!=null && !fangChanResultSet.getString("sl_ycq_zheng").equals("")){
@@ -666,9 +690,9 @@ public class FcHouseOwnerRecord {
                                                 "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                                                 "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                                                 "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
-                                                "and yw_jieduan not like '%审批%' and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                                                "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                                                 "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                                                "or y.keycode like '2016%' or y.keycode like '2015%') " +
+                                                "or y.keycode like '2016%') " +
                                                 "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                                                 "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                                                 "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
@@ -712,8 +736,8 @@ public class FcHouseOwnerRecord {
                                         personType = "INIT";
                                     }
                                     if (DEAL_DEFINE_ID.contains(DEFINE_ID) || DEFINE_ID.equals("WP9") || DEFINE_ID.equals("WP10") || DEFINE_ID.equals("WP12") || DEFINE_ID.equals("WP13") || DEFINE_ID.equals("WP15")
-                                            || DEFINE_ID.equals("WP171") || DEFINE_ID.equals("WP17") || DEFINE_ID.equals("WP25")
-                                            || DEFINE_ID.equals("WP73") || DEFINE_ID.equals("WP74") || DEAL_DEFINE_ID.equals("WP38")) {
+                                            || DEFINE_ID.equals("OM2") || DEFINE_ID.equals("WP17") || DEFINE_ID.equals("WP25")
+                                            || DEFINE_ID.equals("WP73") || DEFINE_ID.equals("WP74") || DEFINE_ID.equals("WP38") || DEFINE_ID.equals("WP34")) {
                                         personType = "OWNER";
                                     }
                                     if (DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP44") || DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP4")) {
@@ -879,9 +903,9 @@ public class FcHouseOwnerRecord {
                                             "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                                             "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                                             "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
-                                            "and yw_jieduan not like '%审批%' and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                                            "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                                             "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                                            "or y.keycode like '2016%' or y.keycode like '2015%') " +
+                                            "or y.keycode like '2016%') " +
                                             "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                                             "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                                             "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
@@ -923,9 +947,9 @@ public class FcHouseOwnerRecord {
                                             "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
                                             "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                                             "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
-                                            "and yw_jieduan not like '%审批%' and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                                            "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                                             "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                                            "or y.keycode like '2016%' or y.keycode like '2015%') " +
+                                            "or y.keycode like '2016%' ) " +
                                             "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                                             "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                                             "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
@@ -938,6 +962,22 @@ public class FcHouseOwnerRecord {
                                         sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")), Q.pm(cfjcResultSet.getTimestamp("jfsj")), Q.pm(fangChanResultSet.getString("keycode"))
                                                 , Q.pm(cfjcResultSet.getString("jffy")), Q.pm(cfjcResultSet.getString("jfwj")), Q.pm(cfjcResultSet.getString("jfwh")),Q.p(fangChanResultSet.getString("sl_ycq_zheng"))
                                                + ");"));
+                                        sqlWriter.newLine();
+                                    }
+                                }
+
+                                //业务要件
+                                //BUSINESS_FILE
+                                ResultSet fileResulset = statementFangchanCH.executeQuery("select * from c_ftp where BusinessId='"+fangChanResultSet.getString("keycode")+"'");
+                                fileResulset.last();
+                                int feilesl=fileResulset.getRow();
+                                if (feilesl>0){
+                                    fileResulset.beforeFirst();
+                                    while (fileResulset.next()){
+                                        sqlWriter.write("INSERT BUSINESS_FILE (ID, BUSINESS_ID, NAME,  NO_FILE, PRIORITY, TYPE) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.p(fileResulset.getString("id")),Q.pm(fileResulset.getString("BusinessId"))
+                                                ,Q.pm(fileResulset.getString("FileDir")),
+                                                "True",Q.pm(fileResulset.getString("PRIORITY")),Q.p("ADDITIONAL")+ ");"));
                                         sqlWriter.newLine();
                                     }
                                 }

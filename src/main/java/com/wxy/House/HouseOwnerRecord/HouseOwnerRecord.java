@@ -44,6 +44,9 @@ public class HouseOwnerRecord {
     private static final String DB_SHARK_URL = "jdbc:jtds:sqlserver://192.168.3.200:1433/shark";
 
 
+
+
+
     private static Connection recordConnection;
 
     private static Connection houseConnection;
@@ -146,7 +149,7 @@ public class HouseOwnerRecord {
             sqlPWriterErree = new BufferedWriter(Pfwe);
             sqlPWriter = new BufferedWriter(pfw);
             sqlPWriter.write("USE HOUSE_OWNER_RECORD;");
-            sqlWriter.write("set global max_allowed_packet=1024*1024*2048;");
+            //sqlWriter.write("set global max_allowed_packet=1024*1024*2048;");
             sqlPWriter.newLine();
             sqlPWriter.flush();
         } catch (IOException e) {
@@ -239,10 +242,10 @@ public class HouseOwnerRecord {
                 }
             }
             //房屋状态为在建工程抵押，查封，不可售，异议，灭籍,声明作废,房屋已注销(灭籍) 导入预警 抵押(做完初始登记直接做的抵押)
-//            ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
-//                    " where houseState=890 or houseState=99 or houseState=127 or houseState=116 or houseState=115 or houseState=117 or houseState=119 or houseState=4111");
-              ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
-                      " where houseState=4111");
+            ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
+                    " where houseState=890 or houseState=99 or houseState=127 or houseState=116 or houseState=115 or houseState=117 or houseState=119 or houseState=4111");
+//              ResultSet setd = statementHouse.executeQuery("select h.*,b.no as bno from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
+//                      " where houseState=4111");
 
               sqlWriter.newLine();
               sqlWriter.write("INSERT LOCKED_HOUSE(HOUSE_CODE, DESCRIPTION, TYPE, EMP_CODE, EMP_NAME, LOCKED_TIME, ID, BUILD_CODE) values ");
@@ -270,7 +273,7 @@ public class HouseOwnerRecord {
             return;
         }
 
-
+/**
         try {
 //            ResultSet rstHouse = statementHouse.executeQuery("select b.no as bno,h.* " +
 //                    "from DGHouseInfo..house as h left join DGHouseInfo..Build as b on h.buildid=b.id" +
@@ -1126,7 +1129,7 @@ public class HouseOwnerRecord {
 
 
 //预售许可证信息
-/**
+
         try {
               ResultSet rstRecortProject = statementRecord.executeQuery("select d.*,p.name as pname,p.no as pno from " +
                     "(select b.*,dd.name as ddname,dd.no as ddno from " +
@@ -1257,22 +1260,7 @@ public class HouseOwnerRecord {
                                 Q.p(rstRecortProjectbiz.getString("Sellobject")),"'MAP_SELL'",Q.p(rstRecortProjectbiz.getString("LandCardNO")),
                                 "''",!rstRecortProjectbiz.getString("LandProperty").equals("0")?Q.p(rstRecortProjectbiz.getString("LandProperty")):"Null",
                                 rstRecortProjectbiz.getString("luts")!=null?Q.p(rstRecortProjectbiz.getString("luts")):"'1970-01-01 08:00:00.0'",
-                                rstRecortProjectbiz.getString("luto")!=null?Q.p(rstRecortProjectbiz.getString("luto")):"'1970-01-01 08:00:00.0'",
-                                !rstRecortProjectbiz.getString("landGetMode").equals("0")?Q.p(rstRecortProjectbiz.getString("LandProperty")):"Null",
-                                Q.p(rstRecortProjectbiz.getBigDecimal("landArea")),"'landCardType.stateOwned'",
-                                rstRecortProjectbiz.getString("useType")!=null?Q.p(rstRecortProjectbiz.getString("useType")):"''",
-                                rstRecortProjectbiz.getString("BCLicence")!=null?Q.pm(rstRecortProjectbiz.getString("BCLicence")):"''",
-                                rstRecortProjectbiz.getString("PClicence")!=null?Q.pm(rstRecortProjectbiz.getString("PClicence")):"''",
-                                Q.p(rstRecortProjectbiz.getString("YYLicence")),Q.p(rstRecortProjectbiz.getString("USLLicence"))
-                                + ");"));
-                        sqlPWriter.newLine();
-
-                        // MAKE_CARD=====
-                        sqlPWriter.write("INSERT MAKE_CARD (ID, NUMBER, TYPE, BUSINESS_ID, ENABLE) VALUE ");
-                        sqlPWriter.write("(" + Q.v(Q.p(rstRecortProject.getString("RecordBizNO")),
-                                Q.pm(rstRecortProjectbiz.getString("hpcno")),"'PROJECT_RSHIP'",
-                                Q.p(rstRecortProject.getString("RecordBizNO")),
-                                "True"
+ PROJECT_SELL_INFO             "True"
                                         + ");"));
                         sqlPWriter.newLine();
 

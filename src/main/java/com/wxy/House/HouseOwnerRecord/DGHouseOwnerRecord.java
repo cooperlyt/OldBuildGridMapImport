@@ -146,13 +146,6 @@ public class DGHouseOwnerRecord {
         SELECT_DEFINE_ID.add("WP47");//预购商品房预告更正登记
         SELECT_DEFINE_ID.add("WP70");//房屋所有权转移预告注销登记
 
-        //有问题房屋编号，不导入
-//        HOUSE_ERROR.add("118058");
-//        HOUSE_ERROR.add("118057");
-//        HOUSE_ERROR.add("128518");
-//        HOUSE_ERROR.add("144016");
-
-
 
 
 

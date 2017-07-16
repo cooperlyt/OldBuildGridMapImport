@@ -255,8 +255,8 @@ public class FcHouseOwnerRecord {
                     "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
-                    //"and (y.yw_houseid='21999') " +
-                   // "and (y.keycode='201601180034') " +
+                   // "and (y.yw_houseid='67559') " +
+                    "and (y.keycode='201707130011') " +
                     "order by yw_houseid,y.keycode " );
 
 
@@ -459,7 +459,7 @@ public class FcHouseOwnerRecord {
 
                                 //System.out.println(Q.pmZc(fangChanResultSet.getString("ch_zongceng")));
 
-                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")+"-1F"), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
+                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")+"-1"), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
                                         , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
                                         , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
                                         , "0", "0", "0", "0"
@@ -745,7 +745,7 @@ public class FcHouseOwnerRecord {
                                         || fangChanResultSet.getString("yw_houseid").equals("")){// 没有houseCode keycode=houseCode
 
                                     sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
-                                    sqlWriter.write("(" + Q.v(Q.p("F"+fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode"))
+                                    sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode"))
                                             , Q.p(houseState), Q.pm(DescriptionDisplay.toStringValue(businessDisplay)), Q.pm(keyRecord.getKey()) + ");"));
                                     sqlWriter.newLine();
                                 }
@@ -809,7 +809,7 @@ public class FcHouseOwnerRecord {
                                                 String recordHouseState = null;
                                                 if (resultSetHouseRecord.next()) {
                                                     recordHouseState = resultSetHouseRecord.getString("HOUSE_STATUS"); //PROJECT_PLEDGE
-                                                    if (recordHouseState.equals("PROJECT_PLEDGE")) {
+                                                    if (recordHouseState!=null && recordHouseState.equals("PROJECT_PLEDGE")) {
                                                         lastHouseState = "PROJECT_PLEDGE";
                                                     }
                                                     sqlWriter.write("DELETE FROM HOUSE_RECORD WHERE HOUSE_CODE='" + houseid + "';");
@@ -842,6 +842,35 @@ public class FcHouseOwnerRecord {
                                             || DEFINE_ID.equals("WP73") || DEFINE_ID.equals("WP74") || DEFINE_ID.equals("WP38") || DEFINE_ID.equals("WP34")) {
                                         personType = "OWNER";
                                     }
+                                    if (DEAL_DEFINE_ID.contains(DEFINE_ID)){//原产权人
+                                        sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                                                " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                                        String ycqr;
+                                        String ypersonType;
+                                        if (DEFINE_ID.equals("WP41")){
+                                            ycqr = fangChanResultSet.getString("sl_kaifagongsi");
+                                            ypersonType ="INIT";
+
+                                        }else{
+                                            ycqr = fangChanResultSet.getString("sl_ycqr");
+                                            ypersonType = "OWNER";
+                                        }
+
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")+"Y"), Q.pm(ycqr)
+                                                , Q.fcCardType(fangChanResultSet.getString("sl_ycqr_card_type")), Q.pm(fangChanResultSet.getString("sl_ycqr_card")), Q.pm(fangChanResultSet.getString("sl_ycqr_dianhua"))
+                                                , Q.p("未知")
+                                                , Q.p(ypersonType), "'1'"
+                                                , "Null", "True", "NULL" + ");"));
+                                        sqlWriter.newLine();
+
+                                        //房屋与产权人关联
+                                        sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                                        sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")),
+                                                Q.pm(fangChanResultSet.getString("keycode")+"Y") + ");"));
+                                        sqlWriter.newLine();
+
+
+                                    }
                                     if (DEFINE_ID.equals("WP46") || DEFINE_ID.equals("WP44") || DEFINE_ID.equals("WP1") || DEFINE_ID.equals("WP4")) {
                                         personType = "PREPARE";
                                     }
@@ -850,7 +879,7 @@ public class FcHouseOwnerRecord {
                                             " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
                                     sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")), Q.pm(fangChanResultSet.getString("yw_cqr"))
                                             , Q.fcCardType(fangChanResultSet.getString("yw_cqr_card_type")), Q.pm(fangChanResultSet.getString("yw_cqr_card")), Q.pm(fangChanResultSet.getString("yw_cqr_dianhua"))
-                                            , Q.p(fangChanResultSet.getString("yw_zuoluo"))
+                                            , Q.p("未知")
                                             , Q.p(personType), "'1'"
                                             , "Null", "false", "NULL" + ");"));
                                     sqlWriter.newLine();

@@ -256,7 +256,7 @@ public class FcHouseOwnerRecord {
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                    // "and (y.yw_houseid='67559') " +
-                    "and (y.keycode='201707130011') " +
+                    "and (y.keycode='201707030018') " +
                     "order by yw_houseid,y.keycode " );
 
 
@@ -527,9 +527,18 @@ public class FcHouseOwnerRecord {
                                     }
                                 }
                                 if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
-                                    if (fangChanResultSet.getString("sl_ycqr")!=null && !fangChanResultSet.getString("sl_ycqr").equals("")){
-                                        key.addWord((fangChanResultSet.getString("sl_ycqr").trim())); //原产权人
+                                    if(!DEFINE_ID.equals("WP40")) {
+                                        if (fangChanResultSet.getString("sl_ycqr") != null && !fangChanResultSet.getString("sl_ycqr").equals("")) {
+                                            key.addWord((fangChanResultSet.getString("sl_ycqr").trim())); //原产权人
+
+                                        }
+                                    }else {
+                                        if (fangChanResultSet.getString("sl_kaifagongsi") != null && !fangChanResultSet.getString("sl_kaifagongsi").equals("")) {
+                                            key.addWord((fangChanResultSet.getString("sl_kaifagongsi").trim())); //原产权人
+
+                                        }
                                     }
+
                                     if (fangChanResultSet.getString("sl_ycqr_card")!=null && !fangChanResultSet.getString("sl_ycqr_card").equals("")){
                                         key.addWord((fangChanResultSet.getString("sl_ycqr_card").trim())); //原产权人身份证号
                                     }
@@ -591,9 +600,39 @@ public class FcHouseOwnerRecord {
                                     }
                                 businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH, cqr);
 
+                                if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
+                                    if(!DEFINE_ID.equals("WP40")) {
+                                        if (fangChanResultSet.getString("sl_ycqr") != null && !fangChanResultSet.getString("sl_ycqr").equals("")) {
+                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "原产权备案人");
+                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("sl_ycqr").trim());
+                                        }
+                                    }else {
+                                        if (fangChanResultSet.getString("sl_kaifagongsi") != null && !fangChanResultSet.getString("sl_kaifagongsi").equals("")) {
+                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "原产权备案人");
+                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("sl_kaifagongsi").trim());
+
+                                        }
+                                    }
+
+
+                                }
+
+
+
+
                                 if (DEAL_DEFINE_ID.contains(DEFINE_ID)) {
+
+                                    if (fangChanResultSet.getString("sl_ycq_zheng")!=null && !fangChanResultSet.getString("sl_ycq_zheng").equals("")){
+                                        businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "原权证号");
+                                        businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("sl_ycq_zheng"));
+                                    }
+
                                     businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "权证号");
                                     businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,number);
+
+
+
+
                                 }
                                 if(DEAL_DEFINE_ID.contains("WP73")||DEAL_DEFINE_ID.contains("WP74") || DEFINE_ID.equals("WP38")|| DEFINE_ID.equals("WP34")){//查封，查封解除
                                     businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "权证号");

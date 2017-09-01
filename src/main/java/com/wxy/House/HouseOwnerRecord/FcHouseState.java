@@ -181,13 +181,6 @@ public class FcHouseState {
 
 
 
-
-
-
-
-
-
-
             }
 
 

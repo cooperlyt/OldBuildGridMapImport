@@ -26,6 +26,7 @@ public class FcHouseOwnerRecord {
     private static final String OUT_PATH_HouseOwnerError_FILE = "/FCHouseOwnerError.sql";
 
     private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
+   // private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
 
     //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
@@ -239,28 +240,7 @@ public class FcHouseOwnerRecord {
 
         try {
 
-            fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
-                    "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
-                    "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
-                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
-                    "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
-                    "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
-                    "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
-                    "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
-                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
-                    "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                    "or y.keycode like '2016%') " +
-
-                    "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
-                    "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
-                    "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
-                    "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
-                   // "and (y.yw_houseid='67559') " +
-                    "and (y.keycode='201707030018') " +
-                    "order by yw_houseid,y.keycode " );
-
-
-//            System.out.println("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
+//            fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
 //                    "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
 //                    "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
 //                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
@@ -271,11 +251,53 @@ public class FcHouseOwnerRecord {
 //                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
 //                    "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
 //                    "or y.keycode like '2016%') " +
+//
 //                    "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
 //                    "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
 //                    "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
 //                    "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+//                   // "and (y.yw_houseid='67559') " +
+//                  //  "and (y.keycode='201706280002') " +
 //                    "order by yw_houseid,y.keycode " );
+
+            fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
+                    "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
+                    "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
+                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
+                    "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
+                    "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
+                    "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
+                    "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
+                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                    "and yw_jieduan not like '%测绘%' " +
+                    "and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32') and yw_jieduan='收费' "+
+                    "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
+                    "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
+                    "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+                    "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+                    //"and (y.yw_houseid='67559') " +
+                    //"and (y.keycode='201412080025' or y.keycode='201512290040') " +
+                    "order by yw_houseid,y.keycode " );
+
+
+            System.out.println("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
+            "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
+                    "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
+                    "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
+                    "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
+                    "where  y.keycode = sl.keycode and y.keycode = sf.keycode and  y.keycode=ch.keycode and y.keycode=fs.keycode and y.keycode=qs.keycode " +
+                    "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
+                    "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
+                    "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
+                    "and yw_jieduan not like '%测绘%' " +
+                    "and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32') "+
+                    "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
+                    "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
+                    "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+                    "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
+                    //"and (y.yw_houseid='67559') " +
+                    //"and (y.keycode='201412080025' or y.keycode='201512290040') " +
+                    "order by yw_houseid,y.keycode ");
 
 
             fangChanResultSet.last();
@@ -459,7 +481,7 @@ public class FcHouseOwnerRecord {
 
                                 //System.out.println(Q.pmZc(fangChanResultSet.getString("ch_zongceng")));
 
-                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")+"-1"), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
+                                sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")+"-F"), Q.pm1(fangChanResultSet.getString("ch_fanghao"))
                                         , "Null", Q.pm1(fangChanResultSet.getString("ch_ceng"))
                                         , Q.pm(fangChanResultSet.getBigDecimal("ch_mj_jianzhu")), "0"
                                         , "0", "0", "0", "0"
@@ -581,7 +603,7 @@ public class FcHouseOwnerRecord {
                                 businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
                                 businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "房屋编号");
                                 businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,houseCode);
-                                String cqr = fangChanResultSet.getString("yw_cqr"),gyqr="";
+                                String cqr = fangChanResultSet.getString("yw_cqr")+"["+fangChanResultSet.getString("yw_cqr_card")+"]",gyqr="";
                                 if(DEAL_DEFINE_ID.contains(DEFINE_ID)){ //产权业务
                                     businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "现在产权备案人");
                                 }else if(MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)){
@@ -594,11 +616,17 @@ public class FcHouseOwnerRecord {
                                     if (gysl>0){
                                         resultSetFangchanGy.beforeFirst();
                                         while (resultSetFangchanGy.next()){
-                                            gyqr =","+resultSetFangchanGy.getString("gy_ren").trim();
+                                            if (resultSetFangchanGy.getString("gy_ren")!=null && resultSetFangchanGy.getString("gy_card")!=null) {
+                                                gyqr = "," + resultSetFangchanGy.getString("gy_ren").trim() + "[" + resultSetFangchanGy.getString("gy_card").trim() + "]";
+                                            }
+                                            if (resultSetFangchanGy.getString("gy_ren")!=null && resultSetFangchanGy.getString("gy_card")==null) {
+                                                gyqr = "," + resultSetFangchanGy.getString("gy_ren").trim();
+                                            }
                                         }
                                         cqr = cqr+gyqr;
                                     }
                                 businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH, cqr);
+                                businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
 
                                 if (DEAL_DEFINE_ID.contains(DEFINE_ID)){
                                     if(!DEFINE_ID.equals("WP40")) {
@@ -608,7 +636,7 @@ public class FcHouseOwnerRecord {
                                         }
                                     }else {
                                         if (fangChanResultSet.getString("sl_kaifagongsi") != null && !fangChanResultSet.getString("sl_kaifagongsi").equals("")) {
-                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "原产权备案人");
+                                            businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "开发商");
                                             businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("sl_kaifagongsi").trim());
 
                                         }
@@ -688,14 +716,14 @@ public class FcHouseOwnerRecord {
 
                                 businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
                                 businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,fangChanResultSet.getString("yw_zuoluo"));
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,"未知");
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"图");
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_qiuhao"));
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"丘");
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"幢");
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
-                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"房");
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,"未知");
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"图");
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_qiuhao"));
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"丘");
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"幢");
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,fangChanResultSet.getString("ch_zhuanghao"));
+//                                businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"房");
 
                                 if(MORTGAEGE_DEFINE_ID.contains(DEFINE_ID)){//抵押业务
                                     businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
@@ -708,7 +736,7 @@ public class FcHouseOwnerRecord {
 
                                 sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
                                 sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getString("keycode")), Q.pm(houseCode)
-                                        , Q.pm(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode")+"-1"), Q.p(fangChanResultSet.getString("keycode")), "True", Q.pm(key.getKey()),Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
+                                        , Q.pm(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode")+"-F"), Q.p(fangChanResultSet.getString("keycode")), "False", Q.pm(key.getKey()),Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
                                 sqlWriter.newLine();
 
                                 // 房屋状态 ===ADD_HOUSE_STATUS 交易备案 初始登记 查封

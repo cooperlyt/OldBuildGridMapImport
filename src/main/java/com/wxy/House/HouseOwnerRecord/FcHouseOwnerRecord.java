@@ -234,10 +234,6 @@ public class FcHouseOwnerRecord {
             return;
         }
 
-
-
-
-
         try {
 
 //            fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +

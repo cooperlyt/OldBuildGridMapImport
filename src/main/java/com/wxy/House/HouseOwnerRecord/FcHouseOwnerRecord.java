@@ -25,12 +25,12 @@ public class FcHouseOwnerRecord {
 
     private static final String OUT_PATH_HouseOwnerError_FILE = "/FCHouseOwnerError.sql";
 
-    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
-   // private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
+   // private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
+    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
 
-    //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
-    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
+    //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
 
     private static Connection fangchanConnection;
 
@@ -223,8 +223,8 @@ public class FcHouseOwnerRecord {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
-            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
+            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
+            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             System.out.println("ownerRecordConnection successful");
@@ -270,14 +270,14 @@ public class FcHouseOwnerRecord {
                     "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
                     "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                     "and yw_jieduan not like '%测绘%' " +
-                    "and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32') and yw_jieduan='收费' "+
+                    //"and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32' or y.yw_mc_biaoshi='300' or y.yw_mc_biaoshi='201') "+
                     "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                     "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     //"and (y.yw_houseid='67559') " +
-                    //"and (y.keycode='201412080025' or y.keycode='201512290040') " +
-                    "order by yw_houseid,y.keycode " );
+                    "and (y.keycode='201308090043') " +
+                    "order by yw_houseid,y.keycode" );
 
 
             System.out.println("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
@@ -296,7 +296,7 @@ public class FcHouseOwnerRecord {
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     //"and (y.yw_houseid='67559') " +
-                    //"and (y.keycode='201412080025' or y.keycode='201512290040') " +
+                    "and (y.keycode='201501060040' ) " +
                     "order by yw_houseid,y.keycode ");
 
 
@@ -807,15 +807,15 @@ public class FcHouseOwnerRecord {
 
 
 
-
-                                if(fangChanResultSet.getString("yw_houseid")==null || fangChanResultSet.getString("yw_houseid").equals("0")
-                                        || fangChanResultSet.getString("yw_houseid").equals("")){// 没有houseCode keycode=houseCode
+                                System.out.println("houseid222--"+fangChanResultSet.getString("yw_houseid"));
+                               // if(fangChanResultSet.getString("yw_houseid")==null || fangChanResultSet.getString("yw_houseid").equals("0")
+                               //         || fangChanResultSet.getString("yw_houseid").equals("")){// 没有houseCode keycode=houseCode
 
                                     sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
                                     sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("keycode")), Q.p(fangChanResultSet.getString("keycode"))
                                             , Q.p(houseState), Q.pm(DescriptionDisplay.toStringValue(businessDisplay)), Q.pm(keyRecord.getKey()) + ");"));
                                     sqlWriter.newLine();
-                                }
+                               // }
 
 
                                 if(fangChanResultSet.getString("yw_houseid")!=null && !fangChanResultSet.getString("yw_houseid").equals("0")
@@ -826,7 +826,8 @@ public class FcHouseOwnerRecord {
                                             "OWNER_BUSINESS.ID=BUSINESS_HOUSE.BUSINESS_ID LEFT JOIN HOUSE_RECORD ON BUSINESS_HOUSE.AFTER_HOUSE=HOUSE_RECORD.HOUSE " +
                                             "WHERE HOUSE_RECORD.HOUSE_CODE='" + houseid + "'");
                                     //时间判断 fs_date>REG_TIMEX修改HOUSE_RECORD
-                                    System.out.println();
+                                    System.out.println("houseid--"+houseid);
+
                                     if (resultSetOwnerRecordCh2.next()) {
                                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                         java.util.Date fsDate = new java.util.Date(fangChanResultSet.getTimestamp("fs_date").getTime());   // sql -> util

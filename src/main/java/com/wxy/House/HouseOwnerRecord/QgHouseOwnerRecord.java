@@ -24,9 +24,12 @@ public class QgHouseOwnerRecord {
 
     private static final String OUT_PATH_HouseOwnerError_FILE="/QGHouseOwnerError.sql";
 
-    private static final String DB_FANG_CHAN_URL="jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_qg";
+  //  private static final String DB_FANG_CHAN_URL="jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_qg";
+    private static final String DB_FANG_CHAN_URL="jdbc:jtds:sqlserver://192.168.1.252:1433/fang_chan_dg";
 
-    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+  //  private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+
+    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.253:3306/HOUSE_OWNER_RECORD";
 
     private static Connection fangchanConnection;
 
@@ -149,6 +152,7 @@ public class QgHouseOwnerRecord {
             sqlWriter.write("USE HOUSE_OWNER_RECORD;");
 
             sqlWriter.newLine();
+
             sqlWriter.flush();
         } catch (IOException e) {
             System.out.println("sqlWriter 文件创建失败");
@@ -158,7 +162,8 @@ public class QgHouseOwnerRecord {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            fangchanConnection = DriverManager.getConnection(DB_FANG_CHAN_URL, "sa", "dgsoft");
+           // fangchanConnection = DriverManager.getConnection(DB_FANG_CHAN_URL, "sa", "dgsoft");
+            fangchanConnection = DriverManager.getConnection(DB_FANG_CHAN_URL, "sa", "qgsysdb");
             statementFangchan = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementFangchanCH = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementFangchanCH1 = fangchanConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -172,8 +177,8 @@ public class QgHouseOwnerRecord {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
-            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
+            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
+            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             System.out.println("ownerRecordConnection successful");
@@ -186,8 +191,13 @@ public class QgHouseOwnerRecord {
             fangChanResultSet = statementFangchan.executeQuery("select a.*,sl.sl_tx_bgq,sl.sl_yingyezhizhao,sl.sl_ycqr_card,sl.sl_dlr,sl.sl_dlr_card,sl.sl_dlr_dianhua,sl.sl_tx_bgq from " +
                     "(select jb.*,sz.sz_beizhu from c_jiben jb left join c_shanzheng sz on jb.keycode=sz.keycode) as a " +
                     "left join c_shouli sl on a.keycode=sl.keycode " +
-                    //"where a.keycode='201709300003' order by a.ywmc_bs,a.keycode");
+                    //"where a.keycode='201209140032' order by a.ywmc_bs,a.keycode");
                     "order by a.ywmc_bs,a.keycode");
+//            System.out.println("select a.*,sl.sl_tx_bgq,sl.sl_yingyezhizhao,sl.sl_ycqr_card,sl.sl_dlr,sl.sl_dlr_card,sl.sl_dlr_dianhua,sl.sl_tx_bgq from " +
+//                    "(select jb.*,sz.sz_beizhu from c_jiben jb left join c_shanzheng sz on jb.keycode=sz.keycode) as a " +
+//                    "left join c_shouli sl on a.keycode=sl.keycode " +
+//                    "where a.keycode='201209140032' order by a.ywmc_bs,a.keycode");
+
             fangChanResultSet.last();
             int recordCount = fangChanResultSet.getRow();
             System.out.println("count-"+recordCount);
@@ -756,10 +766,14 @@ public class QgHouseOwnerRecord {
                                 sqlWriter.newLine();
 
 
+                               BigDecimal dkse = new BigDecimal(0);
+                                if (fangChanResultSet.getString("zgzqqddsshse")!=null && !fangChanResultSet.getString("zgzqqddsshse").equals("")){
+                                    dkse=fangChanResultSet.getBigDecimal("zgzqqddsshse");
+                                }
                                 sqlWriter.write("INSERT MORTGAEGE_REGISTE (HIGHEST_MOUNT_MONEY, WARRANT_SCOPE, INTEREST_TYPE, " +
                                         "MORTGAGE_DUE_TIME_S, MORTGAGE_TIME, MORTGAGE_AREA, " +
                                         "TIME_AREA_TYPE, ID, BUSINESS_ID, OLD_FIN, FIN, ORG_NAME) VALUE ");
-                                sqlWriter.write("(" + Q.v(Q.pm(fangChanResultSet.getBigDecimal("zgzqqddsshse")), "Null", Q.pm(fangChanResultSet.getString("diyaleixing")),
+                                sqlWriter.write("(" + Q.v(Q.pm(dkse), "Null", Q.pm(fangChanResultSet.getString("diyaleixing")),
                                         Q.pm(fangChanResultSet.getTimestamp("shediriqi")), Q.pm(fangChanResultSet.getTimestamp("yuedingriqi")), Q.pm(fangChanResultSet.getBigDecimal("mj_jianzhu")),
                                         "'DATE_TIME'", fangChanResultSet.getString("keycode"), fangChanResultSet.getString("keycode"),
                                         "Null", fangChanResultSet.getString("keycode"), "'青冈县房地产管理处'"
@@ -793,6 +807,10 @@ public class QgHouseOwnerRecord {
                             }
                         }
                         // EVALUATE
+                        BigDecimal pgje = new BigDecimal(0);
+                        if (fangChanResultSet.getString("pinggujia")!=null && !fangChanResultSet.getString("pinggujia").equals("")){
+                            pgje = fangChanResultSet.getBigDecimal("pinggujia");
+                        }
                         if(fangChanResultSet.getBigDecimal("pinggujia")!=null){
                             sqlWriter.write("INSERT EVALUATE (EVALUATE_CORP_NAME, EVALUATE_CORP_N0, ASSESSMENT_PRICE, ID, BUSINESS_ID) VALUE ");
                             sqlWriter.write("(" + Q.v(Q.pm("未知"), Q.p("未知")
@@ -848,6 +866,33 @@ public class QgHouseOwnerRecord {
                             sqlWriter.newLine();
 
                         }
+
+                        //业务要件
+                        //BUSINESS_FILE
+                        ResultSet fileResulset = statementFangchanCH.executeQuery("select * from c_ftp where BusinessId='"+fangChanResultSet.getString("keycode")+"'");
+                        fileResulset.last();
+                        int feilesl=fileResulset.getRow(),pri=0;
+                        if (feilesl>0){
+                            fileResulset.beforeFirst();
+                            while (fileResulset.next()){
+                                sqlWriter.write("INSERT BUSINESS_FILE (ID, BUSINESS_ID, NAME,  NO_FILE, PRIORITY, TYPE) VALUES ");
+                                sqlWriter.write("(" + Q.v(Q.p("F-"+fileResulset.getString("id")),Q.pm(fileResulset.getString("BusinessId"))
+                                        ,Q.pm(fileResulset.getString("FileName")),
+                                        "True",Q.pm(fileResulset.getString("PRIORITY")),Q.p("ADDITIONAL")+ ");"));
+                                sqlWriter.newLine();
+
+
+
+                                sqlWriter.write("INSERT UPLOAD_FILE (FILE_NAME, EMP_NAME, EMP_CODE, MD5, BUSINESS_FILE_ID, ID,  UPLOAD_TIME,PRI) VALUE ");
+                                sqlWriter.write("(" + Q.v(Q.p(fileResulset.getString("FileDir")),Q.pm("ADMIN"),Q.pm("ROOT"),Q.pm(""),
+                                        Q.p("F-"+fileResulset.getString("id")),Q.p("F-"+fileResulset.getString("id")),Q.pm(fangChanResultSet.getTimestamp("djsj")),Q.pm(Integer.toString(pri))
+                                                + ");"));
+                                sqlWriter.newLine();
+                                pri++;
+                            }
+                        }
+                        //档案号
+
 
 
 

@@ -25,7 +25,7 @@ public class FcHouseOwnerRecord {
 
     private static final String OUT_PATH_HouseOwnerError_FILE = "/FCHouseOwnerError.sql";
 
-   // private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
+    //private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
     private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
 
     private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
@@ -234,6 +234,10 @@ public class FcHouseOwnerRecord {
             return;
         }
 
+
+
+
+
         try {
 
 //            fangChanResultSet = statementFangchan.executeQuery("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
@@ -272,12 +276,12 @@ public class FcHouseOwnerRecord {
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     //"and (y.yw_houseid='67559') " +
-                    "and (y.keycode='201308090043') " +
+                    "and (y.keycode='201508170001') " +
                     "order by yw_houseid,y.keycode" );
 
 
             System.out.println("select y.keycode,y.yw_houseid,y.yw_mingcheng,y.yw_mc_biaoshi,y.yw_jieduan,y.yw_jd_biaoshi,y.yw_cqr,y.yw_cqr_card_type,y.yw_cqr_card, " +
-            "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
+                    "y.yw_cqr_dianhua,y.yw_zuoluo,sl_kaifagongsi,sl_ycqr,sl_ycqr_card_type,sl_ycqr_card,sl_ycqr_dianhua,sl_ycq_zheng,ch_qiuhao, " +
                     "ch_zhuanghao,ch_fanghao,ch_jiegou,ch_laiyuan,ch_shejiyongtu,ch_mj_jianzhu,ch_jianzhuNianFen,ch_zongceng,ch_ceng,ch_chanbie,sf_goufangkuan,sf_chengjiaojia, " +
                     "sf_goufangkuan,sf_pinggujia,sz_taxiangzheng,sz_zhenghao,sz_zjgczh,sz_ygdjh,sl_str6,sz_beizhu,sl_beizhu,sl_date,fs_date,sl_hth,useType,sz_gongyouqingkuang,sl_taxiangquanren " +
                     "from c_shouli as sl,c_yewu as y,c_shoufei as sf, c_pinggu as pg,c_cehui as ch,c_shanzheng as sz,c_quanshu as qs,c_fushen as fs " +
@@ -286,14 +290,14 @@ public class FcHouseOwnerRecord {
                     "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
                     "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
                     "and yw_jieduan not like '%测绘%' " +
-                    "and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32') "+
+                    //"and  (y.yw_mc_biaoshi='811' or y.yw_mc_biaoshi='34' or y.yw_mc_biaoshi='35' or y.yw_mc_biaoshi='31' or y.yw_mc_biaoshi='32' or y.yw_mc_biaoshi='300' or y.yw_mc_biaoshi='201') "+
                     "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                     "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                     "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     "and y.yw_mc_biaoshi<>'399' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
                     //"and (y.yw_houseid='67559') " +
-                    "and (y.keycode='201501060040' ) " +
-                    "order by yw_houseid,y.keycode ");
+                    "and (y.keycode='2015110120090') " +
+                    "order by yw_houseid,y.keycode");
 
 
             fangChanResultSet.last();
@@ -1099,8 +1103,8 @@ public class FcHouseOwnerRecord {
                                             "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                                             "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
                                             "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
-                                            "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                                            "or y.keycode like '2016%') " +
+                                            "and yw_jieduan not like '%测绘%' " +
+
                                             "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                                             "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                                             "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
@@ -1143,8 +1147,8 @@ public class FcHouseOwnerRecord {
                                             "and y.keycode=sz.keycode and  y.keycode=pg.keycode " +
                                             "and yw_mingcheng <>'租赁登记' and yw_jieduan not like '%受理%' and yw_jieduan not like '%登记%' " +
                                             "and yw_jieduan not like '%复审' and yw_jieduan not like '%评估%' " +
-                                            "and yw_jieduan not like '%测绘%' and( y.keycode like '2017%' " +
-                                            "or y.keycode like '2016%' ) " +
+                                            "and yw_jieduan not like '%测绘%' " +
+
                                             "and  y.yw_mc_biaoshi<>'13' and y.yw_mc_biaoshi<>'12' and y.yw_mc_biaoshi<>'14' and y.yw_mc_biaoshi<>'15' "+
                                             "and y.yw_mc_biaoshi<>'199' and y.yw_mc_biaoshi<>'810' and y.yw_mc_biaoshi<>'53' and y.yw_mc_biaoshi<>'54' "+
                                             "and y.yw_mc_biaoshi<>'81' and y.yw_mc_biaoshi<>'82' and y.yw_mc_biaoshi<>'305' and y.yw_mc_biaoshi<>'306' "+
@@ -1184,26 +1188,6 @@ public class FcHouseOwnerRecord {
                                         sqlWriter.newLine();
                                     }
                                 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                                 i++;
                                 System.out.println(i + "/" + String.valueOf(recordCount));

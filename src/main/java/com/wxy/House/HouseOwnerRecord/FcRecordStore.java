@@ -120,8 +120,8 @@ public class FcRecordStore {
 
 
         try {
-            //fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE WHERE KEYCODE='201608100087' OR KEYCODE='201611240070'");
-            fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE");
+            fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE WHERE KEYCODE='201702140016' OR KEYCODE='201706210022' OR KEYCODE='201707200011' OR KEYCODE='201510120090' ");
+            //fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE");
             while(fangChanResultSet.next()){
                 recordResultSet = statementOwnerRecord.executeQuery("SELECT * FROM OWNER_BUSINESS WHERE ID='"+fangChanResultSet.getString("keycode")+"'");
                 if (recordResultSet.next()){

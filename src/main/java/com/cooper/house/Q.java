@@ -28,7 +28,7 @@ public class Q {
     }
 
     public static String p(String s){
-        if (s == null) {
+        if (s == null || s.equals(""))  {
             return "NULL";
         }else{
             return "'" + filterErrorChar(s) + "'";
@@ -352,7 +352,7 @@ public class Q {
             case 34 : wpid="WP18";break;//在建工程抵押权设定登记
             case 811 : wpid="WP19";break;//在建工程抵押权设定变更登记
             case 123 : wpid="WP21";break;//按揭与在建工程注销登记
-            case 171 : wpid="WP171";break;//抵押注销登记
+            case 171 : wpid="OM2";break;//抵押注销登记
 
 
             case 51 : wpid="WP44";break;//预购商品房
@@ -384,10 +384,10 @@ public class Q {
 
     }
     public static String changeStructureFc(String structure){
-        if (structure == null){
+        if (structure == null || structure.equals("")){
             return "'827'";
         }
-        if (structure.equals("混合")){
+        if (structure.equals("混合") || structure.equals("混合.")){
             return "'824'";
         }else if (structure.equals("钢、钢混")){
             return "'822'";
@@ -417,6 +417,8 @@ public class Q {
             return "'5007'";
         }else if (structure.equals("石木")) {
             return "'5008'";
+        }else if (structure.equals("剪力墙")) {
+            return "'5045'";
         }else{
             return "'827'";
         }

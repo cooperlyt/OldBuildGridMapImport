@@ -19,7 +19,7 @@ public class FcCloseHouse {
 
     //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
-    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
 
 
     private static Connection ownerRecordConnection;
@@ -92,7 +92,7 @@ public class FcCloseHouse {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
+            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
             //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             statementOwnerRecordch = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -107,11 +107,18 @@ public class FcCloseHouse {
             resultSetHouseRecord = statementOwnerRecord.executeQuery("SELECT OWNER_BUSINESS.ID AS BID,CLOSE_HOUSE.*,HOUSE.ID as HID,HOUSE.ADDRESS,HOUSE.HOUSE_AREA,HOUSE.DESIGN_USE_TYPE,BUSINESS_HOUSE.HOUSE_CODE FROM OWNER_BUSINESS LEFT JOIN BUSINESS_HOUSE ON OWNER_BUSINESS.ID=BUSINESS_HOUSE.BUSINESS_ID" +
                     " LEFT JOIN HOUSE ON BUSINESS_HOUSE.AFTER_HOUSE=HOUSE.ID LEFT JOIN CLOSE_HOUSE ON OWNER_BUSINESS.ID=CLOSE_HOUSE.BUSINESS_ID" +
                     " WHERE OWNER_BUSINESS.STATUS<>'ABORT' AND OWNER_BUSINESS.STATUS<>'CANCEL'" +
-                   // " AND (OWNER_BUSINESS.DEFINE_ID='WP73' or OWNER_BUSINESS.DEFINE_ID='OC') AND CLOSE_HOUSE.ID IS NOT NULL AND OWNER_BUSINESS.ID='WP73-201708020151'");
-                    " AND (OWNER_BUSINESS.DEFINE_ID='WP73' or OWNER_BUSINESS.DEFINE_ID='OC') AND CLOSE_HOUSE.ID IS NOT NULL and OWNER_BUSINESS.ID='201308090041' ");
+                    " AND (OWNER_BUSINESS.DEFINE_ID='WP73' or OWNER_BUSINESS.DEFINE_ID='OC') AND CLOSE_HOUSE.ID IS NOT NULL and OWNER_BUSINESS.ID='201510120090' ");
 
 
+
+            System.out.println("wwww");
+            resultSetHouseRecord.last();
+            int recordCount = resultSetHouseRecord.getRow();
+            System.out.println("count-"+recordCount);
+            resultSetHouseRecord.beforeFirst();
             while(resultSetHouseRecord.next()){
+                System.out.println("111111");
+
 
                 KeyGeneratorHelper key = new KeyGeneratorHelper();
 

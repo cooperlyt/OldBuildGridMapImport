@@ -15,7 +15,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -25,17 +27,45 @@ import java.util.Date;
  */
 public class WxyTest {
 
+    public enum Clocr{
+        red,yewwol,block,white
+
+    }
 
 
 
 
 
 
-    public static void main(String[] args) throws SQLException{
-        //WorkBook.main(null);
-        //HouseInfo.main(args);
-       // HouseOwnerRecord.main(null);
 
+    public static void main(String[] args) throws SQLException, ParseException {
+//        WorkBook.main(null);
+//        HouseInfo.main(args);
+//        HouseOwnerRecord.main(null);
+
+        BigDecimal b = new BigDecimal(1.5456);
+        BigDecimal a = new BigDecimal(2.5456);
+        BigDecimal c = new BigDecimal(0);
+        c=a.multiply(b);
+        b=b.setScale(0,BigDecimal.ROUND_HALF_UP);
+        System.out.print(c.setScale(0,BigDecimal.ROUND_HALF_UP));
+
+//        String systemDateStr = "2018-08-01";
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        Date date = new Date();
+//        date = sdf.parse(systemDateStr);
+//        System.out.println(sdf.format(date));
+//
+//        Date date1 = new Date();
+//
+//        System.out.println(sdf.format(date1));
+//        System.out.println(date.compareTo(date1));
+//        if (date1.compareTo(date)>0){
+//           System.out.println("111");
+//
+//        }else {
+//            System.out.println("222");
+//        }
 //        Connection conn = null ;        // 数据库连接
 //        try {
 //            String DBURL = "jdbc:oracle:thin:@localhost:1521:orcl";
@@ -58,7 +88,7 @@ public class WxyTest {
 
 
 
-        FcHouseOwnerRecord.main(null);
+      //  FcHouseOwnerRecord.main(null);
 
 
     }

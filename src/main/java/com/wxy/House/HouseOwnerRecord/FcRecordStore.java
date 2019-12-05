@@ -19,11 +19,11 @@ public class FcRecordStore {
 
     private static final String OUT_PATH_HouseOwnerError_FILE = "/FcRecordStoreError.sql";
 
-    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://192.168.1.2:1433/fang_chan";
+    private static final String DB_FANG_CHAN_URL = "jdbc:jtds:sqlserver://127.0.0.1:1433/fang_chan_fc";
 
-    //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
+    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://127.0.0.1:3306/HOUSE_OWNER_RECORD";
 
-    private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
+    //private static final String DB_HOUSE_OWNER_RECORD_URL="jdbc:mysql://192.168.1.7:3306/HOUSE_OWNER_RECORD";
 
     private static Connection fangchanConnection;
 
@@ -107,8 +107,8 @@ public class FcRecordStore {
         }
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
-            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
+            //ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "isNull");
+            ownerRecordConnection = DriverManager.getConnection(DB_HOUSE_OWNER_RECORD_URL, "root", "dgsoft");
             statementOwnerRecord = ownerRecordConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             System.out.println("ownerRecordConnection successful");
@@ -120,11 +120,11 @@ public class FcRecordStore {
 
 
         try {
-            fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE WHERE KEYCODE='201702140016' OR KEYCODE='201706210022' OR KEYCODE='201707200011' OR KEYCODE='201510120090' ");
+            fangChanResultSet = statementFangchan.executeQuery("SELECT s.* FROM c_yewu as y left join  RECORD_STORE as s on y.keycode = s.keycode WHERE (y.yw_cqr LIKE '%辽宁凤城老窖酒业有限责任公司%') and y.keycode like '20171213%'"  );
             //fangChanResultSet = statementFangchan.executeQuery("select * from RECORD_STORE");
             while(fangChanResultSet.next()){
-                recordResultSet = statementOwnerRecord.executeQuery("SELECT * FROM OWNER_BUSINESS WHERE ID='"+fangChanResultSet.getString("keycode")+"'");
-                if (recordResultSet.next()){
+//                recordResultSet = statementOwnerRecord.executeQuery("SELECT * FROM OWNER_BUSINESS WHERE ID='"+fangChanResultSet.getString("keycode")+"'");
+//                if (recordResultSet.next()){
                     sqlWriter.write("INSERT RECORD_STORE (ID, RECORD_CODE, BUSINESS, VERSION, CREATE_TIME, CABINET, FRAME, BOX, ROOM) VALUE ");
                     sqlWriter.write("(" + Q.v(Q.p(fangChanResultSet.getString("KEYCODE")),Q.pm(fangChanResultSet.getString("RECORD_CODE")),Q.pm(fangChanResultSet.getString("KEYCODE")),Q.pm("1"),
                             Q.p(fangChanResultSet.getTimestamp("CREATE_TIME")),Q.p(fangChanResultSet.getString("CABINET")),Q.p(fangChanResultSet.getString("FRAME"))
@@ -132,14 +132,14 @@ public class FcRecordStore {
                                     + ");"));
                     sqlWriter.newLine();
                 }
-                recordResultSet = statementOwnerRecord.executeQuery("SELECT * FROM BUSINESS_FILE WHERE BUSINESS_ID='"+fangChanResultSet.getString("keycode")+"'");
-                if(recordResultSet.next()){
-                    sqlWriter.write("UPDATE BUSINESS_FILE SET RECORD_STORE='"+fangChanResultSet.getString("keycode")+"' WHERE BUSINESS_ID='"+fangChanResultSet.getString("keycode")+"';");
-                    sqlWriter.newLine();
-                }
+//                recordResultSet = statementOwnerRecord.executeQuery("SELECT * FROM BUSINESS_FILE WHERE BUSINESS_ID='"+fangChanResultSet.getString("keycode")+"'");
+//                if(recordResultSet.next()){
+//                    sqlWriter.write("UPDATE BUSINESS_FILE SET RECORD_STORE='"+fangChanResultSet.getString("keycode")+"' WHERE BUSINESS_ID='"+fangChanResultSet.getString("keycode")+"';");
+//                    sqlWriter.newLine();
+//                }
 
                 sqlWriter.flush();
-            }
+//            }
 
 
 
@@ -148,7 +148,7 @@ public class FcRecordStore {
 
 
         } catch (Exception e) {
-            System.out.println("keycode is errer-----"+fangChanResultSet.getString("statementFangchan"));
+           // System.out.println("keycode is errer-----"+fangChanResultSet.getString("statementFangchan"));
             e.printStackTrace();
             return;
         }

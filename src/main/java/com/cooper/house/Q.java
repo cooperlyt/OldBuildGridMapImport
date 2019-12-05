@@ -327,6 +327,7 @@ public class Q {
         String wpid=null;
 //        System.out.println("aaa-"+id);
         switch (id){
+            case 15 : wpid="WP43";break;//撤销备案
             case 11 : wpid="WP41";break;//商品房交易
             case 21 : wpid="WP56";break;//二手房交易
             case 808 : wpid="WP68";break;//分照交易
@@ -369,6 +370,7 @@ public class Q {
             case 71: wpid="WP53";break;//	自翻扩改
 
             case 300: wpid="WP30";break;//新建房屋
+            case 13: wpid="WP30";break;//新建房屋
             case 121: wpid="WP32";break;//遗失补照
             case 301: wpid="WP38";break;//房屋灭籍
             case 151: wpid="WP33";break;//换照

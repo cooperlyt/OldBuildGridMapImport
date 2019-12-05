@@ -73,6 +73,11 @@
             <artifactId>pinyin4j</artifactId>
             <version>2.5.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.1.0</version>
+        </dependency>
     </dependencies>
 
 
@@ -105,7 +110,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.cooper.house.MSDataBaseExport</mainClass>
+                            <mainClass>com.wxy.House.WxyTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

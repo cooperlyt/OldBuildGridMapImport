@@ -7,9 +7,6 @@ import com.wxy.House.HouseOwnerRecord.FcHouseOwnerRecord;
 import com.wxy.House.HouseOwnerRecord.HouseOwnerRecord;
 import com.wxy.House.Shark.WorkBook;
 
-import oracle.jdbc.oci.OracleOCIConnection;
-import oracle.jdbc.pool.OracleConnectionPoolDataSource;
-import oracle.jdbc.pool.OracleOCIConnectionPool;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+
 
 /**
  * Created by wxy on 2016-09-14.
@@ -39,16 +37,17 @@ public class WxyTest {
 
 
     public static void main(String[] args) throws SQLException, ParseException {
-//        WorkBook.main(null);
+        System.out.println(1111);
+        //        WorkBook.main(null);
 //        HouseInfo.main(args);
 //        HouseOwnerRecord.main(null);
 
-        BigDecimal b = new BigDecimal(1.5456);
-        BigDecimal a = new BigDecimal(2.5456);
-        BigDecimal c = new BigDecimal(0);
-        c=a.multiply(b);
-        b=b.setScale(0,BigDecimal.ROUND_HALF_UP);
-        System.out.print(c.setScale(0,BigDecimal.ROUND_HALF_UP));
+//        BigDecimal b = new BigDecimal(1.5456);
+//        BigDecimal a = new BigDecimal(2.5456);
+//        BigDecimal c = new BigDecimal(0);
+//        c=a.multiply(b);
+//        b=b.setScale(0,BigDecimal.ROUND_HALF_UP);
+//        System.out.print(c.setScale(0,BigDecimal.ROUND_HALF_UP));
 
 //        String systemDateStr = "2018-08-01";
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

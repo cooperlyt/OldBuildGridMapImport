@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
 
 /**
@@ -229,13 +230,40 @@ public class DgTownsRecord {
                    sqlWriter.newLine();
                    // 共有权人
                    if(ownerResultSet.getString("POOL_MEMO")!=null
-                           && ownerResultSet.getString("POOL_MEMO").equals("TOGETHER_OWNER")
-                           && ownerResultSet.getString("POOL_MEMO").equals("SHARE_OWNER")
+                           && (ownerResultSet.getString("POOL_MEMO").equals("TOGETHER_OWNER")
+                           || ownerResultSet.getString("POOL_MEMO").equals("SHARE_OWNER"))
                            && ownerResultSet.getString("share_name")!=null
                            && !ownerResultSet.getString("share_name").equals("")){
 
+                       sqlWriter.write("INSERT POWER_OWNER (ID, NAME, ID_TYPE, ID_NO,PHONE,ADDRESS," +
+                               " TYPE, PRI, CARD, OLD, PROXY_PERSON) VALUE ");
+                       sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")+"-DP"), Q.pm(ownerResultSet.getString("share_name"))
+                               , Q.pm(ownerResultSet.getString("SHARE_ID_TYPE")),Q.pm(ownerResultSet.getString("SHARE_ID_NO")),Q.pm("未知")
+                               , "NULL"
+                               , Q.p("CONTRACT"), "'2'"
+                               , "Null","false","NULL" + ");"));
+                       sqlWriter.newLine();
+                       sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
+                       sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")),
+                               Q.pm(ownerResultSet.getString("reg_code")+"-DP")+");"));
+
+                   }
+                   sqlWriter.newLine();
+                   /**
+                    * HOUSE_CONTRACT
+                    */
+                   BigDecimal price = BigDecimal.valueOf(0);
+                   if(ownerResultSet.getBigDecimal("price_house")!=null && ownerResultSet.getBigDecimal("price_house").compareTo(price)>0){
+                       price =ownerResultSet.getBigDecimal("price_house");
                    }
 
+                   sqlWriter.write("INSERT HOUSE_CONTRACT(ID, CONTRACT_NUMBER, CONTRACT_DATE, TYPE, PROJECT_RSHIP_NUMBER, PAY_TYPE," +
+                           " SUM_PRICE, SALEAREA, LEAST_PROTECTED) VALUE ");
+                   sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")), Q.pm(ownerResultSet.getString("reg_code"))
+                           , Q.p(ownerResultSet.getTimestamp("reg_time")),Q.p("OTHER"),"Null"
+                           , "NULL"
+                           , Q.pm(price), Q.p(houseResultSet.getBigDecimal("HOUSE_AREA"))
+                           , "Null" + ");"));
 
 
 

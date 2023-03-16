@@ -188,10 +188,73 @@ public class DgTownsRecord {
                    /**
                     * BUSINESS_HOUSE
                     */
+                   KeyGeneratorHelper key = new KeyGeneratorHelper();
+                   DescriptionDisplay businessDisplay = new DescriptionDisplay();
+                   businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "房屋编号");
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH, houseResultSet.getString("ID"));
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "合同编号");
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,ownerResultSet.getString("reg_code"));
+                   businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "房屋备案人");
+                   String mainName="";
+                   key.addWord(houseResultSet.getString("ID"));
+                   key.addWord(ownerResultSet.getString("main_name"));
+                   mainName = ownerResultSet.getString("main_name");
+                   if (ownerResultSet.getString("ID_NO")!=null) {
+                       key.addWord(ownerResultSet.getString("ID_NO"));
+                       mainName = mainName+"["+ownerResultSet.getString("ID_NO")+"]";
+                   }
+                   if (ownerResultSet.getString("share_name")!=null
+                           && !ownerResultSet.getString("share_name").equals("")
+                           && !ownerResultSet.getString("share_name").equals("-")) {
+                       key.addWord(ownerResultSet.getString("share_name"));
+                       mainName = mainName+","+ownerResultSet.getString("share_name");
+                   }
+                   if (ownerResultSet.getString("SHARE_ID_NO")!=null) {
+                       key.addWord(ownerResultSet.getString("SHARE_ID_NO"));
+                       mainName = mainName+"["+ownerResultSet.getString("SHARE_ID_NO")+"]";
+                   }
+                   businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,mainName);
+
+
+                   if (houseResultSet.getString("DPNAME")!=null
+                           && !houseResultSet.getString("DPNAME").equals("")) {
+                       businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.LABEL, "开发商");
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,houseResultSet.getString("DPNAME"));
+                       key.addWord(houseResultSet.getString("DPNAME"));
+
+                   }
+
+                   businessDisplay.newLine(DescriptionDisplay.DisplayStyle.NORMAL);
+
+                   if (houseResultSet.getString("ADDRESS")!=null && !houseResultSet.getString("ADDRESS").equals("")){
+                       key.addWord(houseResultSet.getString("ADDRESS"));
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.PARAGRAPH,houseResultSet.getString("ADDRESS"));
+                   }
+                   if (houseResultSet.getString("MAP_NUMBER")!=null && !houseResultSet.getString("MAP_NUMBER").equals("")){
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,houseResultSet.getString("MAP_NUMBER"));
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"图");
+                   }
+
+                   if (houseResultSet.getString("BLOCK_NO")!=null && !houseResultSet.getString("BLOCK_NO").equals("")){
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,houseResultSet.getString("BLOCK_NO"));
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"丘");
+                   }
+                   if (houseResultSet.getString("BUILD_NO")!=null && !houseResultSet.getString("BUILD_NO").equals("")){
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,houseResultSet.getString("BUILD_NO"));
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"幢");
+                   }
+                   if (houseResultSet.getString("HOUSE_ORDER")!=null && !houseResultSet.getString("HOUSE_ORDER").equals("")){
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.IMPORTANT,houseResultSet.getString("HOUSE_ORDER"));
+                       businessDisplay.addData(DescriptionDisplay.DisplayStyle.DECORATE,"房");
+                   }
+
                    sqlWriter.newLine();
                    sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
                    sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID"))
-                           , Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID")+"-S"), Q.p(houseResultSet.getString("ID")), "FALSE", "''", "''" + ");"));
+                           , Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID")+"-S"), Q.p(houseResultSet.getString("ID")),"FALSE",Q.pm(key.getKey()), Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
 
                    /**
                     * ADD_HOUSE_STATUS
@@ -207,7 +270,7 @@ public class DgTownsRecord {
                    sqlWriter.newLine();
                    sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
                    sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")), Q.p(houseResultSet.getString("ID"))
-                           ,Q.p("CONTRACTS_RECORD"), "''", "''" + ");"));
+                           ,Q.p("CONTRACTS_RECORD"),Q.pm(DescriptionDisplay.toStringValue(businessDisplay)),Q.pm(key.getKey())+");"));
                     /**
                     * main_owner pool HOUSE_OWNER POWER_OWNER
                     */
@@ -264,6 +327,7 @@ public class DgTownsRecord {
                            , "NULL"
                            , Q.pm(price), Q.p(houseResultSet.getBigDecimal("HOUSE_AREA"))
                            , "Null" + ");"));
+
 
 
 

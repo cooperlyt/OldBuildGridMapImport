@@ -88,8 +88,8 @@ public class DgTownsRecord {
            + "LEFT JOIN HOUSE_INFO.SECTION S ON P.SECTIONID = S.ID "
            + "LEFT JOIN HOUSE_INFO.DISTRICT D ON S.DISTRICT = D.ID "
            + "LEFT JOIN HOUSE_INFO.DEVELOPER DP ON P.DEVELOPERID = DP.ID  "
-           + "WHERE data_flag=0  AND H.ID IS NOT NULL and H.ID= '"+"210681104000042"+"'"
-//           + "WHERE data_flag=0  AND H.ID IS NOT NULL "
+//           + "WHERE data_flag=0  AND H.ID IS NOT NULL and H.ID= '"+"210681104000042"+"'"
+           + "WHERE data_flag=0  AND H.ID IS NOT NULL "
            + "order by P.NAME,B.NAME,H.HOUSE_ORDER"
            );
 
@@ -309,9 +309,10 @@ public class DgTownsRecord {
                        sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
                        sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")),
                                Q.pm(ownerResultSet.getString("reg_code")+"-DP")+");"));
+                       sqlWriter.newLine();
 
                    }
-                   sqlWriter.newLine();
+
                    /**
                     * HOUSE_CONTRACT
                     */
@@ -328,7 +329,58 @@ public class DgTownsRecord {
                            , Q.pm(price), Q.p(houseResultSet.getBigDecimal("HOUSE_AREA"))
                            , "Null" + ");"));
 
+                   /**
+                    * 受理备注 产权来源也放到备注里了
+                    */
+                   String resionText="";
+                   if (ownerResultSet.getString("owner_memo")!=null && !ownerResultSet.getString("owner_memo").equals("")) {
+                       resionText = ownerResultSet.getString("owner_memo");
+                   }
+                   if (ownerResultSet.getString("owner_source")!=null && !ownerResultSet.getString("owner_source").equals("")) {
+                       resionText =resionText+"  产权来源:"+ownerResultSet.getString("owner_source");
+                   }
+                   if (ownerResultSet.getString("reg_organization")!=null && !ownerResultSet.getString("reg_organization").equals("")) {
+                       resionText =resionText+"  登记单位:"+ownerResultSet.getString("reg_organization");
+                   }
+                   if(!resionText.equals("")) {
+                       sqlWriter.newLine();
+                       sqlWriter.write("INSERT REASON (ID, TYPE, REASON, BUISINESS_ID) VALUE ");
+                       sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")), Q.pm("RECEIVE")
+                               , Q.p(resionText)
+                               , Q.pm(ownerResultSet.getString("reg_code")) + ");"));
+                   }
+                   /**
+                    * 受理时间信息
+                    */
 
+                   if(ownerResultSet.getString("accept_name")!=null
+                           && !ownerResultSet.getString("accept_name").equals("")
+                           && (ownerResultSet.getString("accept_time")!=null
+                           && !ownerResultSet.getString("accept_time").equals(""))) {
+                       String acceptString = "受理人:"+ownerResultSet.getString("accept_name")+ " 受理时间:"+ownerResultSet.getString("accept_time");
+                       sqlWriter.newLine();
+                       sqlWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, BUSINESS_ID, OPER_TIME, COMMENTS, WINDOW_NO, EMP_NAME) VALUE ");
+                       sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")), Q.pm("APPLY_EMP")
+                               , Q.pm(ownerResultSet.getString("accept_name")), Q.pm(ownerResultSet.getString("reg_code"))
+                               , Q.pm(ownerResultSet.getString("accept_time")),Q.p(acceptString),"NULL",Q.pm(ownerResultSet.getString("accept_name"))
+                               +");"));
+                   }
+
+                   /**
+                    * 登记时间时间信息
+                    */
+                    if(ownerResultSet.getString("reg_name")!=null
+                           && !ownerResultSet.getString("reg_name").equals("")
+                           && (ownerResultSet.getString("reg_time")!=null
+                           && !ownerResultSet.getString("reg_time").equals(""))) {
+                       String lastString = "登记人:"+ownerResultSet.getString("reg_name")+ " 登册时间:"+ownerResultSet.getString("reg_time");
+                       sqlWriter.newLine();
+                       sqlWriter.write("INSERT BUSINESS_EMP (ID, TYPE, EMP_CODE, BUSINESS_ID, OPER_TIME, COMMENTS, WINDOW_NO, EMP_NAME) VALUE ");
+                       sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")+"L"), Q.pm("LAST_CHECK_EMP")
+                               , Q.pm(ownerResultSet.getString("reg_name")), Q.pm(ownerResultSet.getString("reg_code"))
+                               , Q.pm(ownerResultSet.getString("reg_time")),Q.p(lastString),"NULL",Q.pm(ownerResultSet.getString("reg_name"))
+                                       +");"));
+                   }
 
 
                    sqlWriter.flush();

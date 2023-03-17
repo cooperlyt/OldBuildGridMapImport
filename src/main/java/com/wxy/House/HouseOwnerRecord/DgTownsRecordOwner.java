@@ -11,7 +11,7 @@ import java.sql.*;
 
 /**
  * 东港村镇倒库
- *
+ *产权 备案
  */
 public class DgTownsRecordOwner {
 
@@ -26,10 +26,8 @@ public class DgTownsRecordOwner {
    private static File houseOwnerErrorFile;
    private static Statement statementOwner;
    private static Statement statementHouse;
-   private static Statement statementHouseInfo;
    private static ResultSet houseResultSet;
    private static ResultSet ownerResultSet;
-   private static ResultSet houseInfoResultSet;
    public static void main(String agr[]) throws SQLException {
 
        recordFile = new File(OUT_PATH_FILE);
@@ -67,7 +65,6 @@ public class DgTownsRecordOwner {
 
            statementHouse = townsConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
            statementOwner = townsConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-           statementHouseInfo = townsConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
            System.out.println("townsConnection successful");
        } catch (Exception e) {
            System.out.println("townsConnection is errer");

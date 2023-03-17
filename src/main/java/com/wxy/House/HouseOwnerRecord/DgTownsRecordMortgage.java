@@ -66,6 +66,7 @@ public class DgTownsRecordMortgage {
             return;
 
         }
+
         try {
             mortgageResultSet = statementMortgage.executeQuery("select M.*,H.BUILDID from x_info_mort M left join HOUSE_INFO.HOUSE H on M.house_key_sub = H.ID"
 //            + " where H.ID is null"+" and house_key_sub = '210681101Z016112'");
@@ -108,18 +109,15 @@ public class DgTownsRecordMortgage {
                 System.out.println(i+"/"+String.valueOf(recordCount)+"--reg_code:"+mortgageResultSet.getString("reg_code"));
             }
 
-
-
-
-
-
-
         }catch (Exception e){
             System.out.println("house_key is errer-----"+mortgageResultSet.getString("house_key_sub"));
             e.printStackTrace();
             return;
 
         }
+
+
+
 
 
 

@@ -13,7 +13,7 @@ import java.sql.*;
  * 东港村镇倒库
  *
  */
-public class DgTownsRecord {
+public class DgTownsRecordOwner {
 
    private static final String BEGIN_DATE = "2023-03-09";
    private static final String OUT_PATH_FILE = "/DGTownsRecord.sql";

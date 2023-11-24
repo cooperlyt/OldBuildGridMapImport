@@ -62,7 +62,6 @@ public class DgTownsRecordOwner {
            Class.forName("com.mysql.jdbc.Driver");
            // 打开链接
            townsConnection = DriverManager.getConnection(DB_TOWNS_RECORD_URL, "root", "dgsoft");
-
            statementHouse = townsConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
            statementOwner = townsConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
            System.out.println("townsConnection successful");
@@ -85,8 +84,8 @@ public class DgTownsRecordOwner {
            + "LEFT JOIN HOUSE_INFO.SECTION S ON P.SECTIONID = S.ID "
            + "LEFT JOIN HOUSE_INFO.DISTRICT D ON S.DISTRICT = D.ID "
            + "LEFT JOIN HOUSE_INFO.DEVELOPER DP ON P.DEVELOPERID = DP.ID  "
-//           + "WHERE data_flag=0  AND H.ID IS NOT NULL and H.ID= '"+"210681104000042"+"'"
-           + "WHERE data_flag=0  AND H.ID IS NOT NULL "
+           + "WHERE data_flag=0  AND H.ID IS NOT NULL and H.ID= '"+"21068110442589460238700391"+"'"
+//           + "WHERE data_flag=0  AND H.ID IS NOT NULL "
            + "order by P.NAME,B.NAME,H.HOUSE_ORDER"
            );
 
@@ -98,11 +97,19 @@ public class DgTownsRecordOwner {
            int i=0;
            // 建筑信息表所有启用的房子，data_flag=0,按reg_time取最后一条记录
            while (houseResultSet.next()){
-               ownerResultSet = statementOwner.executeQuery("select * from x_info_owner as o where o.data_flag=0 and house_key= "
-                       +"'"+houseResultSet.getString("ID")+"' "
-                       +"and o.reg_time = (select max(reg_time) from x_info_owner as o1 where o1.data_flag=0 and o1.house_key= "
-                       +"'"+houseResultSet.getString("ID")+"')"
+//               ownerResultSet = statementOwner.executeQuery("select * from x_info_owner as o where o.data_flag=0 and house_key= "
+//                       +"'"+houseResultSet.getString("ID")+"' "
+//                       +"and o.reg_time = (select max(reg_time) from x_info_owner as o1 where o1.data_flag=0 and o1.house_key= "
+//                       +"'"+houseResultSet.getString("ID")+"')"
+//               );
+               // 指定查一条
+
+               ownerResultSet = statementOwner.executeQuery("select * from x_info_owner as o where reg_code='HT005003'"
+
+
+
                );
+
                ownerResultSet.last();
                if (ownerResultSet.getRow()>0){
                    ownerResultSet.first();
@@ -114,7 +121,7 @@ public class DgTownsRecordOwner {
 
 
                    sqlWriter.write("(" + Q.v(Q.p(ownerResultSet.getString("reg_code")), "0", "'BIZ_IMPORT'", Q.p(ownerResultSet.getString("owner_memo"))
-                           , "'COMPLETE'", Q.p("房屋备案档案补录"), Q.p("TWP42"), "0", null, Q.p(ownerResultSet.getTimestamp("reg_time"))
+                           , "'COMPLETE'", Q.p("房屋备案档案补录"), Q.p("BL42"), "0", null, Q.p(ownerResultSet.getTimestamp("reg_time"))
                            , Q.p(ownerResultSet.getTimestamp("reg_time")), "Null", Q.p(ownerResultSet.getTimestamp("reg_time")), Q.p(ownerResultSet.getTimestamp("reg_time")), "False", "'NORMAL_BIZ'") + ");");
                    sqlWriter.newLine();
 
@@ -131,7 +138,7 @@ public class DgTownsRecordOwner {
                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
                            "UNIT_NUMBER) VALUES");
-                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")+"-S"), Q.pm(houseResultSet.getString("HOUSE_ORDER"))
+                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")+"-S1"), Q.pm(houseResultSet.getString("HOUSE_ORDER"))
                            , Q.pm(houseResultSet.getString("HOUSE_UNIT_NAME")), Q.pm(houseResultSet.getString("IN_FLOOR_NAME"))
                            , Q.pm(houseResultSet.getBigDecimal("HOUSE_AREA")), Q.pm(houseResultSet.getBigDecimal("USE_AREA"))
                            , Q.pm(houseResultSet.getBigDecimal("COMM_AREA")), Q.pm(houseResultSet.getBigDecimal("SHINE_AREA"))
@@ -164,7 +171,7 @@ public class DgTownsRecordOwner {
                            " SECTION_CODE, SECTION_NAME, DISTRICT_CODE, DISTRICT_NAME, BUILD_NAME, " +
                            "BUILD_DEVELOPER_NUMBER, POOL_MEMO, MAIN_OWNER, LAND_INFO, REG_INFO, DESIGN_USE_TYPE, " +
                            "UNIT_NUMBER) VALUES");
-                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")), Q.pm(houseResultSet.getString("HOUSE_ORDER"))
+                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")+"-1"), Q.pm(houseResultSet.getString("HOUSE_ORDER"))
                            , Q.pm(houseResultSet.getString("HOUSE_UNIT_NAME")), Q.pm(houseResultSet.getString("IN_FLOOR_NAME"))
                            , Q.pm(houseResultSet.getBigDecimal("HOUSE_AREA")), Q.pm(houseResultSet.getBigDecimal("USE_AREA"))
                            , Q.pm(houseResultSet.getBigDecimal("COMM_AREA")), Q.pm(houseResultSet.getBigDecimal("SHINE_AREA"))
@@ -251,7 +258,7 @@ public class DgTownsRecordOwner {
                    sqlWriter.newLine();
                    sqlWriter.write("INSERT BUSINESS_HOUSE (ID, HOUSE_CODE, BUSINESS_ID, START_HOUSE, AFTER_HOUSE, CANCELED,SEARCH_KEY,DISPLAY) VALUES ");
                    sqlWriter.write("(" + Q.v(Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID"))
-                           , Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID")+"-S"), Q.p(houseResultSet.getString("ID")),"FALSE",Q.pm(key.getKey()), Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
+                           , Q.pm(ownerResultSet.getString("reg_code")), Q.p(houseResultSet.getString("ID")+"-S1"), Q.p(houseResultSet.getString("ID")+"-1"),"FALSE",Q.pm(key.getKey()), Q.pm(DescriptionDisplay.toStringValue(businessDisplay)) + ");"));
 
                    /**
                     * ADD_HOUSE_STATUS
@@ -266,7 +273,7 @@ public class DgTownsRecordOwner {
                     */
                    sqlWriter.newLine();
                    sqlWriter.write("INSERT HOUSE_RECORD (HOUSE_CODE, HOUSE, HOUSE_STATUS,DISPLAY,SEARCH_KEY) VALUES ");
-                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")), Q.p(houseResultSet.getString("ID"))
+                   sqlWriter.write("(" + Q.v(Q.p(houseResultSet.getString("ID")), Q.p(houseResultSet.getString("ID")+"-1")
                            ,Q.p("CONTRACTS_RECORD"),Q.pm(DescriptionDisplay.toStringValue(businessDisplay)),Q.pm(key.getKey())+");"));
                     /**
                     * main_owner pool HOUSE_OWNER POWER_OWNER
@@ -281,11 +288,11 @@ public class DgTownsRecordOwner {
                            , Q.p("CONTRACT"), "'0'"
                            , "Null","false","NULL" + ");"));
                    sqlWriter.newLine();
-                   sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+(ownerResultSet.getString("reg_code")+"-D")+"' WHERE ID='"+(houseResultSet.getString("ID"))+"';");
+                   sqlWriter.write("UPDATE HOUSE SET MAIN_OWNER = '"+(ownerResultSet.getString("reg_code")+"-D")+"' WHERE ID='"+(houseResultSet.getString("ID"))+"-1';");
                    sqlWriter.newLine();
                    //房屋与产权人关联
                    sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
-                   sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")),
+                   sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")+"-1"),
                            Q.pm(ownerResultSet.getString("reg_code")+"-D")+");"));
                    sqlWriter.newLine();
                    // 共有权人
@@ -304,7 +311,7 @@ public class DgTownsRecordOwner {
                                , "Null","false","NULL" + ");"));
                        sqlWriter.newLine();
                        sqlWriter.write("INSERT HOUSE_OWNER (HOUSE,POOL) VALUES ");
-                       sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")),
+                       sqlWriter.write("(" + Q.v(Q.pm(houseResultSet.getString("ID")+"-1"),
                                Q.pm(ownerResultSet.getString("reg_code")+"-DP")+");"));
                        sqlWriter.newLine();
 

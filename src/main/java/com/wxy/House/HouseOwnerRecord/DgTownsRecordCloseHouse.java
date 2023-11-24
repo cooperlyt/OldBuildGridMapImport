@@ -54,6 +54,8 @@ public class DgTownsRecordCloseHouse {
 
         }
 
+
+
         try {
             closeResultSet = statementClose.executeQuery("select f.*,h.BUILDID from x_info_frozen f left join HOUSE_INFO.HOUSE h on f.house_key=h.ID"
                     + " where h.ID is not null");
@@ -85,7 +87,7 @@ public class DgTownsRecordCloseHouse {
 
                 sqlWriter.write("INSERT LOCKED_HOUSE (HOUSE_CODE, DESCRIPTION, TYPE, EMP_CODE, EMP_NAME, ID, BUILD_CODE) VALUES ");
                 sqlWriter.write("(" + Q.v(Q.p(closeResultSet.getString("house_key")),Q.p(textStr), "'CLOSE_REG'","'root'"
-                        , "'root'", Q.pm(closeResultSet.getString("reg_code")), Q.pm(closeResultSet.getString("BUILDID")) + ");"));
+                        , "'root'", Q.pm(closeResultSet.getString("reg_code")+"BL"), Q.pm(closeResultSet.getString("BUILDID")) + ");"));
                 sqlWriter.newLine();
                 sqlWriter.flush();
 

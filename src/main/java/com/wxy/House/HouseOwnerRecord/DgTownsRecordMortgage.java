@@ -101,7 +101,7 @@ public class DgTownsRecordMortgage {
 
                 sqlWriter.write("INSERT LOCKED_HOUSE (HOUSE_CODE, DESCRIPTION, TYPE, EMP_CODE, EMP_NAME, ID, BUILD_CODE) VALUES ");
                 sqlWriter.write("(" + Q.v(Q.p(mortgageResultSet.getString("house_key_sub")),Q.p(textStr), "'MORTGAGE_REEG'","'root'"
-                        , "'root'", Q.pm(mortgageResultSet.getString("reg_code")), Q.pm(mortgageResultSet.getString("BUILDID")) + ");"));
+                        , "'root'", Q.pm(mortgageResultSet.getString("reg_code")+"BL"), Q.pm(mortgageResultSet.getString("BUILDID")) + ");"));
                 sqlWriter.newLine();
                 sqlWriter.flush();
 
